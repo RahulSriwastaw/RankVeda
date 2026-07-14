@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FaSearch, FaMoon, FaSun, FaUsers, FaRobot, FaChartLine, FaCoins } from 'react-icons/fa';
+import { FaSearch, FaMoon, FaSun, FaUsers, FaRobot, FaChartLine, FaCoins, FaBookOpen, FaUser } from 'react-icons/fa';
 import { useTheme } from 'next-themes';
 import axios from 'axios';
 
@@ -34,6 +35,18 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Nav Bar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 bg-white/10 dark:bg-black/20 backdrop-blur-md border-b border-white/10">
+        <span className="text-lg font-extrabold gradient-text">RankVeda</span>
+        <div className="flex items-center gap-3">
+          <Link href="/marketplace" className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-medium">
+            <FaBookOpen className="text-xs" /> Question Bank
+          </Link>
+          <Link href="/login" className="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+            <FaUser className="text-xs" /> Login
+          </Link>
+        </div>
+      </nav>
       {/* ... Background blobs, Dark mode toggle (same as before) ... */}
 
       <motion.div
@@ -50,7 +63,7 @@ export default function Home() {
         {/* Live Counter */}
         <div className="mt-4 inline-flex items-center gap-2 bg-indigo-100 dark:bg-indigo-900/30 px-5 py-2 rounded-full text-sm font-medium">
           <FaUsers className="text-indigo-600 dark:text-indigo-400" />
-          <span className="font-bold">{liveCount.toLocaleString()}</span>
+          <span className="font-bold" suppressHydrationWarning>{liveCount.toLocaleString()}</span>
           <span className="text-gray-600 dark:text-gray-400">छात्र चेक कर चुके हैं</span>
         </div>
 
@@ -98,18 +111,20 @@ export default function Home() {
         </motion.div>
 
         {/* Features - same as before */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-10">
           {[
             { icon: FaRobot, title: 'AI सॉल्यूशन', desc: 'Claude से हर गलती का समाधान' },
             { icon: FaChartLine, title: 'लाइव रैंक', desc: 'तुरंत रैंक और परसेंटाइल' },
-            { icon: FaCoins, title: 'पॉइंट्स सिस्टम', desc: 'फ्री पॉइंट्स कमाएँ और सॉल्यूशन खोलें' },
+            { icon: FaCoins, title: 'पॉइंट्स सिस्टम', desc: 'फ्री पॉइंट्स कमाएं और सॉल्यूशन खोलें' },
+            { icon: FaBookOpen, title: 'Question Bank', desc: 'सभी shifts के questions एक जगह', link: '/marketplace' },
           ].map((feat, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 + i * 0.1 }}
-              className="glass rounded-xl p-4 text-center backdrop-blur-sm"
+              className={`glass rounded-xl p-4 text-center backdrop-blur-sm ${feat.link ? 'cursor-pointer hover:scale-105 transition-transform' : ''}`}
+              onClick={feat.link ? () => router.push(feat.link) : undefined}
             >
               <feat.icon className="text-3xl text-indigo-500 mx-auto mb-2" />
               <h3 className="font-bold">{feat.title}</h3>

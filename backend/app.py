@@ -6,6 +6,9 @@ from routes.results import results_bp
 from routes.questions import questions_bp
 from routes.user import user_bp
 from routes.live_stats import live_stats_bp
+from routes.admin import admin_bp
+from routes.auth import auth_bp
+from routes.marketplace import marketplace_bp
 import stripe
 
 def create_app():
@@ -23,6 +26,10 @@ def create_app():
     app.register_blueprint(questions_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(live_stats_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(marketplace_bp)
+
     
     # Error handlers
     @app.errorhandler(404)

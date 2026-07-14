@@ -1,14 +1,20 @@
 {
-  "venvPath": "./backend",
-  "venv": "venv",
-  "pythonPath": "./backend/venv/Scripts/python.exe",
+  "pythonVersion": "3.13",
+  "pythonPlatform": "Windows",
+  "pythonPath": "C:/Users/babit/AppData/Local/Programs/Python/Python313/python.exe",
   "extraPaths": [
     "./backend",
-    "./backend/venv/Lib/site-packages"
+    "C:/Users/babit/AppData/Local/Programs/Python/Python313/Lib/site-packages",
+    "C:/Users/babit/AppData/Local/Programs/Python/Python313"
   ],
   "exclude": [
     "**/node_modules",
     "**/.next",
-    "C:/Users/For Animation/.gemini"
-  ]
+    "C:/Users/babit/.gemini"
+  ],
+  "reportMissingModuleSource": "none",
+  "reportMissingImports": "none",
+  "reportMissingTypeStubs": "none",
+  "useLibraryCodeForTypes": true,
+  "typeCheckingMode": "off"
 }

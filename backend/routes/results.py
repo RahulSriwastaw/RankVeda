@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
-from db.models import db, ExamResult, QuestionResponse
+from db.models import db, ExamResult, QuestionResponse, MasterQuestion
 from services.scraper import fetch_html, parse_result_html
 from sqlalchemy.exc import IntegrityError
+from datetime import datetime
 import uuid
 
 results_bp = Blueprint('results', __name__, url_prefix='/api/results')
@@ -20,44 +21,109 @@ def get_result_from_url():
     if not url:
         return jsonify({'error': 'URL is required'}), 400
 
-    # ── 1. Try real scraping ──────────────────────────────────────────────
+    # ── 1. Check if input is URL or Raw HTML ──────────────────────────────
     parsed = None
-    print(f"[API] Fetching URL: {url}")
     try:
-        html = fetch_html(url, use_curl=True)
+        html = None
+        if url.startswith('http://') or url.startswith('https://') or url.startswith('www.'):
+            print(f"[API] Fetching URL: {url}")
+            html = fetch_html(url, use_curl=True)
+        else:
+            # Assume it's raw HTML pasted directly
+            print("[API] Input does not look like a URL. Treating as raw HTML.")
+            html = url
+
         if html:
-            print("[API] HTML fetched, parsing...")
+            print("[API] Parsing HTML...")
             parsed = parse_result_html(html)
             if parsed and len(parsed.get('questions', [])) > 0:
                 print(f"[API] Parsed {len(parsed['questions'])} questions ✅")
             else:
-                print("[API] 0 questions parsed, falling back to mock")
+                print("[API] 0 questions parsed. Invalid HTML or unsupported format.")
                 parsed = None
         else:
-            print("[API] Failed to fetch HTML, using mock data")
+            print("[API] Failed to fetch or receive HTML.")
+            return jsonify({'error': 'Failed to load HTML from URL'}), 400
+
     except Exception as e:
         print(f"[API] Scraping error: {e}")
+        import traceback
+        traceback.print_exc()
         parsed = None
 
-    # ── 2. Fallback to mock ───────────────────────────────────────────────
     if not parsed:
-        print("[API] Using MOCK DATA")
-        parsed = _get_mock_result()
+        return jsonify({'error': 'Answer key could not be parsed. Make sure the URL or HTML is correct and from a supported exam (TCS iON).'}), 400
 
-    # ── 3. Save ExamResult ────────────────────────────────────────────────
-    roll_number = parsed.get('roll_number') or str(uuid.uuid4())[:8]
+    if not isinstance(parsed, dict):
+        return jsonify({'error': 'Invalid parse structure'}), 500
+
+    # ── 3. Save ExamResult with all candidate info ─────────────────────────
+    roll_number = parsed.get('roll_number')
+    registration_number = parsed.get('registration_number')
+
+    existing_result = None
+    if roll_number:
+        existing_result = ExamResult.query.filter_by(exam_id=exam_id, roll_number=roll_number).first()
+    elif registration_number:
+        existing_result = ExamResult.query.filter_by(exam_id=exam_id, registration_number=registration_number).first()
+
+    if existing_result:
+        print(f"[API] Result already exists for roll/reg: {roll_number or registration_number}. Returning cached result.")
+        questions = (
+            QuestionResponse.query
+            .filter_by(result_id=existing_result.id)
+            .order_by(QuestionResponse.question_no)
+            .all()
+        )
+        return jsonify({
+            'result': existing_result.to_dict(),
+            'questions': [q.to_dict() for q in questions]
+        })
+
+    def _coerce_datetime(value):
+        if isinstance(value, datetime):
+            return value
+        if isinstance(value, str):
+            value = value.strip()
+            if not value:
+                return None
+            try:
+                return datetime.fromisoformat(value.replace('Z', '+00:00'))
+            except ValueError:
+                return None
+        return None
+
+    # If not found, create new one
+    roll_number = roll_number or str(uuid.uuid4())[:8]
+    parsed_at = _coerce_datetime(parsed.get('parsed_at'))
 
     try:
         new_result = ExamResult(
             user_id=None,
             exam_id=exam_id,
+            registration_number=registration_number,
             roll_number=roll_number,
+            candidate_name=parsed.get('candidate_name'),
+            community=parsed.get('community'),
+            test_centre_name=parsed.get('test_centre_name'),
+            test_date=parsed.get('test_date'),
+            test_time=parsed.get('test_time'),
+            subject=parsed.get('subject'),
+            photo_url=parsed.get('photo_url'),
+            application_photograph=parsed.get('application_photograph') or parsed.get('photo_url'),
+            candidate_payload=parsed.get('candidate_payload') or {},
+            source_html=parsed.get('source_html'),
+            parser_version=parsed.get('parser_version', 'rankveda-parser-v1.0'),
+            parsed_at=parsed_at,
             score=parsed.get('score', 0) or 0,
             rank=parsed.get('rank', 0) or 0,
             percentile=parsed.get('percentile', 0) or 0,
             category_rank=parsed.get('category_rank', 0) or 0,
             category=parsed.get('category', 'UR') or 'UR',
-            section_wise=parsed.get('section_wise', {}) or {}
+            section_wise=parsed.get('section_wise', {}) or {},
+            total_correct=parsed.get('total_correct', 0),
+            total_wrong=parsed.get('total_wrong', 0),
+            total_unattempted=parsed.get('total_unattempted', 0)
         )
         db.session.add(new_result)
         db.session.commit()
@@ -68,20 +134,49 @@ def get_result_from_url():
         new_result = ExamResult(
             user_id=None,
             exam_id=exam_id,
+            registration_number=registration_number,
             roll_number=roll_number,
+            candidate_name=parsed.get('candidate_name'),
+            community=parsed.get('community'),
+            test_centre_name=parsed.get('test_centre_name'),
+            test_date=parsed.get('test_date'),
+            test_time=parsed.get('test_time'),
+            subject=parsed.get('subject'),
+            photo_url=parsed.get('photo_url'),
+            application_photograph=parsed.get('application_photograph') or parsed.get('photo_url'),
+            candidate_payload=parsed.get('candidate_payload') or {},
+            source_html=parsed.get('source_html'),
+            parser_version=parsed.get('parser_version', 'rankveda-parser-v1.0'),
+            parsed_at=parsed_at,
             score=parsed.get('score', 0) or 0,
             rank=parsed.get('rank', 0) or 0,
             percentile=parsed.get('percentile', 0) or 0,
             category_rank=parsed.get('category_rank', 0) or 0,
             category=parsed.get('category', 'UR') or 'UR',
-            section_wise=parsed.get('section_wise', {}) or {}
+            section_wise=parsed.get('section_wise', {}) or {},
+            total_correct=parsed.get('total_correct', 0),
+            total_wrong=parsed.get('total_wrong', 0),
+            total_unattempted=parsed.get('total_unattempted', 0)
         )
         db.session.add(new_result)
         db.session.commit()
 
-    # ── 4. Save QuestionResponses ─────────────────────────────────────────
+    # ── 4. Save QuestionResponses with master question mapping ─────────────
     saved_qnos = set()
-    for q in parsed.get('questions', []):
+    current_shift = {
+        'exam_id': exam_id,
+        'test_date': parsed.get('test_date'),
+        'test_time': parsed.get('test_time'),
+        'subject': parsed.get('subject')
+    }
+
+    questions_list = parsed.get('questions')
+    if not isinstance(questions_list, list):
+        questions_list = []
+
+    for q in questions_list:
+        if not isinstance(q, dict):
+            continue
         qno = q.get('qno')
         correct = q.get('correct_answer')
 
@@ -91,28 +186,79 @@ def get_result_from_url():
         saved_qnos.add(qno)
 
         try:
+            q_text = q.get('question_text') or ''
+            q_hash = MasterQuestion.generate_hash(q_text)
+            q_id_html = q.get('question_id_html')
+
+            # Find existing master question
+            mq = None
+            if q_id_html:
+                mq = MasterQuestion.query.filter_by(question_id_html=q_id_html).first()
+            if not mq:
+                mq = MasterQuestion.query.filter_by(question_hash=q_hash).first()
+
+            if mq:
+                mq.reference_count += 1
+                shifts_list = mq.shifts or []
+                is_new_shift = True
+                for s in shifts_list:
+                    if (s.get('exam_id') == current_shift['exam_id'] and
+                        s.get('test_date') == current_shift['test_date'] and
+                        s.get('test_time') == current_shift['test_time'] and
+                        s.get('subject') == current_shift['subject']):
+                        is_new_shift = False
+                        break
+                if is_new_shift:
+                    mq.shifts = shifts_list + [current_shift]
+                    mq.shift_count = len(mq.shifts)
+            else:
+                mq = MasterQuestion(
+                    question_id_html=q_id_html,
+                    question_hash=q_hash,
+                    question_text=q_text,
+                    correct_answer=correct,
+                    parsed_payload=q,
+                    correct_option_text=q.get('correct_option_text'),
+                    option_a_id=q.get('option_a_id'),
+                    option_b_id=q.get('option_b_id'),
+                    option_c_id=q.get('option_c_id'),
+                    option_d_id=q.get('option_d_id'),
+                    option_a_text=q.get('option_a_text'),
+                    option_b_text=q.get('option_b_text'),
+                    option_c_text=q.get('option_c_text'),
+                    option_d_text=q.get('option_d_text'),
+                    reference_count=1,
+                    shifts=[current_shift],
+                    shift_count=1
+                )
+                db.session.add(mq)
+                db.session.flush()
+
             qr = QuestionResponse(
                 result_id=new_result.id,
                 question_no=qno,
-                question_text=q.get('question_text'),
+                master_question_id=mq.id,
+                option_id=q.get('option_id'),
+                parsed_payload=q,
                 student_answer=q.get('student_answer'),
-                correct_answer=correct,
-                marks_awarded=q.get('marks', 0) or 0
+                student_option_text=q.get('student_option_text'),
+                marks_awarded=q.get('marks', 0) or 0,
+                status=q.get('status', 'unattempted')
             )
             db.session.add(qr)
-            db.session.flush()  # catch constraint errors per row
-        except IntegrityError:
+            db.session.flush()
+        except Exception as ex:
             db.session.rollback()
-            # Re-open session after rollback
-            db.session.add(new_result)
+            print(f"[API] Question insert error: {ex}")
+            continue
 
     try:
         db.session.commit()
-    except IntegrityError as e:
+    except Exception as e:
         db.session.rollback()
         print(f"[API] Question insert error (partial save): {e}")
 
-    # ── 5. Build response ─────────────────────────────────────────────────
+    # ── 5. Build response with all data ────────────────────────────────────
     questions = (
         QuestionResponse.query
         .filter_by(result_id=new_result.id)
@@ -121,53 +267,42 @@ def get_result_from_url():
     )
 
     return jsonify({
-        'result': {
-            'id': new_result.id,
-            'roll_number': new_result.roll_number,
-            'score': float(new_result.score),
-            'rank': new_result.rank,
-            'percentile': float(new_result.percentile) if new_result.percentile else 0,
-            'category_rank': new_result.category_rank or 0,
-            'category': new_result.category or 'UR',
-            'section_wise': new_result.section_wise or {},
-            'user_id': new_result.user_id
-        },
-        'questions': [{
-            'id': q.id,
-            'question_no': q.question_no,
-            'question_text': q.question_text,
-            'student_answer': q.student_answer,
-            'correct_answer': q.correct_answer,
-            'marks_awarded': float(q.marks_awarded) if q.marks_awarded is not None else 0
-        } for q in questions]
+        'result': new_result.to_dict(),
+        'questions': [q.to_dict() for q in questions]
     })
 
 
-def _get_mock_result():
-    mock_questions = [
-        "निम्नलिखित में से कौन सा संविधान का मूल ढांचा नहीं है?",
-        "भारत का राष्ट्रपति किस अनुच्छेद के तहत अध्यादेश जारी कर सकता है?",
-        "संविधान के किस भाग में मूल कर्तव्यों का उल्लेख है?",
-        "लोकसभा की अधिकतम सदस्य संख्या कितनी है?",
-        "भारत के प्रथम मुख्य चयन आयुक्त कौन थे?"
-    ]
-    alt = ['1', '2']
-    return {
-        'score': 85.5,
-        'rank': 245,
-        'percentile': 92.4,
-        'category_rank': 67,
-        'category': 'UR',
-        'roll_number': None,
-        'section_wise': {'english': 20, 'maths': 25, 'reasoning': 22, 'gk': 18.5},
-        'questions': [
-            {
-                'qno': i,
-                'question_text': mock_questions[i % len(mock_questions)],
-                'student_answer': alt[i % 2],
-                'correct_answer': '1',
-                'marks': 1 if alt[i % 2] == '1' else -1/3
-            }
-            for i in range(1, 101)
-        ]
-    }
+# ── Live Rank Endpoint ────────────────────────────────────────────────────────
+
+@results_bp.route('/rank', methods=['GET'])
+def get_live_rank():
+    """Calculate live rank based on score among all results for an exam."""
+    from db.models import ExamResult
+    try:
+        exam_id = request.args.get('exam_id', 1, type=int)
+        score = request.args.get('score', type=float)
+        if score is None:
+            return jsonify({'error': 'score required'}), 400
+
+        # Count total results for this exam
+        total = ExamResult.query.filter_by(exam_id=exam_id).count()
+
+        # Count how many scored higher
+        higher = ExamResult.query.filter(
+            ExamResult.exam_id == exam_id,
+            ExamResult.score > score
+        ).count()
+
+        rank = higher + 1
+        percentile = round((1 - higher / max(total, 1)) * 100, 2)
+
+        return jsonify({
+            'rank': rank,
+            'total_appeared': total,
+            'percentile': percentile,
+            'score': score,
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500

@@ -14,10 +14,15 @@ def unlock_question(result_id, q_id):
         return jsonify({'error': 'User not authenticated'}), 401
 
     try:
-        # 1. Check if solution already exists in cache
-        sol = AISolution.query.filter_by(question_id=q_id).first()
+        # 1. Get question data (to generate solution)
+        q = QuestionResponse.query.get(q_id)
+        if not q:
+            return jsonify({'error': 'Question not found'}), 404
+
+        # 2. Check if solution already exists in cache by master_question_id
+        sol = AISolution.query.filter_by(master_question_id=q.master_question_id).first()
         if sol:
-            # Return cached solution along with current balance (optional)
+            # Return cached solution along with current balance
             balance = get_balance(user_id)
             return jsonify({
                 'solution': sol.to_dict(),
@@ -25,32 +30,20 @@ def unlock_question(result_id, q_id):
                 'newBalance': balance
             })
 
-        # 2. Check balance
+        # 3. Check balance
         balance = get_balance(user_id)
         if balance < 5:
             return jsonify({'error': 'Insufficient points. Please recharge.'}), 402
 
-        # 3. Deduct 5 points
+        # 4. Deduct 5 points
         deduct_points(user_id, 5, f'Unlocked solution for question {q_id}')
-
-        # 4. Get question data (to generate solution)
-        q = QuestionResponse.query.get(q_id)
-        if not q:
-            # If question not found, rollback deduction? But we already deducted.
-            # Better to check before deduction, but we'll handle gracefully.
-            # We can refund points if question not found, but for simplicity, we'll return error.
-            # However, we can also move balance check after question existence.
-            # I recommend moving balance check after question fetch.
-            # Let's restructure: first get question, then check balance, deduct, generate.
-            # I'll refactor below.
-            return jsonify({'error': 'Question not found'}), 404
 
         # 5. Generate AI solution
         sol_data = generate_solution(q.question_no, q.correct_answer, q.student_answer)
 
         # 6. Save to DB
         new_sol = AISolution(
-            question_id=q_id,
+            master_question_id=q.master_question_id,
             explanation=sol_data['explanation'],
             why_wrong=sol_data.get('why_wrong'),
             key_takeaways=sol_data.get('key_takeaways'),
