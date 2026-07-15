@@ -742,9 +742,9 @@ def update_master_question(mq_id):
         mq = MasterQuestion.query.get_or_404(mq_id)
         data = request.get_json() or {}
 
-        if 'question_text' in data:
+        if data.get('question_text'):
             mq.question_text = data['question_text']
-            mq.question_hash = MasterQuestion.generate_hash(data['question_text'])
+            mq.question_hash = MasterQuestion.generate_hash(data['question_text'], mq.question_id_html)
         if 'correct_answer' in data:
             mq.correct_answer = data['correct_answer']
         if 'correct_option_text' in data:
@@ -794,7 +794,7 @@ def ai_edit_master_question(mq_id):
         if auto_apply:
             if result.get('question_text'):
                 mq.question_text = result['question_text']
-                mq.question_hash = MasterQuestion.generate_hash(result['question_text'])
+                mq.question_hash = MasterQuestion.generate_hash(result['question_text'], mq.question_id_html)
             if result.get('option_a'): mq.option_a_text = result['option_a']
             if result.get('option_b'): mq.option_b_text = result['option_b']
             if result.get('option_c'): mq.option_c_text = result['option_c']
@@ -847,7 +847,7 @@ def bulk_ai_edit_master_questions():
                     d = r['data']
                     if d.get('question_text'):
                         mq.question_text = d['question_text']
-                        mq.question_hash = MasterQuestion.generate_hash(d['question_text'])
+                        mq.question_hash = MasterQuestion.generate_hash(d['question_text'], mq.question_id_html)
                     if d.get('option_a'): mq.option_a_text = d['option_a']
                     if d.get('option_b'): mq.option_b_text = d['option_b']
                     if d.get('option_c'): mq.option_c_text = d['option_c']

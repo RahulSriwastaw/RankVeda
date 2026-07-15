@@ -46,9 +46,12 @@ class MasterQuestion(db.Model):
         return f'<MasterQuestion {self.question_id_html or self.id}>'
 
     @staticmethod
-    def generate_hash(text_str):
+    def generate_hash(text_str, html_id=None):
         if not text_str:
             text_str = ""
+        if html_id:
+            html_id = str(html_id).strip()
+            text_str = f"{html_id}:{text_str}"
         return hashlib.sha256(text_str.encode('utf-8')).hexdigest()
 
 

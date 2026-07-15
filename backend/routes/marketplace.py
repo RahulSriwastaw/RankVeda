@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from db.models import db, MasterQuestion, Exam, AISolution, ExamPurchase, UserPoints, PointsTransaction, QuestionPack
+from db.models import db, MasterQuestion, Exam, AISolution, ExamPurchase, UserPoints, PointsTransaction, QuestionPack, QuestionResponse, ExamResult
 from routes.auth import get_current_user
 from sqlalchemy import func, desc
 from services.marketplace_service import purchase_question_pack
@@ -47,26 +47,25 @@ def list_marketplace_exams():
 
         result = []
         for exam in exams:
-            # Count unique master questions in this exam (via shifts JSON)
-            # Need to check all MasterQuestions since contains() filter won't work with type mismatch
-            mqs = MasterQuestion.query.filter(
-                MasterQuestion.shifts != None
-            ).all()
-            
-            total_questions = 0
-            subjects = set()
-            dates = set()
-            
-            for mq in mqs:
-                for s in (mq.shifts or []):
-                    # Convert to string for comparison since shifts store exam_id as string
-                    if str(s.get('exam_id')) == str(exam.id):
-                        total_questions += 1
-                        if s.get('subject'): 
-                            subjects.add(s['subject'])
-                        if s.get('test_date'): 
-                            dates.add(s['test_date'])
-                        break  # Only count each question once even if multiple shifts
+            # Count unique question numbers parsed for this exam
+            total_questions = db.session.query(QuestionResponse.question_no).join(
+                ExamResult, QuestionResponse.result_id == ExamResult.id
+            ).filter(
+                ExamResult.exam_id == exam.id
+            ).distinct().count()
+
+            # Get unique subjects and dates (shifts) from ExamResult
+            results_info = db.session.query(
+                ExamResult.subject, ExamResult.test_date, ExamResult.test_time
+            ).filter(
+                ExamResult.exam_id == exam.id
+            ).distinct().all()
+
+            subjects = {r[0] for r in results_info if r[0]}
+            dates = {r[1] for r in results_info if r[1]}
+
+            # Fallback to exam.total_questions if no results have been uploaded yet
+            display_questions = total_questions if total_questions > 0 else (exam.total_questions or 100)
 
             # Check if current user has purchased
             purchased = False
@@ -79,9 +78,9 @@ def list_marketplace_exams():
                 'id': exam.id,
                 'name': exam.name,
                 'date': str(exam.date) if exam.date else None,
-                'total_questions': total_questions,
+                'total_questions': display_questions,
                 'price': exam.price or 0,
-                'shifts': len(dates),
+                'shifts': max(len(dates), 1) if results_info else 0,
                 'subjects': list(subjects),
                 'purchased': purchased,
             })
@@ -105,24 +104,20 @@ def exam_shifts(exam_id):
             ).first() is not None
 
         exam = Exam.query.get_or_404(exam_id)
-        all_mqs = MasterQuestion.query.filter(MasterQuestion.shifts != None).all()
-
-        # Collect all unique shifts for this exam with question counts
+        results = ExamResult.query.filter_by(exam_id=exam_id).all()
         shifts_dict = {}
-        for mq in all_mqs:
-            for s in (mq.shifts or []):
-                if str(s.get('exam_id')) == str(exam_id):
-                    shift_key = (s.get('test_date'), s.get('test_time'), s.get('subject'))
-                    if shift_key not in shifts_dict:
-                        shifts_dict[shift_key] = {
-                            'test_date': s.get('test_date'),
-                            'test_time': s.get('test_time'),
-                            'subject': s.get('subject'),
-                            'question_count': 0,
-                        }
-                    shifts_dict[shift_key]['question_count'] += 1
+        for r in results:
+            shift_key = (r.test_date, r.test_time, r.subject)
+            if shift_key not in shifts_dict:
+                q_count = QuestionResponse.query.filter_by(result_id=r.id).count()
+                shifts_dict[shift_key] = {
+                    'test_date': r.test_date,
+                    'test_time': r.test_time,
+                    'subject': r.subject,
+                    'question_count': q_count,
+                }
 
-        shifts_list = sorted(shifts_dict.values(), key=lambda x: (x['test_date'], x['test_time']))
+        shifts_list = sorted(shifts_dict.values(), key=lambda x: (x['test_date'] or '', x['test_time'] or ''))
 
         return jsonify({
             'exam': {'id': exam.id, 'name': exam.name, 'price': exam.price or 0},

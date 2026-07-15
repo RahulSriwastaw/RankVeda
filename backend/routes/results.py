@@ -16,7 +16,10 @@ def get_result_from_url():
         return jsonify({'error': 'JSON body required'}), 400
 
     url = data.get('url')
-    exam_id = data.get('exam_id', 1)
+    try:
+        exam_id = int(data.get('exam_id', 1))
+    except (ValueError, TypeError):
+        exam_id = 1
 
     if not url:
         return jsonify({'error': 'URL is required'}), 400
@@ -181,8 +184,8 @@ def get_result_from_url():
         try:
             db.session.begin_nested()
             q_text = q.get('question_text') or ''
-            q_hash = MasterQuestion.generate_hash(q_text)
             q_id_html = q.get('question_id_html')
+            q_hash = MasterQuestion.generate_hash(q_text, q_id_html)
 
             # Find existing master question
             mq = None
