@@ -30,7 +30,7 @@ const EXAMS = [
     topics: ['Mathematics (30)', 'General Awareness (40)', 'Reasoning (30)'],
   },
   {
-    slug: 'ntpc-cbt2',
+    slug: 'ntpc-cbt2-rank-predictor',
     name: 'NTPC CBT-II',
     year: '2025',
     fullName: 'Railway NTPC Computer Based Test-II',
@@ -40,7 +40,7 @@ const EXAMS = [
     icon: '🚉',
     color: 'from-indigo-600/20 to-purple-600/20',
     border: 'border-indigo-700/30',
-    href: '/exams/ntpc-cbt2',
+    href: '/exams/ntpc-cbt2-rank-predictor',
     examId: 7,
     pattern: { sections: 3, questions: 100, duration: 90, marking: '+1 / -⅓' },
     topics: ['General Awareness (40)', 'Mathematics (30)', 'Reasoning (30)'],

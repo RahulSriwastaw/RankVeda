@@ -456,6 +456,18 @@ export default function ResultPage() {
             <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <h2 className="text-lg font-bold">🎫 Official Score Card</h2>
               <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    if (window.history.length > 1) {
+                      router.back();
+                    } else {
+                      router.push('/');
+                    }
+                  }}
+                  className="flex items-center gap-1.5 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition"
+                >
+                  <FaChevronLeft className="text-xs" /> Check Another
+                </button>
                 <button onClick={() => handleDownload('image')} disabled={downloading}
                   className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition disabled:opacity-50">
                   <FaDownload /> {downloading ? 'Downloading...' : 'Download PNG'}

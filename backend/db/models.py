@@ -13,6 +13,7 @@ class Exam(db.Model):
     total_questions = db.Column(db.Integer, default=100)
     price = db.Column(db.Integer, default=0)  # Points required to access question bank
     description = db.Column(db.Text)  # Marketplace description
+    disclaimer = db.Column(db.Text)  # Custom legal disclaimer
 
     def __repr__(self):
         return f'<Exam {self.name}>'
@@ -320,3 +321,29 @@ class ExamPurchase(db.Model):
 
     def __repr__(self):
         return f'<ExamPurchase user={self.user_id} exam={self.exam_id}>'
+
+
+class QuestionPackPurchase(db.Model):
+    """Tracks which user has purchased access to which question pack (B2B)."""
+    __tablename__ = 'question_pack_purchases'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    pack_id = db.Column(db.Integer, db.ForeignKey('question_packs.id', ondelete='CASCADE'), nullable=False)
+    org_name = db.Column(db.String(255), default='')  # Custom Org Name for branded PDF exports
+    purchased_at = db.Column(db.DateTime, default=utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'pack_id', name='uq_user_pack_purchase'),
+    )
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'pack_id': self.pack_id,
+            'org_name': self.org_name or '',
+            'purchased_at': self.purchased_at.isoformat() if self.purchased_at else None,
+        }
+
+    def __repr__(self):
+        return f'<QuestionPackPurchase user={self.user_id} pack={self.pack_id}>'

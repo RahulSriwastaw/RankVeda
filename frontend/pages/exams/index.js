@@ -1,94 +1,8 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FaArrowRight } from 'react-icons/fa';
-
-const EXAMS = [
-  {
-    slug: 'rrb-ntpc-ug',
-    name: 'RRB NTPC UG',
-    year: '2025',
-    fullName: 'Railway NTPC Under Graduate Level CBT-I',
-    desc: '100 questions | 90 min | Math, GK, Reasoning. Check answer key, calculate score with negative marking and predict rank.',
-    badge: 'Active',
-    badgeColor: 'bg-green-900/50 text-green-400 border-green-800',
-    icon: '🚂',
-    color: 'from-red-600/20 to-orange-600/20',
-    border: 'border-red-700/30',
-  },
-  {
-    slug: 'ntpc-cbt2',
-    name: 'NTPC CBT-II',
-    year: '2025',
-    fullName: 'Railway NTPC Computer Based Test-II',
-    desc: '100 questions | 90 min | General Awareness, Mathematics, Reasoning. Check answer key, calculate score and predict rank.',
-    badge: 'Active',
-    badgeColor: 'bg-indigo-900/50 text-indigo-400 border-indigo-800',
-    icon: '🚉',
-    color: 'from-indigo-600/20 to-purple-600/20',
-    border: 'border-indigo-700/30',
-  },
-  {
-    slug: 'ssc-cgl',
-    name: 'SSC CGL',
-    year: '2025',
-    fullName: 'Staff Selection Commission CGL Tier-I',
-    desc: '100 questions | 60 min | GK, English, Math, Reasoning. Free score calculator and rank predictor.',
-    badge: 'Coming Soon',
-    badgeColor: 'bg-blue-900/50 text-blue-400 border-blue-800',
-    icon: '📋',
-    color: 'from-blue-600/10 to-indigo-600/10',
-    border: 'border-blue-700/30',
-  },
-  {
-    slug: 'ssc-chsl',
-    name: 'SSC CHSL',
-    year: '2025',
-    fullName: 'Staff Selection Commission CHSL Tier-I',
-    desc: '100 questions | 60 min | 4 sections. Marks calculator with negative marking.',
-    badge: 'Coming Soon',
-    badgeColor: 'bg-purple-900/50 text-purple-400 border-purple-800',
-    icon: '📋',
-    color: 'from-purple-600/10 to-pink-600/10',
-    border: 'border-purple-700/30',
-  },
-  {
-    slug: 'rrb-alp',
-    name: 'RRB ALP',
-    year: '2025',
-    fullName: 'Railway Recruitment Board ALP CBT-I',
-    desc: '75 questions | 60 min | Math, Science, GK. Score and rank calculator.',
-    badge: 'Coming Soon',
-    badgeColor: 'bg-teal-900/50 text-teal-400 border-teal-800',
-    icon: '🚆',
-    color: 'from-teal-600/10 to-cyan-600/10',
-    border: 'border-teal-700/30',
-  },
-  {
-    slug: 'bank-po',
-    name: 'Bank PO',
-    year: '2025',
-    fullName: 'IBPS / SBI PO Preliminary Exam',
-    desc: '100 questions | 60 min | Quant, Reasoning, English. Answer key calculator.',
-    badge: 'Coming Soon',
-    badgeColor: 'bg-amber-900/50 text-amber-400 border-amber-800',
-    icon: '🏦',
-    color: 'from-amber-600/10 to-orange-600/10',
-    border: 'border-amber-700/30',
-  },
-  {
-    slug: 'ssc-mts',
-    name: 'SSC MTS',
-    year: '2025',
-    fullName: 'Staff Selection Commission MTS Tier-I',
-    desc: '90 questions | 90 min | 4 sections. Marks and rank calculator.',
-    badge: 'Coming Soon',
-    badgeColor: 'bg-pink-900/50 text-pink-400 border-pink-800',
-    icon: '📋',
-    color: 'from-pink-600/10 to-rose-600/10',
-    border: 'border-pink-700/30',
-  },
-];
+import { FaArrowRight, FaLock, FaBookOpen } from 'react-icons/fa';
+import { EXAMS } from '../../data/exams';
 
 const SITE_URL = 'https://rankveda.in';
 
@@ -98,96 +12,187 @@ const breadcrumbSchema = {
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
     { '@type': 'ListItem', position: 2, name: 'Exams', item: `${SITE_URL}/exams` },
-  ]
+  ],
 };
 
 const itemListSchema = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
-  name: 'All Government Exam Answer Key Calculators',
+  name: 'All Government Exam Answer Key Calculators — RankVeda',
   itemListElement: EXAMS.map((e, i) => ({
-    '@type': 'ListItem', position: i + 1,
-    name: `${e.name} ${e.year} - ${e.fullName}`,
+    '@type': 'ListItem',
+    position: i + 1,
+    name: `${e.name} ${e.year} Answer Key — ${e.fullName}`,
     url: `${SITE_URL}/exams/${e.slug}`,
-  }))
+  })),
 };
 
 export default function ExamsIndexPage() {
+  const activeExams = EXAMS.filter((e) => e.status === 'active');
+  const upcomingExams = EXAMS.filter((e) => e.status !== 'active');
+
   return (
     <>
       <Head>
         <title>All Exam Answer Key Calculators 2025 | RRB NTPC, SSC CGL, CHSL, Bank PO | RankVeda</title>
-        <meta name="description" content="Check answer keys, calculate exact scores and predict rank for RRB NTPC UG, SSC CGL, SSC CHSL, RRB ALP, Bank PO and SSC MTS 2025. Free tool with section-wise analysis and score card download." />
-        <meta name="keywords" content="exam answer key calculator 2025, RRB NTPC answer key, SSC CGL answer key, SSC CHSL answer key, RRB ALP answer key, Bank PO answer key, SSC MTS answer key, government exam rank predictor" />
+        <meta
+          name="description"
+          content="Check answer keys, calculate exact scores and predict rank for RRB NTPC UG, NTPC CBT-II, SSC CGL, SSC CHSL, RRB ALP, IBPS PO and SSC MTS 2025. Free tool with section-wise analysis and score card download."
+        />
+        <meta
+          name="keywords"
+          content="exam answer key calculator 2025, RRB NTPC answer key, NTPC CBT-II answer key, SSC CGL answer key, SSC CHSL answer key, RRB ALP answer key, IBPS PO answer key, SSC MTS answer key, government exam rank predictor"
+        />
         <link rel="canonical" href={`${SITE_URL}/exams`} />
-        <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="All Exam Answer Key Calculators 2025 | RankVeda" />
-        <meta property="og:description" content="Free answer key calculators for RRB NTPC UG, SSC CGL, SSC CHSL, RRB ALP, Bank PO and SSC MTS. Check score, rank and download score card." />
-        <meta property="og:url" content={`${SITE_URL}/exams`} />
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+        <meta name="author" content="RankVeda" />
         <meta property="og:type" content="website" />
+        <meta property="og:title" content="All Exam Answer Key Calculators 2025 | RankVeda" />
+        <meta
+          property="og:description"
+          content="Free answer key calculators for RRB NTPC, SSC CGL, SSC CHSL, RRB ALP, IBPS PO and SSC MTS. Check score, rank and download score card."
+        />
+        <meta property="og:url" content={`${SITE_URL}/exams`} />
+        <meta property="og:site_name" content="RankVeda" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="All Exam Answer Key Calculators 2025 | RankVeda" />
+        <meta name="twitter:site" content="@RankVedaIn" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
       </Head>
 
       <div className="min-h-screen bg-gray-950 text-white">
+
+        {/* Navbar */}
         <nav className="sticky top-0 z-50 bg-gray-900/90 backdrop-blur-md border-b border-gray-800 px-4 py-3">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <Link href="/" className="text-xl font-black gradient-text">RankVeda</Link>
-            <Link href="/marketplace" className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg transition">Question Bank</Link>
+            <Link href="/" className="text-xl font-black gradient-text">⚡ RankVeda</Link>
+            <Link
+              href="/marketplace"
+              className="flex items-center gap-1.5 text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg transition"
+            >
+              <FaBookOpen className="text-xs" /> Question Bank
+            </Link>
           </div>
         </nav>
 
         <div className="max-w-6xl mx-auto px-4 py-10">
+
+          {/* Breadcrumb */}
           <nav aria-label="breadcrumb" className="mb-6">
             <ol className="flex items-center gap-2 text-xs text-gray-500">
               <li><Link href="/" className="hover:text-gray-300">Home</Link></li>
-              <li>&#8250;</li>
+              <li>›</li>
               <li className="text-indigo-400">Exams</li>
             </ol>
           </nav>
 
+          {/* Page header */}
           <h1 className="text-3xl md:text-4xl font-black mb-2">
             Government Exam <span className="gradient-text">Answer Key</span> Calculators
           </h1>
-          <p className="text-gray-400 mb-8 max-w-2xl">
-            RRB NTPC UG, SSC CGL, SSC CHSL, RRB ALP, Bank PO, SSC MTS — free answer key calculator for all exams. Exact score, live rank, percentile and score card download.
+          <p className="text-gray-400 mb-10 max-w-2xl text-sm leading-relaxed">
+            RRB NTPC UG, NTPC CBT-II, SSC CGL, SSC CHSL, RRB ALP, IBPS PO, SSC MTS — free answer key calculator
+            for all exams. Exact score with negative marking, live rank, percentile &amp; score card download.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {EXAMS.map((exam, i) => {
-              const isActive = exam.badge === 'Active';
-              const Wrapper = isActive ? Link : 'div';
-              const wrapperProps = isActive ? { href: `/exams/${exam.slug}` } : {};
+          {/* Active exams */}
+          {activeExams.length > 0 && (
+            <>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <h2 className="text-sm font-bold text-green-400 uppercase tracking-wider">Live Now</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
+                {activeExams.map((exam, i) => (
+                  <motion.div
+                    key={exam.slug}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                  >
+                    <Link href={`/exams/${exam.slug}`} className="block group">
+                      <div className={`bg-gradient-to-br ${exam.color} border ${exam.border} rounded-2xl p-5 hover:border-indigo-600/50 transition-all hover:shadow-lg hover:shadow-indigo-900/20 cursor-pointer`}>
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-3">
+                              <span className="text-2xl">{exam.icon}</span>
+                              <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${exam.badgeColor}`}>
+                                {exam.badge}
+                              </span>
+                            </div>
+                            <h2 className="font-black text-lg text-gray-200 mb-0.5 group-hover:text-indigo-400 transition">
+                              {exam.name}{' '}
+                              <span className="text-xs font-normal text-gray-500">{exam.year}</span>
+                            </h2>
+                            <p className="text-xs text-gray-500 mb-2">{exam.fullName}</p>
+                            <p className="text-sm text-gray-400 leading-relaxed">{exam.descCard}</p>
+                            <div className="mt-3 flex items-center gap-1 text-xs text-indigo-400 font-medium">
+                              Check Answer Key &amp; Rank <FaArrowRight className="text-xs group-hover:translate-x-1 transition" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </>
+          )}
 
-              return (
-                <motion.div key={exam.slug} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-                  <Wrapper {...wrapperProps}>
-                    <div className={`bg-gradient-to-br ${exam.color} border ${exam.border} rounded-2xl p-5 transition ${isActive ? 'hover:border-indigo-600/50 cursor-pointer group' : 'opacity-60'}`}>
+          {/* Coming Soon exams */}
+          {upcomingExams.length > 0 && (
+            <>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="w-2 h-2 rounded-full bg-gray-600" />
+                <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Coming Soon</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {upcomingExams.map((exam, i) => (
+                  <motion.div
+                    key={exam.slug}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.06 + 0.2 }}
+                  >
+                    <div className={`bg-gradient-to-br ${exam.color} border ${exam.border} rounded-2xl p-5 opacity-60`}>
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
+                          <div className="flex items-center gap-3 mb-3">
                             <span className="text-2xl">{exam.icon}</span>
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${exam.badgeColor}`}>{exam.badge}</span>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${exam.badgeColor}`}>
+                              {exam.badge}
+                            </span>
                           </div>
-                          <h2 className="font-black text-lg text-gray-200 mb-0.5 transition group-hover:text-indigo-400">
-                            {exam.name} <span className="text-xs font-normal text-gray-500">{exam.year}</span>
+                          <h2 className="font-black text-lg text-gray-400 mb-0.5">
+                            {exam.name}{' '}
+                            <span className="text-xs font-normal text-gray-600">{exam.year}</span>
                           </h2>
-                          <p className="text-xs text-gray-500 mb-2">{exam.fullName}</p>
-                          <p className="text-sm text-gray-400 leading-relaxed">{exam.desc}</p>
-                          {isActive && (
-                            <div className="mt-3 flex items-center gap-1 text-xs text-indigo-400 font-medium">
-                              Check Answer Key <FaArrowRight className="text-xs group-hover:translate-x-1 transition" />
-                            </div>
-                          )}
+                          <p className="text-xs text-gray-600 mb-2">{exam.fullName}</p>
+                          <p className="text-sm text-gray-500 leading-relaxed">{exam.descCard}</p>
+                          <div className="mt-3 flex items-center gap-1 text-xs text-gray-600 font-medium">
+                            <FaLock className="text-xs" /> Available soon
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </Wrapper>
-                </motion.div>
-              );
-            })}
-          </div>
+                  </motion.div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
+
+        {/* Footer */}
+        <footer className="border-t border-gray-800 mt-10 py-8 px-4">
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <span className="text-lg font-black gradient-text">⚡ RankVeda</span>
+            <div className="flex items-center gap-6 text-xs text-gray-600">
+              <Link href="/" className="hover:text-gray-400 transition">Home</Link>
+              <Link href="/marketplace" className="hover:text-gray-400 transition">Question Bank</Link>
+            </div>
+          </div>
+        </footer>
       </div>
     </>
   );

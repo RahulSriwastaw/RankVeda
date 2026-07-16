@@ -1,7 +1,6 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDybByBZ7_BEHGaax6KKiKeS8BAT1ObR00",
   authDomain: "rankveda-8863.firebaseapp.com",
@@ -12,13 +11,9 @@ const firebaseConfig = {
   measurementId: "G-ZPC84KD6Z3"
 };
 
-// Initialize Firebase (SSR friendly: avoid duplicate initialization)
+// Initialize Firebase (safely for SSR/Next.js)
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
 
-// Initialize Analytics safely on client side
-let analytics;
-if (typeof window !== "undefined") {
-  analytics = getAnalytics(app);
-}
-
-export { app, analytics };
+export { auth, googleProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword };

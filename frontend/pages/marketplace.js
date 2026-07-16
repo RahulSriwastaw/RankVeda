@@ -153,43 +153,146 @@ export default function Marketplace() {
     setBuyMsg('');
   };
 
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const confirmBuy = async () => {
     setBuying(true);
     setBuyMsg('');
     try {
-      const endpoint = buyModal.kind === 'pack'
-        ? `${API}/api/marketplace/packs/${buyModal.id}/purchase`
-        : `${API}/api/marketplace/purchase`;
-      const payload = buyModal.kind === 'pack'
-        ? { pack_id: buyModal.id }
-        : { exam_id: buyModal.id };
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...authHeaders },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setBuyMsg('✅ ' + data.message);
-        // Update local user balance
-        const u = JSON.parse(localStorage.getItem('rv_user') || '{}');
-        u.balance = data.new_balance;
-        localStorage.setItem('rv_user', JSON.stringify(u));
-        fetchExams();
-        fetchPacks();
-        if (buyModal.kind === 'exam') {
+      if (buyModal.kind === 'pack') {
+        // Razorpay flow for B2B packs
+        const resOrder = await fetch(`${API}/api/marketplace/packs/${buyModal.id}/razorpay/order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders }
+        });
+        const orderData = await resOrder.json();
+        if (!orderData.success) {
+          setBuyMsg('❌ ' + (orderData.error || 'Failed to initialize order'));
+          setBuying(false);
+          return;
+        }
+
+        if (orderData.is_mock) {
+          const confirmMock = window.confirm(`[RAZORPAY SANDBOX] Pay ₹${buyModal.price} for pack "${buyModal.name}"?`);
+          if (!confirmMock) {
+            setBuyMsg('❌ Payment cancelled');
+            setBuying(false);
+            return;
+          }
+          // Call verify with mock flag
+          const resVerify = await fetch(`${API}/api/marketplace/packs/${buyModal.id}/razorpay/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...authHeaders },
+            body: JSON.stringify({ is_mock: true })
+          });
+          const verifyData = await resVerify.json();
+          if (verifyData.success) {
+            setBuyMsg('✅ ' + verifyData.message);
+            fetchPacks();
+            fetchExams();
+            setTimeout(() => setBuyModal(null), 1200);
+          } else {
+            setBuyMsg('❌ ' + (verifyData.error || 'Verification failed'));
+          }
+        } else {
+          // Real Razorpay checkout
+          const scriptLoaded = await loadRazorpay();
+          if (!scriptLoaded) {
+            setBuyMsg('❌ Failed to load Razorpay SDK');
+            setBuying(false);
+            return;
+          }
+          const options = {
+            key: orderData.key_id,
+            amount: orderData.amount,
+            currency: orderData.currency,
+            name: 'RankVeda B2B',
+            description: orderData.pack.name,
+            order_id: orderData.order_id,
+            handler: async function (response) {
+              setBuying(true);
+              setBuyMsg('Verifying payment...');
+              try {
+                const resVerify = await fetch(`${API}/api/marketplace/packs/${buyModal.id}/razorpay/verify`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', ...authHeaders },
+                  body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                    is_mock: false
+                  })
+                });
+                const verifyData = await resVerify.json();
+                if (verifyData.success) {
+                  setBuyMsg('✅ ' + verifyData.message);
+                  fetchPacks();
+                  fetchExams();
+                  setTimeout(() => setBuyModal(null), 1200);
+                } else {
+                  setBuyMsg('❌ ' + (verifyData.error || 'Verification failed'));
+                }
+              } catch (err) {
+                setBuyMsg('❌ Verification error');
+              } finally {
+                setBuying(false);
+              }
+            },
+            prefill: {
+              name: orderData.user.name || '',
+              email: orderData.user.email || ''
+            },
+            theme: { color: '#6366f1' },
+            modal: {
+              ondismiss: function () {
+                setBuyMsg('❌ Payment cancelled');
+                setBuying(false);
+              }
+            }
+          };
+          const rzp = new window.Razorpay(options);
+          rzp.open();
+        }
+      } else {
+        // Original Points purchase flow for standard exams
+        const res = await fetch(`${API}/api/marketplace/purchase`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders },
+          body: JSON.stringify({ exam_id: buyModal.id }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setBuyMsg('✅ ' + data.message);
+          // Update local user balance
+          const u = JSON.parse(localStorage.getItem('rv_user') || '{}');
+          u.balance = data.new_balance;
+          localStorage.setItem('rv_user', JSON.stringify(u));
+          fetchExams();
+          fetchPacks();
           setTimeout(() => {
             setBuyModal(null);
             openExam({ ...buyModal, is_purchased: true });
           }, 1500);
         } else {
-          setTimeout(() => setBuyModal(null), 1200);
+          setBuyMsg('❌ ' + (data.error || 'Purchase failed'));
         }
-      } else {
-        setBuyMsg('❌ ' + (data.error || 'Purchase failed'));
       }
-    } catch (e) { setBuyMsg('❌ Network error'); }
-    finally { setBuying(false); }
+    } catch (e) {
+      setBuyMsg('❌ Network error');
+    } finally {
+      if (buyModal?.kind !== 'pack') {
+        setBuying(false);
+      }
+    }
   };
 
   const OPTION_LABELS = ['A', 'B', 'C', 'D'];
@@ -475,14 +578,22 @@ export default function Marketplace() {
                     {pack.purchased ? (
                       <span className="text-xs px-3 py-1.5 rounded-full bg-green-900/40 border border-green-700 text-green-400">Purchased</span>
                     ) : (
-                      <span className="text-xs px-3 py-1.5 rounded-full bg-amber-900/30 border border-amber-700 text-amber-400">{pack.price || 0} pts</span>
+                      <span className="text-xs px-3 py-1.5 rounded-full bg-emerald-900/30 border border-emerald-700 text-emerald-400">₹{pack.price || 0}</span>
                     )}
                   </div>
                   <div className="mt-4 text-sm text-gray-400">Includes {(pack.exam_ids || []).length} exams</div>
                   <div className="mt-5 flex gap-3">
-                    <button onClick={() => buyItem(pack, 'pack')} className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-sm">
-                      {pack.purchased ? 'View Access' : 'Unlock Pack'}
-                    </button>
+                    {pack.purchased ? (
+                      <Link href={`/marketplace/packs/${pack.id}/analysis`} className="w-full">
+                        <button className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm">
+                          View Access & Marks Analysis
+                        </button>
+                      </Link>
+                    ) : (
+                      <button onClick={() => buyItem(pack, 'pack')} className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-sm">
+                        Unlock Pack — ₹{pack.price || 0}
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               ))}

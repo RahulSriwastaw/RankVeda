@@ -99,7 +99,97 @@ def list_users():
     except Exception as e:
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
+import hashlib
 
+def _hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+@admin_bp.route('/users', methods=['POST'])
+def admin_create_user():
+    """Create a new user from admin panel."""
+    try:
+        data = request.get_json() or {}
+        email = (data.get('email') or '').strip().lower()
+        name = (data.get('name') or '').strip()
+        password = data.get('password') or ''
+        points = int(data.get('points', 0))
+
+        if not email or not password:
+            return jsonify({'error': 'Email and password are required'}), 400
+
+        existing = User.query.filter_by(email=email).first()
+        if existing:
+            return jsonify({'error': 'Email already registered'}), 409
+
+        user = User(email=email, name=name or email.split('@')[0], password_hash=_hash_password(password))
+        db.session.add(user)
+        db.session.flush()
+
+        wallet = UserPoints(user_id=user.id, balance=points, total_earned=points, total_spent=0)
+        db.session.add(wallet)
+        
+        if points > 0:
+            txn = PointsTransaction(
+                user_id=user.id,
+                type='earn',
+                amount=points,
+                description='[Admin] Initial balance on user creation'
+            )
+            db.session.add(txn)
+
+        db.session.commit()
+        return jsonify({'success': True, 'user_id': user.id}), 201
+    except Exception as e:
+        db.session.rollback()
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/users/<int:user_id>', methods=['PUT'])
+def admin_update_user(user_id):
+    """Update a user's details (name, email, password)."""
+    try:
+        data = request.get_json() or {}
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        if 'email' in data:
+            email = data['email'].strip().lower()
+            if email != user.email:
+                existing = User.query.filter_by(email=email).first()
+                if existing:
+                    return jsonify({'error': 'Email already exists'}), 409
+                user.email = email
+        if 'name' in data:
+            user.name = data['name'].strip()
+        if 'password' in data and data['password']:
+            user.password_hash = _hash_password(data['password'])
+
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/users/<int:user_id>', methods=['DELETE'])
+def admin_delete_user(user_id):
+    """Delete a user."""
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        # Clean related records explicitly to prevent FK constraint failures
+        UserPoints.query.filter_by(user_id=user_id).delete()
+        PointsTransaction.query.filter_by(user_id=user_id).delete()
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
 
 
 @admin_bp.route('/users/<int:user_id>', methods=['GET'])
@@ -229,6 +319,9 @@ def list_exams():
                 'name': e.name,
                 'date': e.date.isoformat() if e.date else None,
                 'total_questions': e.total_questions,
+                'price': e.price or 0,
+                'description': e.description or '',
+                'disclaimer': e.disclaimer or '',
                 'results_count': ExamResult.query.filter_by(exam_id=e.id).count()
             } for e in exams]
         })
@@ -248,7 +341,10 @@ def create_exam():
         exam = Exam(
             name=data['name'],
             date=datetime.strptime(data['date'], '%Y-%m-%d').date() if data.get('date') else datetime.now(timezone.utc).date(),
-            total_questions=data.get('total_questions', 100)
+            total_questions=data.get('total_questions', 100),
+            price=data.get('price', 0),
+            description=data.get('description', ''),
+            disclaimer=data.get('disclaimer', '')
         )
         db.session.add(exam)
         db.session.commit()
@@ -266,12 +362,18 @@ def update_exam(exam_id):
     try:
         exam = Exam.query.get_or_404(exam_id)
         data = request.get_json()
-        if data.get('name'):
+        if 'name' in data:
             exam.name = data['name']
-        if data.get('date'):
-            exam.date = datetime.strptime(data['date'], '%Y-%m-%d').date()
-        if data.get('total_questions'):
+        if 'date' in data:
+            exam.date = datetime.strptime(data['date'], '%Y-%m-%d').date() if data['date'] else None
+        if 'total_questions' in data:
             exam.total_questions = data['total_questions']
+        if 'price' in data:
+            exam.price = data['price']
+        if 'description' in data:
+            exam.description = data['description']
+        if 'disclaimer' in data:
+            exam.disclaimer = data['disclaimer']
         db.session.commit()
         return jsonify({'success': True})
     except Exception as e:
@@ -400,10 +502,30 @@ def list_results():
         per_page = request.args.get('per_page', 20, type=int)
         exam_id = request.args.get('exam_id', type=int)
         search = request.args.get('search', '').strip()
+        category = request.args.get('category', '').strip()
+        shift_date = request.args.get('shift_date', '').strip()
+        shift_time = request.args.get('shift_time', '').strip()
+        subject = request.args.get('subject', '').strip()
+        min_score = request.args.get('min_score', type=float)
+        max_score = request.args.get('max_score', type=float)
+        download = request.args.get('download', '').strip().lower()
 
         query = ExamResult.query
         if exam_id:
             query = query.filter_by(exam_id=exam_id)
+        if category:
+            query = query.filter(ExamResult.category.ilike(category))
+        if shift_date:
+            query = query.filter(ExamResult.test_date == shift_date)
+        if shift_time:
+            query = query.filter(ExamResult.test_time == shift_time)
+        if subject:
+            query = query.filter(ExamResult.subject.ilike(subject))
+        if min_score is not None:
+            query = query.filter(ExamResult.score >= min_score)
+        if max_score is not None:
+            query = query.filter(ExamResult.score <= max_score)
+
         if search:
             like_term = f'%{search}%'
             query = query.filter(
@@ -417,12 +539,17 @@ def list_results():
             )
 
         total = query.count()
-        results = query.order_by(desc(ExamResult.created_at)).paginate(page=page, per_page=per_page, error_out=False)
+        if download == 'all':
+            items = query.order_by(desc(ExamResult.score)).all()
+        else:
+            paginated = query.order_by(desc(ExamResult.score)).paginate(page=page, per_page=per_page, error_out=False)
+            items = paginated.items
 
         return jsonify({
             'results': [{
                 'id': r.id,
                 'exam_id': r.exam_id,
+                'exam_name': r.exam.name if r.exam else '',
                 'registration_number': r.registration_number,
                 'roll_number': r.roll_number,
                 'candidate_name': r.candidate_name,
@@ -434,10 +561,7 @@ def list_results():
                 'photo_url': r.photo_url,
                 'application_photograph': r.application_photograph or r.photo_url,
                 'candidate_payload': r.candidate_payload or {},
-                'source_html': r.source_html,
-                'parser_version': r.parser_version,
-                'parsed_at': r.parsed_at.isoformat() if r.parsed_at else None,
-                'score': float(r.score),
+                'score': float(r.score) if r.score is not None else 0.0,
                 'rank': r.rank,
                 'percentile': float(r.percentile) if r.percentile else None,
                 'category': r.category,
@@ -447,11 +571,11 @@ def list_results():
                 'total_unattempted': r.total_unattempted,
                 'questions_count': QuestionResponse.query.filter_by(result_id=r.id).count(),
                 'created_at': r.created_at.isoformat() if r.created_at else None
-            } for r in results.items],
+            } for r in items],
             'total': total,
-            'page': page,
-            'per_page': per_page,
-            'pages': (total + per_page - 1) // per_page
+            'page': page if download != 'all' else 1,
+            'per_page': per_page if download != 'all' else total,
+            'pages': (total + per_page - 1) // per_page if download != 'all' else 1
         })
     except Exception as e:
         print(traceback.format_exc())

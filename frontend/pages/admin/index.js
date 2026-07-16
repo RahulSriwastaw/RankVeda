@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
-import { FaShieldAlt, FaTachometerAlt, FaUsers, FaBook, FaClipboardList, FaQuestionCircle, FaMoneyBillWave, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
+import { FaShieldAlt, FaTachometerAlt, FaUsers, FaBook, FaClipboardList, FaQuestionCircle, FaMoneyBillWave, FaSignOutAlt, FaBars, FaTimes, FaBox, FaDatabase } from 'react-icons/fa';
 
-const ADMIN_PASS = "admin123"; // Simple password for demo
+const ADMIN_PASS = "admin123";
 
 export default function AdminLayout() {
   const router = useRouter();
@@ -27,113 +27,141 @@ export default function AdminLayout() {
       setAuthenticated(true);
       setError('');
     } else {
-      setError('गलत पासवर्ड');
+      setError('Incorrect password');
     }
   };
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-gray-950 relative overflow-hidden">
+        {/* Animated background orbs */}
+        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-3xl" />
+
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md"
+          initial={{ opacity: 0, y: 20, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+          className="relative bg-gray-900/80 backdrop-blur-xl p-7 rounded-2xl w-full max-w-sm border border-gray-800/80 shadow-2xl shadow-indigo-500/5"
         >
           <div className="text-center mb-6">
-            <FaShieldAlt className="text-5xl text-indigo-500 mx-auto mb-2" />
-            <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
-            <p className="text-gray-400 text-sm">RankVeda एडमिन पैनल</p>
-          </div>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">पासवर्ड</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="एडमिन पासवर्ड डालें"
-                autoFocus
-              />
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-500/20">
+              <FaShieldAlt className="text-xl text-white" />
             </div>
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+            <h1 className="text-lg font-bold text-white">Admin Panel</h1>
+            <p className="text-gray-500 text-xs mt-0.5">RankVeda Administration</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-gray-400">Password</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-gray-800/60 border border-gray-700/60 text-white text-sm placeholder-gray-500 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 focus:bg-gray-800 transition-all outline-none"
+                  placeholder="Enter admin password"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={error ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              {error && (
+                <div className="flex items-center gap-2 bg-red-900/30 border border-red-800/40 rounded-lg px-3 py-2">
+                  <svg className="w-4 h-4 text-red-400 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+                  <p className="text-red-300 text-xs">{error}</p>
+                </div>
+              )}
+            </motion.div>
+
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:scale-[1.02] transition-transform"
+              className="w-full py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-sm hover:from-indigo-500 hover:to-purple-500 active:scale-[0.98] transition-all shadow-lg shadow-indigo-600/20"
             >
-              लॉगिन करें
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                Sign In
+              </span>
             </button>
           </form>
+
+          <p className="text-center text-gray-600 text-[10px] mt-5">Protected area &bull; Authorized access only</p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex">
-      {/* Mobile Sidebar Toggle */}
+    <div className="min-h-screen bg-gray-950 text-white flex">
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-gray-800"
+        className="lg:hidden fixed top-3 left-3 z-50 p-2 rounded-lg bg-gray-900 border border-gray-800"
       >
-        {sidebarOpen ? <FaTimes /> : <FaBars />}
+        {sidebarOpen ? <FaTimes size={14} /> : <FaBars size={14} />}
       </button>
 
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:relative z-40 w-64 h-full bg-gray-800 border-r border-gray-700 transition-transform duration-300`}>
-        <div className="p-6 border-b border-gray-700">
-          <div className="flex items-center gap-3">
-            <FaShieldAlt className="text-2xl text-indigo-500" />
+      <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:relative z-40 w-56 h-full bg-gray-900 border-r border-gray-800 transition-transform duration-300`}>
+        <div className="p-4 border-b border-gray-800">
+          <div className="flex items-center gap-2">
+            <FaShieldAlt className="text-lg text-indigo-500" />
             <div>
-              <h2 className="font-bold">RankVeda</h2>
-              <p className="text-xs text-gray-400">Admin Panel</p>
+              <h2 className="font-bold text-sm">RankVeda</h2>
+              <p className="text-[10px] text-gray-500">Admin Panel</p>
             </div>
           </div>
         </div>
 
-        <nav className="p-4 space-y-2">
+        <nav className="p-2 space-y-1">
           {[
-            { id: 'dashboard', icon: FaTachometerAlt, label: 'डैशबोर्ड' },
-            { id: 'users', icon: FaUsers, label: 'यूज़र्स' },
-            { id: 'exams', icon: FaBook, label: 'परीक्षाएं' },
-            { id: 'packs', icon: FaBook, label: 'पैक्स' },
-            { id: 'results', icon: FaClipboardList, label: 'रिजल्ट' },
-            { id: 'questions', icon: FaQuestionCircle, label: 'प्रश्न' },
-            { id: 'parsed', icon: FaClipboardList, label: 'पैरस्ड डेटा' },
-            { id: 'transactions', icon: FaMoneyBillWave, label: 'ट्रांजेक्शन्स' },
+            { id: 'dashboard', icon: FaTachometerAlt, label: 'Dashboard' },
+            { id: 'users', icon: FaUsers, label: 'Users' },
+            { id: 'exams', icon: FaBook, label: 'Exams' },
+            { id: 'packs', icon: FaBox, label: 'Packs' },
+            { id: 'results', icon: FaClipboardList, label: 'Results' },
+            { id: 'questions', icon: FaQuestionCircle, label: 'Questions' },
+            { id: 'parsed', icon: FaDatabase, label: 'Parsed Data' },
+            { id: 'transactions', icon: FaMoneyBillWave, label: 'Transactions' },
           ].map((item) => (
             <button
               key={item.id}
               onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${activeTab === item.id
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition ${activeTab === item.id
+                  ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
+                  : 'text-gray-500 hover:bg-gray-800 hover:text-gray-300'
                 }`}
             >
-              <item.icon />
+              <item.icon size={14} />
               {item.label}
             </button>
           ))}
         </nav>
 
-        <div className="absolute bottom-0 w-full p-4 border-t border-gray-700">
+        <div className="absolute bottom-0 w-full p-2 border-t border-gray-800">
           <button
             onClick={() => { sessionStorage.removeItem('admin_auth'); setAuthenticated(false); }}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-red-400 hover:bg-gray-700 transition"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-red-400 hover:bg-gray-800 transition"
           >
-            <FaSignOutAlt /> लॉगआउट
+            <FaSignOutAlt size={14} /> Logout
           </button>
         </div>
       </div>
 
-      {/* Overlay for mobile */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        <div className="p-6 lg:p-8">
+        <div className="p-4 lg:p-5">
           {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'users' && <Users />}
           {activeTab === 'exams' && <Exams />}
@@ -148,7 +176,6 @@ export default function AdminLayout() {
   );
 }
 
-// ==================== DASHBOARD COMPONENT ====================
 function Dashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -174,54 +201,53 @@ function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
       </div>
     );
   }
 
   const cards = [
-    { label: 'कुल यूज़र्स', value: stats?.total_users || 0, color: 'from-blue-500 to-blue-600' },
-    { label: 'कुल परीक्षाएं', value: stats?.total_exams || 0, color: 'from-purple-500 to-purple-600' },
-    { label: 'कुल रिजल्ट', value: stats?.total_results || 0, color: 'from-green-500 to-green-600' },
-    { label: 'कुल प्रश्न', value: stats?.total_questions || 0, color: 'from-pink-500 to-pink-600' },
-    { label: 'AI सॉल्यूशन्स', value: stats?.total_solutions || 0, color: 'from-amber-500 to-amber-600' },
-    { label: 'आज के रिजल्ट', value: stats?.today_results || 0, color: 'from-cyan-500 to-cyan-600' },
-    { label: 'आज के यूज़र्स', value: stats?.today_users || 0, color: 'from-teal-500 to-teal-600' },
+    { label: 'Total Users', value: stats?.total_users || 0, color: 'from-blue-600 to-blue-700' },
+    { label: 'Total Exams', value: stats?.total_exams || 0, color: 'from-purple-600 to-purple-700' },
+    { label: 'Total Results', value: stats?.total_results || 0, color: 'from-emerald-600 to-emerald-700' },
+    { label: 'Total Questions', value: stats?.total_questions || 0, color: 'from-pink-600 to-pink-700' },
+    { label: 'AI Solutions', value: stats?.total_solutions || 0, color: 'from-amber-600 to-amber-700' },
+    { label: "Today's Results", value: stats?.today_results || 0, color: 'from-cyan-600 to-cyan-700' },
+    { label: "Today's Users", value: stats?.today_users || 0, color: 'from-teal-600 to-teal-700' },
   ];
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">📊 डैशबोर्ड</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <h1 className="text-lg font-bold mb-4">Dashboard</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {cards.map((card, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className={`bg-gradient-to-br ${card.color} rounded-xl p-5 shadow-lg`}
+            className={`bg-gradient-to-br ${card.color} rounded-lg p-4 shadow-lg`}
           >
-            <p className="text-sm opacity-80">{card.label}</p>
-            <p className="text-3xl font-bold mt-1">{card.value}</p>
+            <p className="text-xs opacity-80">{card.label}</p>
+            <p className="text-2xl font-bold mt-1">{card.value}</p>
           </motion.div>
         ))}
       </div>
 
-      {/* Points Summary */}
-      <div className="mt-8 bg-gray-800 rounded-xl p-6">
-        <h2 className="text-lg font-semibold mb-4">💰 पॉइंट्स सारांश</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-gray-700/50 rounded-lg p-4">
-            <p className="text-sm text-gray-400">कुल कमाए गए</p>
-            <p className="text-2xl font-bold text-green-400">{stats?.total_points_earned || 0}</p>
+      <div className="mt-5 bg-gray-900 rounded-lg p-4">
+        <h2 className="text-sm font-semibold mb-3">Points Summary</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="bg-gray-800/50 rounded-lg p-3">
+            <p className="text-xs text-gray-500">Total Earned</p>
+            <p className="text-xl font-bold text-green-400">{stats?.total_points_earned || 0}</p>
           </div>
-          <div className="bg-gray-700/50 rounded-lg p-4">
-            <p className="text-sm text-gray-400">कुल खर्च किए</p>
-            <p className="text-2xl font-bold text-red-400">{stats?.total_points_spent || 0}</p>
+          <div className="bg-gray-800/50 rounded-lg p-3">
+            <p className="text-xs text-gray-500">Total Spent</p>
+            <p className="text-xl font-bold text-red-400">{stats?.total_points_spent || 0}</p>
           </div>
-          <div className="bg-gray-700/50 rounded-lg p-4">
-            <p className="text-sm text-gray-400">नेट बैलेंस</p>
-            <p className="text-2xl font-bold text-indigo-400">{(stats?.total_points_earned || 0) - (stats?.total_points_spent || 0)}</p>
+          <div className="bg-gray-800/50 rounded-lg p-3">
+            <p className="text-xs text-gray-500">Net Balance</p>
+            <p className="text-xl font-bold text-indigo-400">{(stats?.total_points_earned || 0) - (stats?.total_points_spent || 0)}</p>
           </div>
         </div>
       </div>
@@ -229,7 +255,6 @@ function Dashboard() {
   );
 }
 
-// ==================== QUESTION PACKS COMPONENT ====================
 function Packs() {
   const [packs, setPacks] = useState([]);
   const [exams, setExams] = useState([]);
@@ -238,6 +263,7 @@ function Packs() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [form, setForm] = useState({ name: '', description: '', price: '0', exam_ids: [] });
+  const [editingPackId, setEditingPackId] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -263,11 +289,37 @@ function Packs() {
   };
 
   const toggleExam = (examId) => {
+    setForm(prev => {
+      const exists = prev.exam_ids.some(item => 
+        typeof item === 'object' ? item.exam_id === examId : item === examId
+      );
+      if (exists) {
+        return {
+          ...prev,
+          exam_ids: prev.exam_ids.filter(item => 
+            typeof item === 'object' ? item.exam_id !== examId : item !== examId
+          )
+        };
+      } else {
+        return {
+          ...prev,
+          exam_ids: [...prev.exam_ids, { exam_id: examId, include_questions: true, include_results: true }]
+        };
+      }
+    });
+  };
+
+  const updateExamConfig = (examId, key, value) => {
     setForm(prev => ({
       ...prev,
-      exam_ids: prev.exam_ids.includes(examId)
-        ? prev.exam_ids.filter(id => id !== examId)
-        : [...prev.exam_ids, examId],
+      exam_ids: prev.exam_ids.map(item => {
+        const isTarget = typeof item === 'object' ? item.exam_id === examId : item === examId;
+        if (isTarget) {
+          const itemObj = typeof item === 'object' ? item : { exam_id: examId, include_questions: true, include_results: true };
+          return { ...itemObj, [key]: value };
+        }
+        return item;
+      })
     }));
   };
 
@@ -277,8 +329,13 @@ function Packs() {
     setMessage('');
     setError('');
     try {
-      const res = await fetch('http://localhost:5000/api/admin/packs', {
-        method: 'POST',
+      const url = editingPackId 
+        ? `http://localhost:5000/api/admin/packs/${editingPackId}` 
+        : 'http://localhost:5000/api/admin/packs';
+      const method = editingPackId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: form.name,
@@ -289,21 +346,39 @@ function Packs() {
       });
       const data = await res.json();
       if (data.success) {
-        setMessage('✅ Pack created successfully');
+        setMessage(editingPackId ? 'Pack updated successfully' : 'Pack created successfully');
         setForm({ name: '', description: '', price: '0', exam_ids: [] });
+        setEditingPackId(null);
         fetchData();
       } else {
-        setError(data.error || 'Failed to create pack');
+        setError(data.error || 'Failed to save pack');
       }
     } catch (e) {
-      setError('Network error while creating pack');
+      setError('Network error while saving pack');
     } finally {
       setSubmitting(false);
     }
   };
 
+  const editPack = (pack) => {
+    setEditingPackId(pack.id);
+    setForm({
+      name: pack.name || '',
+      description: pack.description || '',
+      price: (pack.price || 0).toString(),
+      exam_ids: pack.exam_ids || []
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingPackId(null);
+    setForm({ name: '', description: '', price: '0', exam_ids: [] });
+    setMessage('');
+    setError('');
+  };
+
   const handleDelete = async (packId) => {
-    if (!confirm('क्या आप इस पैक को हटाना चाहते हैं?')) return;
+    if (!confirm('Are you sure you want to delete this pack?')) return;
     try {
       const res = await fetch(`http://localhost:5000/api/admin/packs/${packId}`, { method: 'DELETE' });
       const data = await res.json();
@@ -319,97 +394,144 @@ function Packs() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold">📦 Question Pack Management</h1>
-          <p className="text-gray-400 text-sm mt-1">Admin packs bundle multiple exams into one marketplace offer.</p>
+          <h1 className="text-lg font-bold">Question Packs</h1>
+          <p className="text-gray-500 text-xs mt-0.5">Bundle multiple exams into marketplace offers</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <form onSubmit={handleSubmit} className="xl:col-span-2 bg-gray-800 rounded-2xl p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Create New Pack</h2>
-          {message && <div className="rounded-lg bg-green-900/40 border border-green-700 px-3 py-2 text-sm text-green-300">{message}</div>}
-          {error && <div className="rounded-lg bg-red-900/40 border border-red-700 px-3 py-2 text-sm text-red-300">{error}</div>}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <form onSubmit={handleSubmit} className="xl:col-span-2 bg-gray-900 rounded-lg p-4 space-y-3">
+          <h2 className="text-sm font-semibold">{editingPackId ? 'Edit Pack' : 'Create New Pack'}</h2>
+          {message && <div className="rounded-lg bg-emerald-900/40 border border-emerald-700 px-3 py-1.5 text-xs text-emerald-300">{message}</div>}
+          {error && <div className="rounded-lg bg-red-900/40 border border-red-700 px-3 py-1.5 text-xs text-red-300">{error}</div>}
 
           <div>
-            <label className="block text-sm text-gray-300 mb-1">Pack Name</label>
+            <label className="block text-xs text-gray-400 mb-1">Pack Name</label>
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-gray-700 border border-gray-600 text-white"
+              className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm"
               placeholder="e.g. RRB NTPC Mega Pack"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-300 mb-1">Description</label>
+            <label className="block text-xs text-gray-400 mb-1">Description</label>
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-gray-700 border border-gray-600 text-white"
-              rows="3"
+              className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm"
+              rows="2"
               placeholder="Bundle details"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-300 mb-1">Pack Price (points)</label>
+            <label className="block text-xs text-gray-400 mb-1">Pack Price (INR)</label>
             <input
               type="number"
               min="0"
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-gray-700 border border-gray-600 text-white"
+              className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-300 mb-1">Select Exams</label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-64 overflow-auto p-2 rounded-xl bg-gray-900/60">
-              {exams.map((exam) => (
-                <label key={exam.id} className="flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-sm text-gray-300">
-                  <input
-                    type="checkbox"
-                    checked={form.exam_ids.includes(exam.id)}
-                    onChange={() => toggleExam(exam.id)}
-                  />
-                  <span>{exam.name}</span>
-                </label>
-              ))}
+            <label className="block text-xs text-gray-400 mb-1">Select Exams & Configure Access</label>
+            <div className="grid grid-cols-1 gap-2 max-h-56 overflow-auto p-2 rounded-lg bg-gray-950/60">
+              {exams.map((exam) => {
+                const selectedConfig = form.exam_ids.find(item => 
+                  typeof item === 'object' ? item.exam_id === exam.id : item === exam.id
+                );
+                const isChecked = !!selectedConfig;
+                
+                return (
+                  <div key={exam.id} className="border border-gray-800 rounded-lg p-2.5 bg-gray-900/40 flex flex-col gap-2">
+                    <label className="flex items-center gap-2 text-xs font-semibold text-gray-300 hover:text-white cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleExam(exam.id)}
+                        className="w-3.5 h-3.5 text-indigo-600 bg-gray-800 border-gray-700 rounded focus:ring-indigo-500"
+                      />
+                      <span>{exam.name}</span>
+                    </label>
+                    
+                    {isChecked && (
+                      <div className="flex gap-4 pl-5 text-[10px] text-gray-400">
+                        <label className="flex items-center gap-1.5 cursor-pointer hover:text-gray-300">
+                          <input
+                            type="checkbox"
+                            checked={typeof selectedConfig === 'object' ? selectedConfig.include_questions !== false : true}
+                            onChange={(e) => updateExamConfig(exam.id, 'include_questions', e.target.checked)}
+                            className="w-3 h-3 text-indigo-600 bg-gray-850 border-gray-750 rounded"
+                          />
+                          <span>Include Questions</span>
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer hover:text-gray-300">
+                          <input
+                            type="checkbox"
+                            checked={typeof selectedConfig === 'object' ? selectedConfig.include_results !== false : true}
+                            onChange={(e) => updateExamConfig(exam.id, 'include_results', e.target.checked)}
+                            className="w-3 h-3 text-indigo-600 bg-gray-850 border-gray-750 rounded"
+                          />
+                          <span>Include Results/Analysis</span>
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold disabled:opacity-60"
-          >
-            {submitting ? 'Creating...' : 'Create Pack'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-xs disabled:opacity-60"
+            >
+              {submitting ? 'Saving...' : editingPackId ? 'Update Pack' : 'Create Pack'}
+            </button>
+            {editingPackId && (
+              <button
+                type="button"
+                onClick={cancelEdit}
+                className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-semibold text-xs"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
 
-        <div className="bg-gray-800 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold mb-4">Existing Packs</h2>
+        <div className="bg-gray-900 rounded-lg p-4">
+          <h2 className="text-sm font-semibold mb-3">Existing Packs</h2>
           {loading ? (
-            <div className="text-sm text-gray-400">Loading...</div>
+            <div className="text-xs text-gray-500">Loading...</div>
           ) : packs.length === 0 ? (
-            <div className="text-sm text-gray-400">No packs created yet.</div>
+            <div className="text-xs text-gray-500">No packs created yet.</div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {packs.map((pack) => (
-                <div key={pack.id} className="rounded-xl border border-gray-700 p-3">
+                <div key={pack.id} className="rounded-lg border border-gray-800 p-2.5">
                   <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="font-semibold text-white">{pack.name}</h3>
-                      <p className="text-xs text-gray-400 mt-1">{pack.description || 'No description'}</p>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-white text-xs truncate">{pack.name}</h3>
+                      <p className="text-[10px] text-gray-500 mt-0.5 truncate">{pack.description || 'No description'}</p>
                     </div>
-                    <button onClick={() => handleDelete(pack.id)} className="text-xs text-red-400">Delete</button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button onClick={() => editPack(pack)} className="text-[10px] text-indigo-400 hover:text-indigo-300">Edit</button>
+                      <button onClick={() => handleDelete(pack.id)} className="text-[10px] text-red-400 hover:text-red-300">Delete</button>
+                    </div>
                   </div>
-                  <div className="mt-3 flex items-center justify-between text-sm text-gray-400">
+                  <div className="mt-2 flex items-center justify-between text-[10px] text-gray-500">
                     <span>{(pack.exam_ids || []).length} exams</span>
-                    <span className="text-amber-400 font-medium">{pack.price || 0} pts</span>
+                    <span className="text-green-400 font-medium">₹{pack.price || 0}</span>
                   </div>
                 </div>
               ))}
@@ -421,7 +543,6 @@ function Packs() {
   );
 }
 
-// ==================== USERS COMPONENT ====================
 function Users() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -436,6 +557,12 @@ function Users() {
   const [dateTo, setDateTo] = useState('');
   const [perPage, setPerPage] = useState(20);
   const [bulkSelected, setBulkSelected] = useState([]);
+
+  // Add/Edit states
+  const [showAdd, setShowAdd] = useState(false);
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', points: 0 });
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', email: '', password: '' });
 
   useEffect(() => {
     fetchUsers();
@@ -459,10 +586,80 @@ function Users() {
     }
   };
 
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('http://localhost:5000/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newUser)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setShowAdd(false);
+        setNewUser({ name: '', email: '', password: '', points: 0 });
+        fetchUsers();
+      } else {
+        alert(data.error || 'Failed to create user');
+      }
+    } catch (err) {
+      alert('Network error');
+    }
+  };
+
+  const startEditUser = (u) => {
+    setEditingUserId(u.id);
+    setEditForm({
+      name: u.name || '',
+      email: u.email || '',
+      password: ''
+    });
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`http://localhost:5000/api/admin/users/${editingUserId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setEditingUserId(null);
+        fetchUsers();
+        if (selectedUser && selectedUser.user?.id === editingUserId) {
+          fetchUserDetail(editingUserId);
+        }
+      } else {
+        alert(data.error || 'Failed to update user');
+      }
+    } catch (err) {
+      alert('Network error');
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!confirm('Are you sure you want to delete this user? All their results and points balance will be deleted.')) return;
+    try {
+      const res = await fetch(`http://localhost:5000/api/admin/users/${userId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        fetchUsers();
+        if (selectedUser && selectedUser.user?.id === userId) {
+          setSelectedUser(null);
+        }
+      } else {
+        alert(data.error || 'Failed to delete user');
+      }
+    } catch (err) {
+      alert('Delete failed');
+    }
+  };
+
   const runBulkDeleteUsers = async () => {
     if (bulkSelected.length === 0) return;
-    if (!confirm(`क्या आप वाकई ${bulkSelected.length} यूज़र्स और उनका सारा डेटा (Points, Results, Transactions) delete करना चाहते हैं?`)) return;
-    
+    if (!confirm(`Are you sure you want to delete ${bulkSelected.length} users and all their data (Points, Results, Transactions)?`)) return;
     try {
       const res = await fetch('http://localhost:5000/api/admin/users/bulk-delete', {
         method: 'POST',
@@ -471,7 +668,7 @@ function Users() {
       });
       const data = await res.json();
       if (data.success) {
-        alert(`✅ ${data.deleted} Users deleted`);
+        alert(`${data.deleted} Users deleted`);
         setBulkSelected([]);
         if (page === 1) {
           fetchUsers();
@@ -479,9 +676,9 @@ function Users() {
           setPage(1);
         }
       } else {
-        alert('❌ Error: ' + (data.error || ''));
+        alert('Error: ' + (data.error || ''));
       }
-    } catch (e) { alert('❌ Delete failed'); }
+    } catch (e) { alert('Delete failed'); }
   };
 
   const fetchUserDetail = async (userId) => {
@@ -514,52 +711,162 @@ function Users() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">👥 यूज़र्स मैनेजमेंट</h1>
-        {bulkSelected.length > 0 && (
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-indigo-400">{bulkSelected.length} selected</span>
-            <button onClick={runBulkDeleteUsers} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm transition">
-              🗑️ Bulk Delete
-            </button>
-            <button onClick={() => setBulkSelected([])} className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm transition">
-              Clear
-            </button>
-          </div>
-        )}
+      <div className="flex justify-between items-center mb-3">
+        <div>
+          <h1 className="text-lg font-bold">Users</h1>
+          <p className="text-xs text-gray-500 mt-0.5">{total} total users registered</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {bulkSelected.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-indigo-400">{bulkSelected.length} selected</span>
+              <button onClick={runBulkDeleteUsers} className="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded text-xs transition">
+                Bulk Delete
+              </button>
+              <button onClick={() => setBulkSelected([])} className="bg-gray-700 hover:bg-gray-600 text-white px-2.5 py-1 rounded text-xs transition">
+                Clear
+              </button>
+            </div>
+          )}
+          <button
+            onClick={() => setShowAdd(true)}
+            className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition"
+          >
+            + New User
+          </button>
+        </div>
       </div>
 
-      {/* Search & Filters */}
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-3">
+      <div className="mb-3 grid grid-cols-1 md:grid-cols-4 gap-2">
         <input
           type="text"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          placeholder="ईमेल या नाम से खोजें..."
-          className="col-span-2 px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500"
+          placeholder="Search by email or name..."
+          className="col-span-2 px-3 py-1.5 rounded-lg bg-gray-900 border border-gray-800 text-xs text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
         />
         <select value={sortBy} onChange={e => { setSortBy(e.target.value); setPage(1); }}
-          className="px-3 py-2 rounded-xl bg-gray-800 border border-gray-700 text-sm text-white focus:outline-none">
-          <option value="created_at">📅 नवीनतम</option>
-          <option value="balance">💰 Points Balance</option>
+          className="px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-800 text-xs text-white focus:outline-none">
+          <option value="created_at">Latest</option>
+          <option value="balance">Points Balance</option>
         </select>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           <input type="date" value={dateFrom} onChange={e => { setDateFrom(e.target.value); setPage(1); }}
-            className="flex-1 px-3 py-2 rounded-xl bg-gray-800 border border-gray-700 text-sm text-white focus:outline-none" />
+            className="flex-1 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-800 text-xs text-white focus:outline-none" />
           <input type="date" value={dateTo} onChange={e => { setDateTo(e.target.value); setPage(1); }}
-            className="flex-1 px-3 py-2 rounded-xl bg-gray-800 border border-gray-700 text-sm text-white focus:outline-none" />
+            className="flex-1 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-800 text-xs text-white focus:outline-none" />
         </div>
       </div>
+
+      {showAdd && (
+        <form onSubmit={handleCreateUser} className="bg-gray-900 rounded-lg p-4 mb-4 border border-gray-800 space-y-3">
+          <h3 className="font-semibold text-sm text-indigo-400">Create New User</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Full Name</label>
+              <input
+                type="text"
+                value={newUser.name}
+                onChange={(ev) => setNewUser({ ...newUser, name: ev.target.value })}
+                className="w-full px-3 py-1.5 rounded-lg bg-gray-850 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Email Address</label>
+              <input
+                type="email"
+                value={newUser.email}
+                onChange={(ev) => setNewUser({ ...newUser, email: ev.target.value })}
+                className="w-full px-3 py-1.5 rounded-lg bg-gray-850 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Password</label>
+              <input
+                type="password"
+                value={newUser.password}
+                onChange={(ev) => setNewUser({ ...newUser, password: ev.target.value })}
+                className="w-full px-3 py-1.5 rounded-lg bg-gray-850 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Initial Points</label>
+              <input
+                type="number"
+                value={newUser.points}
+                onChange={(ev) => setNewUser({ ...newUser, points: parseInt(ev.target.value) || 0 })}
+                className="w-full px-3 py-1.5 rounded-lg bg-gray-850 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button type="submit" className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition">
+              Create User
+            </button>
+            <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-xs transition">
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+
+      {editingUserId && (
+        <form onSubmit={handleUpdateUser} className="bg-gray-900 rounded-lg p-4 mb-4 border border-gray-800 space-y-3">
+          <h3 className="font-semibold text-sm text-indigo-400">Edit User Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Full Name</label>
+              <input
+                type="text"
+                value={editForm.name}
+                onChange={(ev) => setEditForm({ ...editForm, name: ev.target.value })}
+                className="w-full px-3 py-1.5 rounded-lg bg-gray-850 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Email Address</label>
+              <input
+                type="email"
+                value={editForm.email}
+                onChange={(ev) => setEditForm({ ...editForm, email: ev.target.value })}
+                className="w-full px-3 py-1.5 rounded-lg bg-gray-850 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">New Password (leave blank to keep current)</label>
+              <input
+                type="password"
+                value={editForm.password}
+                onChange={(ev) => setEditForm({ ...editForm, password: ev.target.value })}
+                className="w-full px-3 py-1.5 rounded-lg bg-gray-850 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button type="submit" className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition">
+              Save Changes
+            </button>
+            <button type="button" onClick={() => setEditingUserId(null)} className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-xs transition">
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
 
       {selectedUser ? (
         <UserDetail user={selectedUser} onBack={() => setSelectedUser(null)} onAdjustPoints={(u) => setAdjustModal(u)} />
       ) : (
         <>
-          <div className="bg-gray-800 rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
+            <table className="w-full text-xs">
               <thead>
-                <tr className="bg-gray-700">
-                  <th className="p-3 text-left w-10">
+                <tr className="bg-gray-800/50">
+                  <th className="p-2.5 text-left w-8">
                     <input type="checkbox" onChange={e => {
                       if (e.target.checked) {
                         setBulkSelected(prev => [...new Set([...prev, ...users.map(u => u.id)])]);
@@ -568,61 +875,76 @@ function Users() {
                         setBulkSelected(prev => prev.filter(id => !userIds.includes(id)));
                       }
                     }}
-                    checked={users.length > 0 && users.every(u => bulkSelected.includes(u.id))} className="w-4 h-4" />
+                    checked={users.length > 0 && users.every(u => bulkSelected.includes(u.id))} className="w-3 h-3" />
                   </th>
-                  <th className="p-3 text-left">ID</th>
-                  <th className="p-3 text-left">नाम</th>
-                  <th className="p-3 text-left">ईमेल</th>
-                  <th className="p-3 text-left">पॉइंट्स</th>
-                  <th className="p-3 text-left">रिजल्ट</th>
-                  <th className="p-3 text-left">एक्शन</th>
+                  <th className="p-2.5 text-left font-medium text-gray-500">ID</th>
+                  <th className="p-2.5 text-left font-medium text-gray-500">Name</th>
+                  <th className="p-2.5 text-left font-medium text-gray-500">Email</th>
+                  <th className="p-2.5 text-left font-medium text-gray-500">Points</th>
+                  <th className="p-2.5 text-left font-medium text-gray-500">Results</th>
+                  <th className="p-2.5 text-left font-medium text-gray-500">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => (
-                  <tr key={u.id} className="border-t border-gray-700 hover:bg-gray-750">
-                    <td className="p-3">
-                      <input type="checkbox" checked={bulkSelected.includes(u.id)}
-                        onChange={e => setBulkSelected(prev => e.target.checked ? [...prev, u.id] : prev.filter(x => x !== u.id))}
-                        className="w-4 h-4" />
-                    </td>
-                    <td className="p-3">{u.id}</td>
-                    <td className="p-3">{u.name || '—'}</td>
-                    <td className="p-3 text-gray-400">{u.email || '—'}</td>
-                    <td className="p-3">
-                      <span className="text-yellow-400">{u.points_balance}</span>
-                    </td>
-                    <td className="p-3">{u.results_count}</td>
-                    <td className="p-3">
-                      <button
-                        onClick={() => fetchUserDetail(u.id)}
-                        className="text-indigo-400 hover:text-indigo-300 mr-2"
-                      >
-                        विवरण
-                      </button>
-                    </td>
+                {users.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="py-10 text-center text-gray-500">No users found.</td>
                   </tr>
-                ))}
+                ) : (
+                  users.map((u) => (
+                    <tr key={u.id} className="border-t border-gray-800 hover:bg-gray-800/30">
+                      <td className="p-2.5">
+                        <input type="checkbox" checked={bulkSelected.includes(u.id)}
+                          onChange={e => setBulkSelected(prev => e.target.checked ? [...prev, u.id] : prev.filter(x => x !== u.id))}
+                          className="w-3 h-3" />
+                      </td>
+                      <td className="p-2.5 text-gray-400">{u.id}</td>
+                      <td className="p-2.5 font-medium text-white">{u.name || '—'}</td>
+                      <td className="p-2.5 text-gray-500">{u.email || '—'}</td>
+                      <td className="p-2.5 text-yellow-400 font-bold">{u.points_balance}</td>
+                      <td className="p-2.5 text-gray-400">{u.results_count}</td>
+                      <td className="p-2.5 flex items-center gap-3">
+                        <button
+                          onClick={() => fetchUserDetail(u.id)}
+                          className="text-indigo-400 hover:text-indigo-300 text-xs font-semibold"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => startEditUser(u)}
+                          className="text-indigo-400 hover:text-indigo-300 text-xs font-semibold"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(u.id)}
+                          className="text-red-400 hover:text-red-300 text-xs font-semibold"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
-          {/* Pagination */}
-          <div className="mt-4 flex justify-between items-center bg-gray-800 p-3 rounded-xl">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-gray-400">Rows per page:</span>
-              <select value={perPage} onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }} className="bg-gray-700 text-white rounded px-2 py-1">
+          <div className="mt-3 flex justify-between items-center bg-gray-900 p-2.5 rounded-lg border border-gray-800">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-gray-500">Rows:</span>
+              <select value={perPage} onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }} className="bg-gray-800 text-white rounded px-2 py-0.5 text-xs">
                 <option value={20}>20</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
               </select>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className={`px-3 py-1 rounded ${page === p ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-gray-600'}`}
+                  className={`px-2.5 py-0.5 rounded text-xs ${page === p ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-gray-700'}`}
                 >
                   {p}
                 </button>
@@ -632,7 +954,6 @@ function Users() {
         </>
       )}
 
-      {/* Adjust Points Modal */}
       {adjustModal && (
         <PointsAdjustModal
           user={adjustModal}
@@ -647,71 +968,70 @@ function Users() {
 function UserDetail({ user, onBack, onAdjustPoints }) {
   return (
     <div>
-      <button onClick={onBack} className="text-indigo-400 hover:text-indigo-300 mb-4 flex items-center gap-2">
-        ← वापस
+      <button onClick={onBack} className="text-indigo-400 hover:text-indigo-300 mb-3 flex items-center gap-1.5 text-xs">
+        ← Back
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* User Info */}
-        <div className="bg-gray-800 rounded-xl p-6">
-          <h2 className="text-lg font-bold mb-4">यूज़र जानकारी</h2>
-          <p><span className="text-gray-400">ID:</span> {user.user?.id}</p>
-          <p><span className="text-gray-400">नाम:</span> {user.user?.name || '—'}</p>
-          <p><span className="text-gray-400">ईमेल:</span> {user.user?.email}</p>
-          <p><span className="text-gray-400">जॉइन:</span> {user.user?.created_at ? new Date(user.user.created_at).toLocaleDateString() : '—'}</p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+          <h2 className="text-sm font-bold mb-3">User Info</h2>
+          <div className="space-y-1.5 text-xs">
+            <p><span className="text-gray-500">ID:</span> {user.user?.id}</p>
+            <p><span className="text-gray-500">Name:</span> {user.user?.name || '—'}</p>
+            <p><span className="text-gray-500">Email:</span> {user.user?.email}</p>
+            <p><span className="text-gray-500">Joined:</span> {user.user?.created_at ? new Date(user.user.created_at).toLocaleDateString() : '—'}</p>
+          </div>
 
-          <div className="mt-4 pt-4 border-t border-gray-700">
-            <p className="text-3xl font-bold text-yellow-400">{user.points?.balance || 0}</p>
-            <p className="text-sm text-gray-400">पॉइंट्स बैलेंस</p>
-            <div className="flex gap-4 mt-2 text-sm">
-              <span className="text-green-400">कमाए: {user.points?.total_earned || 0}</span>
-              <span className="text-red-400">खर्च: {user.points?.total_spent || 0}</span>
+          <div className="mt-3 pt-3 border-t border-gray-800">
+            <p className="text-2xl font-bold text-yellow-400">{user.points?.balance || 0}</p>
+            <p className="text-xs text-gray-500">Points Balance</p>
+            <div className="flex gap-3 mt-1.5 text-xs">
+              <span className="text-green-400">Earned: {user.points?.total_earned || 0}</span>
+              <span className="text-red-400">Spent: {user.points?.total_spent || 0}</span>
             </div>
             <button
               onClick={() => onAdjustPoints(user)}
-              className="mt-4 w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm"
+              className="mt-3 w-full py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs"
             >
-              पॉइंट्स एडजस्ट करें
+              Adjust Points
             </button>
           </div>
         </div>
 
-        {/* Transactions */}
-        <div className="bg-gray-800 rounded-xl p-6">
-          <h2 className="text-lg font-bold mb-4">💰 हाल के ट्रांजेक्शन्स</h2>
+        <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+          <h2 className="text-sm font-bold mb-3">Recent Transactions</h2>
           {user.transactions?.length === 0 ? (
-            <p className="text-gray-500 text-sm">कोई ट्रांजेक्शन नहीं</p>
+            <p className="text-gray-500 text-xs">No transactions</p>
           ) : (
-            <div className="space-y-2 max-h-80 overflow-y-auto">
+            <div className="space-y-1.5 max-h-72 overflow-y-auto">
               {user.transactions?.map((t) => (
-                <div key={t.id} className="flex items-center justify-between bg-gray-700/50 rounded-lg p-3 text-sm">
+                <div key={t.id} className="flex items-center justify-between bg-gray-800/50 rounded-lg p-2.5 text-xs">
                   <div>
                     <span className={`font-medium ${t.type === 'earn' || t.type === 'recharge' ? 'text-green-400' : 'text-red-400'}`}>
                       {t.type === 'earn' || t.type === 'recharge' ? '+' : '-'}{t.amount}
                     </span>
-                    <p className="text-gray-400 text-xs">{t.description}</p>
+                    <p className="text-gray-500 text-[10px]">{t.description}</p>
                   </div>
-                  <span className="text-gray-500 text-xs">{new Date(t.created_at).toLocaleDateString()}</span>
+                  <span className="text-gray-600 text-[10px]">{new Date(t.created_at).toLocaleDateString()}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Results */}
-        <div className="bg-gray-800 rounded-xl p-6">
-          <h2 className="text-lg font-bold mb-4">📝 यूज़र के रिजल्ट</h2>
+        <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+          <h2 className="text-sm font-bold mb-3">User Results</h2>
           {user.results?.length === 0 ? (
-            <p className="text-gray-500 text-sm">कोई रिजल्ट नहीं</p>
+            <p className="text-gray-500 text-xs">No results</p>
           ) : (
-            <div className="space-y-2 max-h-80 overflow-y-auto">
+            <div className="space-y-1.5 max-h-72 overflow-y-auto">
               {user.results?.map((r) => (
-                <div key={r.id} className="bg-gray-700/50 rounded-lg p-3 text-sm">
+                <div key={r.id} className="bg-gray-800/50 rounded-lg p-2.5 text-xs">
                   <div className="flex justify-between">
                     <span className="font-medium">Score: {r.score}</span>
                     <span className="text-indigo-400">Rank #{r.rank}</span>
                   </div>
-                  <p className="text-gray-400 text-xs">रोल: {r.roll_number} | {new Date(r.created_at).toLocaleDateString()}</p>
+                  <p className="text-gray-500 text-[10px]">Roll: {r.roll_number} | {new Date(r.created_at).toLocaleDateString()}</p>
                 </div>
               ))}
             </div>
@@ -728,42 +1048,42 @@ function PointsAdjustModal({ user, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-gray-800 p-6 rounded-2xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-lg font-bold mb-4">पॉइंट्स एडजस्ट करें</h3>
-        <p className="text-sm text-gray-400 mb-4">
-          यूज़र: {user.user?.name || user.user?.email} (ID: {user.user?.id})
-          <br />वर्तमान बैलेंस: {user.points?.balance || 0}
+      <div className="bg-gray-900 p-5 rounded-xl w-full max-w-sm border border-gray-800" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-sm font-bold mb-3">Adjust Points</h3>
+        <p className="text-xs text-gray-400 mb-3">
+          User: {user.user?.name || user.user?.email} (ID: {user.user?.id})
+          <br />Current Balance: {user.points?.balance || 0}
         </p>
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           <div>
-            <label className="block text-sm text-gray-300 mb-1">अमाउंट (पॉइंट्स)</label>
+            <label className="block text-xs text-gray-400 mb-1">Amount (Points)</label>
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(parseInt(e.target.value) || 0)}
-              className="w-full px-4 py-2 rounded-xl bg-gray-700 border border-gray-600 text-white"
-              placeholder="सकारात्मक = जोड़ें, नकारात्मक = घटाएं"
+              className="w-full px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm"
+              placeholder="Positive = add, negative = subtract"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-300 mb-1">कारण</label>
+            <label className="block text-xs text-gray-400 mb-1">Reason</label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2 rounded-xl bg-gray-700 border border-gray-600 text-white"
-              placeholder="जैसे: बोनस, रिफंड, पेनल्टी..."
+              className="w-full px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm"
+              placeholder="e.g. Bonus, refund, penalty..."
             />
           </div>
           <div className="flex gap-2">
-            <button onClick={onClose} className="flex-1 py-2 rounded-xl bg-gray-700 hover:bg-gray-600">
-              रद्द करें
+            <button onClick={onClose} className="flex-1 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs">
+              Cancel
             </button>
             <button
               onClick={() => onSave(user.user.id, amount, description)}
-              className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700"
+              className="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-xs"
             >
-              सेव करें
+              Save
             </button>
           </div>
         </div>
@@ -772,13 +1092,12 @@ function PointsAdjustModal({ user, onClose, onSave }) {
   );
 }
 
-// ==================== EXAMS COMPONENT ====================
 function Exams() {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAdd, setShowAdd] = useState(false);
-  const [newExam, setNewExam] = useState({ name: '', date: '', total_questions: 100 });
   const [bulkSelected, setBulkSelected] = useState([]);
+  const [editingExamId, setEditingExamId] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', date: '', total_questions: 100, price: 0, description: '', disclaimer: '' });
 
   useEffect(() => {
     fetchExams();
@@ -798,7 +1117,7 @@ function Exams() {
 
   const runBulkDeleteExams = async () => {
     if (bulkSelected.length === 0) return;
-    if (!confirm(`क्या आप वाकई ${bulkSelected.length} परीक्षाओं को डिलीट करना चाहते हैं? उनके संबंधित सभी रिजल्ट भी डिलीट हो जाएंगे।`)) return;
+    if (!confirm(`Are you sure you want to delete ${bulkSelected.length} exams? All related results will also be deleted.`)) return;
     try {
       const res = await fetch('http://localhost:5000/api/admin/exams/bulk-delete', {
         method: 'POST',
@@ -807,33 +1126,61 @@ function Exams() {
       });
       const data = await res.json();
       if (data.success) {
-        alert(`✅ ${data.deleted} Exams deleted`);
+        alert(`${data.deleted} Exams deleted`);
         setBulkSelected([]);
         fetchExams();
       } else {
-        alert('❌ Error: ' + (data.error || ''));
+        alert('Error: ' + (data.error || ''));
       }
-    } catch (e) { alert('❌ Delete failed'); }
+    } catch (e) { alert('Delete failed'); }
   };
 
-  const addExam = async (e) => {
-    e.preventDefault();
+  const editExam = (e) => {
+    setEditingExamId(e.id);
+    setEditForm({
+      name: e.name || '',
+      date: e.date ? e.date.substring(0, 10) : '',
+      total_questions: e.total_questions || 100,
+      price: e.price || 0,
+      description: e.description || '',
+      disclaimer: e.disclaimer || ''
+    });
+  };
+
+  const saveExamEdit = async (event) => {
+    event.preventDefault();
     try {
-      await fetch('http://localhost:5000/api/admin/exams', {
-        method: 'POST',
+      const res = await fetch(`http://localhost:5000/api/admin/exams/${editingExamId}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newExam)
+        body: JSON.stringify({
+          name: editForm.name,
+          date: editForm.date || null,
+          total_questions: Number(editForm.total_questions || 100),
+          price: Number(editForm.price || 0),
+          description: editForm.description,
+          disclaimer: editForm.disclaimer
+        })
       });
-      setShowAdd(false);
-      setNewExam({ name: '', date: '', total_questions: 100 });
-      fetchExams();
+      const data = await res.json();
+      if (data.success) {
+        setEditingExamId(null);
+        fetchExams();
+      } else {
+        alert('Error updating exam: ' + (data.error || ''));
+      }
     } catch (e) {
-      console.error(e);
+      alert('Update failed');
     }
   };
 
+  const cancelExamEdit = () => {
+    setEditingExamId(null);
+    setEditForm({ name: '', date: '', total_questions: 100, price: 0, description: '', disclaimer: '' });
+  };
+
   const deleteExam = async (id) => {
-    if (!confirm('क्या आप इस परीक्षा को डिलीट करना चाहते हैं? सभी संबंधित रिजल्ट भी डिलीट होंगे।')) return;
+    if (!confirm('Are you sure you want to delete this exam? All related results will also be deleted.')) return;
     try {
       await fetch(`http://localhost:5000/api/admin/exams/${id}`, { method: 'DELETE' });
       fetchExams();
@@ -844,78 +1191,104 @@ function Exams() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">📚 परीक्षाएं</h1>
-        <div className="flex items-center gap-3">
+      <div className="flex justify-between items-center mb-3">
+        <div>
+          <h1 className="text-lg font-bold">Exams</h1>
+          <p className="text-xs text-gray-500 mt-0.5">Edit price, disclaimer, or details of preloaded exams</p>
+        </div>
+        <div className="flex items-center gap-2">
           {bulkSelected.length > 0 && (
             <>
-              <span className="text-sm text-indigo-400">{bulkSelected.length} selected</span>
-              <button onClick={runBulkDeleteExams} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm transition">
-                🗑️ Bulk Delete
+              <span className="text-xs text-indigo-400">{bulkSelected.length} selected</span>
+              <button onClick={runBulkDeleteExams} className="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded text-xs transition">
+                Bulk Delete
               </button>
-              <button onClick={() => setBulkSelected([])} className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm transition">
+              <button onClick={() => setBulkSelected([])} className="bg-gray-700 hover:bg-gray-600 text-white px-2.5 py-1 rounded text-xs transition">
                 Clear
               </button>
             </>
           )}
-          <button
-            onClick={() => setShowAdd(true)}
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm"
-          >
-            + नई परीक्षा
-          </button>
         </div>
       </div>
 
-      {showAdd && (
-        <form onSubmit={addExam} className="bg-gray-800 rounded-xl p-6 mb-6">
-          <h3 className="font-semibold mb-4">नई परीक्षा जोड़ें</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {editingExamId && (
+        <form onSubmit={saveExamEdit} className="bg-gray-900 rounded-lg p-4 mb-4 border border-gray-800 space-y-3">
+          <h3 className="font-semibold text-sm text-indigo-400">Edit Exam Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div>
-              <label className="block text-sm text-gray-400 mb-1"> परीक्षा का नाम</label>
+              <label className="block text-xs text-gray-400 mb-1">Exam Name</label>
               <input
                 type="text"
-                value={newExam.name}
-                onChange={(e) => setNewExam({ ...newExam, name: e.target.value })}
-                className="w-full px-4 py-2 rounded-xl bg-gray-700 border border-gray-600 text-white"
+                value={editForm.name}
+                onChange={(ev) => setEditForm({ ...editForm, name: ev.target.value })}
+                className="w-full px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">तारीख</label>
+              <label className="block text-xs text-gray-400 mb-1">Date</label>
               <input
                 type="date"
-                value={newExam.date}
-                onChange={(e) => setNewExam({ ...newExam, date: e.target.value })}
-                className="w-full px-4 py-2 rounded-xl bg-gray-700 border border-gray-600 text-white"
+                value={editForm.date}
+                onChange={(ev) => setEditForm({ ...editForm, date: ev.target.value })}
+                className="w-full px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">कुल प्रश्न</label>
+              <label className="block text-xs text-gray-400 mb-1">Total Questions</label>
               <input
                 type="number"
-                value={newExam.total_questions}
-                onChange={(e) => setNewExam({ ...newExam, total_questions: parseInt(e.target.value) || 100 })}
-                className="w-full px-4 py-2 rounded-xl bg-gray-700 border border-gray-600 text-white"
+                value={editForm.total_questions}
+                onChange={(ev) => setEditForm({ ...editForm, total_questions: parseInt(ev.target.value) || 100 })}
+                className="w-full px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Price (INR)</label>
+              <input
+                type="number"
+                value={editForm.price}
+                onChange={(ev) => setEditForm({ ...editForm, price: parseInt(ev.target.value) || 0 })}
+                className="w-full px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
               />
             </div>
           </div>
-          <div className="flex gap-2 mt-4">
-            <button type="submit" className="px-4 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm">
-              सेव करें
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Marketplace Description</label>
+            <textarea
+              value={editForm.description}
+              onChange={(ev) => setEditForm({ ...editForm, description: ev.target.value })}
+              className="w-full px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              rows="2"
+              placeholder="Enter exam description for the marketplace card..."
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Legal Disclaimer override</label>
+            <textarea
+              value={editForm.disclaimer}
+              onChange={(ev) => setEditForm({ ...editForm, disclaimer: ev.target.value })}
+              className="w-full px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              rows="2"
+              placeholder="Enter per-exam disclaimer notice..."
+            />
+          </div>
+          <div className="flex gap-2">
+            <button type="submit" className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition">
+              Save Changes
             </button>
-            <button onClick={() => setShowAdd(false)} className="px-4 py-2 rounded-xl bg-gray-700 hover:bg-gray-600 text-white text-sm">
-              रद्द करें
+            <button type="button" onClick={cancelExamEdit} className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-xs transition">
+              Cancel
             </button>
           </div>
         </form>
       )}
 
-      <div className="bg-gray-800 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
+        <table className="w-full text-xs">
           <thead>
-            <tr className="bg-gray-700">
-              <th className="p-3 text-left w-12">
+            <tr className="bg-gray-800/50">
+              <th className="p-2.5 text-left w-10">
                 <input
                   type="checkbox"
                   onChange={(e) => {
@@ -923,40 +1296,57 @@ function Exams() {
                     else setBulkSelected([]);
                   }}
                   checked={exams.length > 0 && bulkSelected.length === exams.length}
+                  className="w-3 h-3"
                 />
               </th>
-              <th className="p-3 text-left">ID</th>
-              <th className="p-3 text-left">नाम</th>
-              <th className="p-3 text-left">तारीख</th>
-              <th className="p-3 text-left">प्रश्न</th>
-              <th className="p-3 text-left">रिजल्ट</th>
-              <th className="p-3 text-left">एक्शन</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">ID</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Name</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Date</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Questions</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Price (INR)</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Results</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Action</th>
             </tr>
           </thead>
           <tbody>
-            {exams.map((e) => (
-              <tr key={e.id} className="border-t border-gray-700 hover:bg-gray-750">
-                <td className="p-3">
-                  <input
-                    type="checkbox"
-                    checked={bulkSelected.includes(e.id)}
-                    onChange={() => {
-                      setBulkSelected(prev => prev.includes(e.id) ? prev.filter(x => x !== e.id) : [...prev, e.id]);
-                    }}
-                  />
-                </td>
-                <td className="p-3">{e.id}</td>
-                <td className="p-3 font-medium">{e.name}</td>
-                <td className="p-3 text-gray-400">{e.date ? new Date(e.date).toLocaleDateString() : '—'}</td>
-                <td className="p-3">{e.total_questions}</td>
-                <td className="p-3">{e.results_count}</td>
-                <td className="p-3">
-                  <button onClick={() => deleteExam(e.id)} className="text-red-400 hover:text-red-300 text-sm">
-                    डिलीट
-                  </button>
-                </td>
+            {loading ? (
+              <tr>
+                <td colSpan="8" className="py-10 text-center text-gray-500">Loading exams...</td>
               </tr>
-            ))}
+            ) : exams.length === 0 ? (
+              <tr>
+                <td colSpan="8" className="py-10 text-center text-gray-500">No exams preloaded yet.</td>
+              </tr>
+            ) : (
+              exams.map((e) => (
+                <tr key={e.id} className="border-t border-gray-800 hover:bg-gray-800/30">
+                  <td className="p-2.5">
+                    <input
+                      type="checkbox"
+                      checked={bulkSelected.includes(e.id)}
+                      onChange={() => {
+                        setBulkSelected(prev => prev.includes(e.id) ? prev.filter(x => x !== e.id) : [...prev, e.id]);
+                      }}
+                      className="w-3 h-3"
+                    />
+                  </td>
+                  <td className="p-2.5 text-gray-400">{e.id}</td>
+                  <td className="p-2.5 font-medium text-white">{e.name}</td>
+                  <td className="p-2.5 text-gray-500">{e.date ? new Date(e.date).toLocaleDateString() : '—'}</td>
+                  <td className="p-2.5">{e.total_questions}</td>
+                  <td className="p-2.5 font-semibold text-green-400">₹{e.price || 0}</td>
+                  <td className="p-2.5 text-gray-400">{e.results_count}</td>
+                  <td className="p-2.5">
+                    <button onClick={() => editExam(e)} className="text-indigo-400 hover:text-indigo-300 text-xs mr-3 font-medium">
+                      Edit
+                    </button>
+                    <button onClick={() => deleteExam(e.id)} className="text-red-400 hover:text-red-300 text-xs font-medium">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -964,37 +1354,78 @@ function Exams() {
   );
 }
 
-// ==================== RESULTS COMPONENT ====================
 function Results() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [selectedResult, setSelectedResult] = useState(null);
   const [bulkSelected, setBulkSelected] = useState([]);
+  const [exams, setExams] = useState([]);
+
+  // Advanced Filters State
+  const [filters, setFilters] = useState({
+    exam_id: '',
+    category: '',
+    shift_date: '',
+    shift_time: '',
+    subject: '',
+    min_score: '',
+    max_score: ''
+  });
+
+  useEffect(() => {
+    fetchExams();
+  }, []);
 
   useEffect(() => {
     fetchResults();
-  }, [page, search]);
+  }, [page, search, filters]);
 
-  const fetchResults = async () => {
-    setLoading(true);
+  const fetchExams = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/results?page=${page}&per_page=20&search=${search}`);
+      const res = await fetch('http://localhost:5000/api/admin/exams');
       const data = await res.json();
-      setResults(data.results);
-      setTotalPages(data.pages);
+      setExams(data.exams || []);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const fetchResults = async (pageNumber = page, isDownload = false) => {
+    if (!isDownload) setLoading(true);
+    try {
+      const queryParams = new URLSearchParams({
+        page: pageNumber,
+        per_page: isDownload ? 10000 : 20,
+        search,
+        ...filters
+      });
+      if (isDownload) {
+        queryParams.set('download', 'all');
+      }
+
+      const res = await fetch(`http://localhost:5000/api/admin/results?${queryParams.toString()}`);
+      const data = await res.json();
+      if (isDownload) {
+        return data.results;
+      } else {
+        setResults(data.results || []);
+        setTotalPages(data.pages || 1);
+        setTotalItems(data.total || 0);
+      }
     } catch (e) {
       console.error(e);
     } finally {
-      setLoading(false);
+      if (!isDownload) setLoading(false);
     }
   };
 
   const runBulkDeleteResults = async () => {
     if (bulkSelected.length === 0) return;
-    if (!confirm(`क्या आप वाकई ${bulkSelected.length} रिजल्ट्स को डिलीट करना चाहते हैं?`)) return;
+    if (!confirm(`Are you sure you want to delete ${bulkSelected.length} results?`)) return;
     try {
       const res = await fetch('http://localhost:5000/api/admin/results/bulk-delete', {
         method: 'POST',
@@ -1003,17 +1434,14 @@ function Results() {
       });
       const data = await res.json();
       if (data.success) {
-        alert(`✅ ${data.deleted} Results deleted`);
+        alert(`${data.deleted} Results deleted`);
         setBulkSelected([]);
-        if (page === 1) {
-          fetchResults();
-        } else {
-          setPage(1);
-        }
+        setPage(1);
+        fetchResults(1);
       } else {
-        alert('❌ Error: ' + (data.error || ''));
+        alert('Error: ' + (data.error || ''));
       }
-    } catch (e) { alert('❌ Delete failed'); }
+    } catch (e) { alert('Delete failed'); }
   };
 
   const fetchResultDetail = async (id) => {
@@ -1027,7 +1455,7 @@ function Results() {
   };
 
   const deleteResult = async (id) => {
-    if (!confirm('क्या आप इस रिजल्ट को डिलीट करना चाहते हैं?')) return;
+    if (!confirm('Are you sure you want to delete this result?')) return;
     try {
       await fetch(`http://localhost:5000/api/admin/results/${id}`, { method: 'DELETE' });
       fetchResults();
@@ -1036,11 +1464,46 @@ function Results() {
     }
   };
 
+  const handleExportCSV = async () => {
+    const allResults = await fetchResults(1, true);
+    if (!allResults || allResults.length === 0) {
+      alert('No data to export');
+      return;
+    }
+    const csvHeaders = ['ID', 'Exam', 'Roll Number', 'Registration Number', 'Candidate Name', 'Category', 'Subject', 'Date', 'Time', 'Correct', 'Wrong', 'Unattempted', 'Score', 'Rank', 'Percentile'];
+    const csvRows = [csvHeaders.join(',')];
+    allResults.forEach(r => {
+      csvRows.push([
+        r.id,
+        `"${r.exam_name || ''}"`,
+        `"${r.roll_number || ''}"`,
+        `"${r.registration_number || ''}"`,
+        `"${r.candidate_name || ''}"`,
+        r.category || '',
+        `"${r.subject || ''}"`,
+        `"${r.test_date || ''}"`,
+        `"${r.test_time || ''}"`,
+        r.total_correct,
+        r.total_wrong,
+        r.total_unattempted,
+        r.score,
+        r.rank,
+        r.percentile || ''
+      ].join(','));
+    });
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', 'raw_results_export.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (selectedResult) {
     const r = selectedResult.result;
     const qs = selectedResult.questions || [];
 
-    // Helper for Section-wise
     const buildSections = (result, questions) => {
       const sw = result?.section_wise;
       if (Array.isArray(sw) && sw.length > 0) return sw;
@@ -1064,114 +1527,110 @@ function Results() {
 
     return (
       <div>
-        <button onClick={() => setSelectedResult(null)} className="text-indigo-400 hover:text-indigo-300 mb-4 flex items-center gap-2">
+        <button onClick={() => setSelectedResult(null)} className="text-indigo-400 hover:text-indigo-300 mb-3 flex items-center gap-1.5 text-xs">
           ← Back
         </button>
 
-        {/* Candidate Info */}
-        <div className="bg-gray-800 rounded-xl p-6 mb-6">
-          <div className="flex items-start gap-6">
+        <div className="bg-gray-900 rounded-lg p-4 mb-4 border border-gray-800">
+          <div className="flex items-start gap-4">
             {r.photo_url && (
-              <img src={r.photo_url} alt="Photo" className="w-24 h-28 rounded-lg object-cover border border-gray-600" />
+              <img src={r.photo_url} alt="Photo" className="w-20 h-24 rounded-lg object-cover border border-gray-700" />
             )}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 flex-1">
               <div>
-                <p className="text-xs text-gray-400">Registration Number</p>
-                <p className="font-mono text-sm">{r.registration_number || '—'}</p>
+                <p className="text-[10px] text-gray-500">Registration Number</p>
+                <p className="font-mono text-xs">{r.registration_number || '—'}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-400">Roll Number</p>
-                <p className="font-mono text-sm">{r.roll_number || '—'}</p>
+                <p className="text-[10px] text-gray-500">Roll Number</p>
+                <p className="font-mono text-xs">{r.roll_number || '—'}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-400">Candidate Name</p>
-                <p className="font-medium">{r.candidate_name || '—'}</p>
+                <p className="text-[10px] text-gray-500">Candidate Name</p>
+                <p className="font-medium text-xs">{r.candidate_name || '—'}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-400">Community</p>
-                <p>{r.community || '—'}</p>
+                <p className="text-[10px] text-gray-500">Community</p>
+                <p className="text-xs">{r.community || '—'}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-400">Test Centre</p>
-                <p>{r.test_centre_name || '—'}</p>
+                <p className="text-[10px] text-gray-500">Test Centre</p>
+                <p className="text-xs">{r.test_centre_name || '—'}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-400">Test Date</p>
-                <p>{r.test_date || '—'}</p>
+                <p className="text-[10px] text-gray-500">Test Date</p>
+                <p className="text-xs">{r.test_date || '—'}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-400">Test Time</p>
-                <p>{r.test_time || '—'}</p>
+                <p className="text-[10px] text-gray-500">Test Time</p>
+                <p className="text-xs">{r.test_time || '—'}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-400">Subject</p>
-                <p>{r.subject || '—'}</p>
+                <p className="text-[10px] text-gray-500">Subject</p>
+                <p className="text-xs">{r.subject || '—'}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Score Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-gray-800 rounded-xl p-4 text-center">
-            <p className="text-sm text-gray-400">Score</p>
-            <p className="text-2xl font-bold text-indigo-400">{r.score}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 mb-4">
+          <div className="bg-gray-900 rounded-lg p-3 text-center border border-gray-800">
+            <p className="text-[10px] text-gray-500">Score</p>
+            <p className="text-xl font-bold text-indigo-400">{r.score}</p>
           </div>
-          <div className="bg-gray-800 rounded-xl p-4 text-center">
-            <p className="text-sm text-gray-400">Rank</p>
-            <p className="text-2xl font-bold text-purple-400">#{r.rank}</p>
+          <div className="bg-gray-900 rounded-lg p-3 text-center border border-gray-800">
+            <p className="text-[10px] text-gray-500">Rank</p>
+            <p className="text-xl font-bold text-purple-400">#{r.rank}</p>
           </div>
-          <div className="bg-gray-800 rounded-xl p-4 text-center">
-            <p className="text-sm text-gray-400">Percentile</p>
-            <p className="text-2xl font-bold text-pink-400">{r.percentile}%</p>
+          <div className="bg-gray-900 rounded-lg p-3 text-center border border-gray-800">
+            <p className="text-[10px] text-gray-500">Percentile</p>
+            <p className="text-xl font-bold text-pink-400">{r.percentile}%</p>
           </div>
-          <div className="bg-gray-800 rounded-xl p-4 text-center">
-            <p className="text-sm text-gray-400">Category</p>
-            <p className="text-2xl font-bold text-amber-400">{r.category}</p>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-green-600/20 rounded-xl p-4 text-center">
-            <p className="text-sm text-gray-400">सही</p>
-            <p className="text-2xl font-bold text-green-400">{selectedResult.stats?.correct || r.total_correct}</p>
-          </div>
-          <div className="bg-red-600/20 rounded-xl p-4 text-center">
-            <p className="text-sm text-gray-400">गलत</p>
-            <p className="text-2xl font-bold text-red-400">{selectedResult.stats?.wrong || r.total_wrong}</p>
-          </div>
-          <div className="bg-gray-600/20 rounded-xl p-4 text-center">
-            <p className="text-sm text-gray-400">Unattempted</p>
-            <p className="text-2xl font-bold text-gray-400">{selectedResult.stats?.unattempted || r.total_unattempted}</p>
+          <div className="bg-gray-900 rounded-lg p-3 text-center border border-gray-800">
+            <p className="text-[10px] text-gray-500">Category</p>
+            <p className="text-xl font-bold text-amber-400">{r.category}</p>
           </div>
         </div>
 
-        {/* Section-wise Score Summary */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="bg-emerald-600/10 rounded-lg p-3 text-center border border-emerald-800/30">
+            <p className="text-[10px] text-gray-500">Correct</p>
+            <p className="text-xl font-bold text-emerald-400">{selectedResult.stats?.correct || r.total_correct}</p>
+          </div>
+          <div className="bg-red-600/10 rounded-lg p-3 text-center border border-red-800/30">
+            <p className="text-[10px] text-gray-500">Wrong</p>
+            <p className="text-xl font-bold text-red-400">{selectedResult.stats?.wrong || r.total_wrong}</p>
+          </div>
+          <div className="bg-gray-600/10 rounded-lg p-3 text-center border border-gray-700/30">
+            <p className="text-[10px] text-gray-500">Unattempted</p>
+            <p className="text-xl font-bold text-gray-400">{selectedResult.stats?.unattempted || r.total_unattempted}</p>
+          </div>
+        </div>
+
         {sections.length > 0 && (
-          <div className="bg-gray-800 rounded-xl p-6 mb-6">
-            <h3 className="font-bold mb-4">📊 Section-wise Score Summary</h3>
+          <div className="bg-gray-900 rounded-lg p-4 mb-4 border border-gray-800">
+            <h3 className="font-bold text-xs mb-3">Section-wise Score Summary</h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-gray-700/50">
+              <table className="w-full text-xs text-left">
+                <thead className="bg-gray-800/50">
                   <tr>
-                    <th className="p-3">Section Name</th>
-                    <th className="p-3 text-center">Total</th>
-                    <th className="p-3 text-center">Unattempted</th>
-                    <th className="p-3 text-center">Right</th>
-                    <th className="p-3 text-center">Wrong</th>
-                    <th className="p-3 text-center">Marks</th>
+                    <th className="p-2">Section Name</th>
+                    <th className="p-2 text-center">Total</th>
+                    <th className="p-2 text-center">Unattempted</th>
+                    <th className="p-2 text-center">Right</th>
+                    <th className="p-2 text-center">Wrong</th>
+                    <th className="p-2 text-center">Marks</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sections.map((sec, i) => (
-                    <tr key={i} className="border-t border-gray-700/50">
-                      <td className="p-3 text-gray-300">{sec.name}</td>
-                      <td className="p-3 text-center text-gray-400">{sec.total ?? '—'}</td>
-                      <td className="p-3 text-center text-gray-500">{sec.na ?? '—'}</td>
-                      <td className="p-3 text-center text-green-400 font-bold">{sec.right ?? '—'}</td>
-                      <td className="p-3 text-center text-red-400 font-bold">{sec.wrong ?? '—'}</td>
-                      <td className="p-3 text-center text-indigo-400 font-bold">{sec.marks != null ? Number(sec.marks).toFixed(2) : '—'}</td>
+                    <tr key={i} className="border-t border-gray-800/50">
+                      <td className="p-2 text-gray-300">{sec.name}</td>
+                      <td className="p-2 text-center text-gray-500">{sec.total ?? '—'}</td>
+                      <td className="p-2 text-center text-gray-600">{sec.na ?? '—'}</td>
+                      <td className="p-2 text-center text-emerald-400 font-bold">{sec.right ?? '—'}</td>
+                      <td className="p-2 text-center text-red-400 font-bold">{sec.wrong ?? '—'}</td>
+                      <td className="p-2 text-center text-indigo-400 font-bold">{sec.marks != null ? Number(sec.marks).toFixed(2) : '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1180,52 +1639,51 @@ function Results() {
           </div>
         )}
 
-        <div className="bg-gray-800 rounded-xl p-6">
-          <h3 className="font-bold mb-4">Questions ({qs.length})</h3>
-          <div className="space-y-4 max-h-96 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-700">
+        <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+          <h3 className="font-bold text-xs mb-3">Questions ({qs.length})</h3>
+          <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
             {Array.from(new Set(qs.map(q => q.parsed_payload?.section_name || 'Overall'))).map((sectionName) => {
               const sectionQs = qs.filter(q => (q.parsed_payload?.section_name || 'Overall') === sectionName);
               if (sectionQs.length === 0) return null;
               return (
-                <div key={sectionName} className="space-y-2">
-                  <h4 className="text-indigo-300 font-semibold text-sm bg-gray-700/30 p-2 rounded-lg">{sectionName}</h4>
-                  <div className="space-y-2">
+                <div key={sectionName} className="space-y-1.5">
+                  <h4 className="text-indigo-300 font-semibold text-[11px] bg-gray-800/30 p-1.5 rounded-lg">{sectionName}</h4>
+                  <div className="space-y-1.5">
                     {sectionQs.map((q) => {
                       const status = q.student_answer === q.correct_answer ? 'correct' : q.student_answer ? 'wrong' : 'unattempted';
-                      const statusColor = status === 'correct' ? 'bg-green-600/20 border-green-600' : status === 'wrong' ? 'bg-red-600/20 border-red-600' : 'bg-gray-600/20 border-gray-600';
+                      const statusColor = status === 'correct' ? 'bg-emerald-600/10 border-emerald-600' : status === 'wrong' ? 'bg-red-600/10 border-red-600' : 'bg-gray-600/10 border-gray-600';
                       return (
-                        <div key={q.id} className={`${statusColor} border rounded-lg p-3 text-sm`}>
+                        <div key={q.id} className={`${statusColor} border rounded-lg p-2.5 text-xs`}>
                           <div className="flex justify-between">
                             <span className="font-medium">Q{q.question_no}</span>
-                            <span className={`font-medium ${status === 'correct' ? 'text-green-400' : status === 'wrong' ? 'text-red-400' : 'text-gray-400'}`}>
-                              {status === 'correct' ? '✅' : status === 'wrong' ? '❌' : '⏳'} {q.marks_awarded} marks
+                            <span className={`font-medium ${status === 'correct' ? 'text-emerald-400' : status === 'wrong' ? 'text-red-400' : 'text-gray-400'}`}>
+                              {status === 'correct' ? 'Correct' : status === 'wrong' ? 'Wrong' : 'Unattempted'} | {q.marks_awarded} marks
                             </span>
                           </div>
-                          <p className="text-gray-300 mt-2 font-medium" dangerouslySetInnerHTML={{ __html: q.question_text || `Question ${q.question_no}` }}></p>
+                          <p className="text-gray-300 mt-1.5 font-medium text-xs" dangerouslySetInnerHTML={{ __html: q.question_text || `Question ${q.question_no}` }}></p>
                           
-                          {/* Render Options */}
-                          <div className="space-y-1 mt-2">
+                          <div className="space-y-1 mt-1.5">
                             {['a', 'b', 'c', 'd'].map(opt => {
                               const optText = q.parsed_payload?.[`option_${opt}_text`];
                               if (!optText) return null;
                               const isOptCorrect = q.parsed_payload?.correct_option_text === optText;
                               const isOptSelected = q.student_option_text === optText;
-                              let optStyle = 'text-gray-400';
-                              if (isOptCorrect) optStyle = 'text-green-400 font-bold';
+                              let optStyle = 'text-gray-500';
+                              if (isOptCorrect) optStyle = 'text-emerald-400 font-bold';
                               else if (isOptSelected) optStyle = 'text-red-400';
                               
                               return (
-                                <div key={opt} className={`flex gap-2 ${optStyle}`}>
+                                <div key={opt} className={`flex gap-1.5 text-[11px] ${optStyle}`}>
                                   <span className="uppercase">{opt}.</span>
                                   <span dangerouslySetInnerHTML={{ __html: optText }}></span>
-                                  {isOptSelected && <span className="text-xs opacity-70 ml-1">(Chosen)</span>}
-                                  {isOptCorrect && <span className="text-xs opacity-70 ml-1">(Correct)</span>}
+                                  {isOptSelected && <span className="text-[10px] opacity-70 ml-1">(Chosen)</span>}
+                                  {isOptCorrect && <span className="text-[10px] opacity-70 ml-1">(Correct)</span>}
                                 </div>
                               );
                             })}
                           </div>
                           
-                          <div className="mt-3 pt-2 border-t border-gray-600/50 flex flex-wrap gap-3 text-xs text-gray-500">
+                          <div className="mt-2 pt-1.5 border-t border-gray-700/50 flex flex-wrap gap-2 text-[10px] text-gray-600">
                             {q.question_id_html && <span>Q ID: {q.question_id_html}</span>}
                             {q.option_id && <span>Chosen Opt ID: {q.option_id}</span>}
                           </div>
@@ -1244,36 +1702,134 @@ function Results() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">📋 Results Management</h1>
-        {bulkSelected.length > 0 && (
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-indigo-400">{bulkSelected.length} selected</span>
-            <button onClick={runBulkDeleteResults} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm transition">
-              🗑️ Bulk Delete
-            </button>
-            <button onClick={() => setBulkSelected([])} className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm transition">
-              Clear
-            </button>
+      <div className="flex justify-between items-center mb-3">
+        <div>
+          <h1 className="text-lg font-bold">Results</h1>
+          <p className="text-[10px] text-gray-500 mt-0.5">{totalItems} results found</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportCSV}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold transition"
+          >
+            Export Filtered CSV
+          </button>
+          {bulkSelected.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-indigo-400">{bulkSelected.length} selected</span>
+              <button onClick={runBulkDeleteResults} className="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded text-xs transition">
+                Bulk Delete
+              </button>
+              <button onClick={() => setBulkSelected([])} className="bg-gray-700 hover:bg-gray-600 text-white px-2.5 py-1 rounded text-xs transition">
+                Clear
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Advanced Filters Panel */}
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-3.5 mb-3 grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div>
+          <label className="block text-[10px] text-gray-500 mb-1">Filter by Exam</label>
+          <select
+            value={filters.exam_id}
+            onChange={e => { setFilters({ ...filters, exam_id: e.target.value }); setPage(1); }}
+            className="w-full px-2.5 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-white"
+          >
+            <option value="">All Exams</option>
+            {exams.map(ex => (
+              <option key={ex.id} value={ex.id}>{ex.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-[10px] text-gray-500 mb-1">Category</label>
+          <select
+            value={filters.category}
+            onChange={e => { setFilters({ ...filters, category: e.target.value }); setPage(1); }}
+            className="w-full px-2.5 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-white"
+          >
+            <option value="">All Categories</option>
+            <option value="UR">UR</option>
+            <option value="OBC">OBC</option>
+            <option value="SC">SC</option>
+            <option value="ST">ST</option>
+            <option value="EWS">EWS</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-[10px] text-gray-500 mb-1">Marks Range</label>
+          <div className="flex items-center gap-1.5">
+            <input
+              type="number"
+              placeholder="Min"
+              value={filters.min_score}
+              onChange={e => { setFilters({ ...filters, min_score: e.target.value }); setPage(1); }}
+              className="w-full px-2.5 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-white"
+            />
+            <span className="text-gray-500 text-xs">-</span>
+            <input
+              type="number"
+              placeholder="Max"
+              value={filters.max_score}
+              onChange={e => { setFilters({ ...filters, max_score: e.target.value }); setPage(1); }}
+              className="w-full px-2.5 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-white"
+            />
           </div>
-        )}
+        </div>
+
+        <div>
+          <label className="block text-[10px] text-gray-500 mb-1">Subject Keyword</label>
+          <input
+            type="text"
+            placeholder="e.g. English, Math..."
+            value={filters.subject}
+            onChange={e => { setFilters({ ...filters, subject: e.target.value }); setPage(1); }}
+            className="w-full px-2.5 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-white"
+          />
+        </div>
+
+        <div className="md:col-span-3">
+          <label className="block text-[10px] text-gray-500 mb-1">Search Candidate</label>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            placeholder="Search by roll number, name, registration number, test center..."
+            className="w-full px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-white focus:outline-none"
+          />
+        </div>
+
+        <div className="flex items-end">
+          <button
+            onClick={() => {
+              setSearch('');
+              setFilters({
+                exam_id: '',
+                category: '',
+                shift_date: '',
+                shift_time: '',
+                subject: '',
+                min_score: '',
+                max_score: ''
+              });
+              setPage(1);
+            }}
+            className="w-full py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition"
+          >
+            Reset Filters
+          </button>
+        </div>
       </div>
 
-      <div className="mb-6">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          placeholder="Search by roll number..."
-          className="w-full px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
-
-      <div className="bg-gray-800 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
+        <table className="w-full text-xs">
           <thead>
-            <tr className="bg-gray-700">
-              <th className="p-3 text-left w-12">
+            <tr className="bg-gray-800/50">
+              <th className="p-2.5 text-left w-10">
                 <input
                   type="checkbox"
                   onChange={(e) => {
@@ -1281,70 +1837,98 @@ function Results() {
                     else setBulkSelected([]);
                   }}
                   checked={results.length > 0 && bulkSelected.length === results.length}
+                  className="w-3 h-3"
                 />
               </th>
-              <th className="p-3 text-left">ID</th>
-              <th className="p-3 text-left">Roll No.</th>
-              <th className="p-3 text-left">Score</th>
-              <th className="p-3 text-left">Rank</th>
-              <th className="p-3 text-left">Percentile</th>
-              <th className="p-3 text-left">Category</th>
-              <th className="p-3 text-left">Questions</th>
-              <th className="p-3 text-left">Date</th>
-              <th className="p-3 text-left">Action</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">ID</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Candidate Name</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Roll No.</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Exam</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Score</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Rank</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Percentile</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Category</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Subject</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Action</th>
             </tr>
           </thead>
           <tbody>
-            {results.map((r) => (
-              <tr key={r.id} className="border-t border-gray-700 hover:bg-gray-750">
-                <td className="p-3">
-                  <input
-                    type="checkbox"
-                    checked={bulkSelected.includes(r.id)}
-                    onChange={() => {
-                      setBulkSelected(prev => prev.includes(r.id) ? prev.filter(x => x !== r.id) : [...prev, r.id]);
-                    }}
-                  />
-                </td>
-                <td className="p-3">{r.id}</td>
-                <td className="p-3 font-mono text-xs">{r.roll_number}</td>
-                <td className="p-3">{r.score}</td>
-                <td className="p-3 text-purple-400">#{r.rank}</td>
-                <td className="p-3">{r.percentile}%</td>
-                <td className="p-3">{r.category}</td>
-                <td className="p-3">{r.questions_count}</td>
-                <td className="p-3 text-gray-400 text-xs">{new Date(r.created_at).toLocaleDateString()}</td>
-                <td className="p-3">
-                  <button onClick={() => fetchResultDetail(r.id)} className="text-indigo-400 hover:text-indigo-300 mr-2">
-                    View
-                  </button>
-                  <button onClick={() => deleteResult(r.id)} className="text-red-400 hover:text-red-300">
-                    Delete
-                  </button>
-                </td>
+            {loading ? (
+              <tr>
+                <td colSpan="11" className="py-10 text-center text-gray-500">Loading results...</td>
               </tr>
-            ))}
+            ) : results.length === 0 ? (
+              <tr>
+                <td colSpan="11" className="py-10 text-center text-gray-500">No results found matching filters.</td>
+              </tr>
+            ) : (
+              results.map((r) => (
+                <tr key={r.id} className="border-t border-gray-800 hover:bg-gray-800/30">
+                  <td className="p-2.5">
+                    <input
+                      type="checkbox"
+                      checked={bulkSelected.includes(r.id)}
+                      onChange={() => {
+                        setBulkSelected(prev => prev.includes(r.id) ? prev.filter(x => x !== r.id) : [...prev, r.id]);
+                      }}
+                      className="w-3 h-3"
+                    />
+                  </td>
+                  <td className="p-2.5 text-gray-400">{r.id}</td>
+                  <td className="p-2.5 font-medium text-white">{r.candidate_name || '—'}</td>
+                  <td className="p-2.5 font-mono text-[11px]">{r.roll_number}</td>
+                  <td className="p-2.5 text-gray-400">{r.exam_name || '—'}</td>
+                  <td className="p-2.5 font-bold text-indigo-400">{r.score}</td>
+                  <td className="p-2.5 text-purple-400">#{r.rank}</td>
+                  <td className="p-2.5">{r.percentile}%</td>
+                  <td className="p-2.5 uppercase font-bold text-[10px] text-gray-500">{r.category}</td>
+                  <td className="p-2.5 text-gray-500 max-w-[120px] truncate">{r.subject || '—'}</td>
+                  <td className="p-2.5">
+                    <button onClick={() => fetchResultDetail(r.id)} className="text-indigo-400 hover:text-indigo-300 mr-1.5">
+                      View
+                    </button>
+                    <button onClick={() => deleteResult(r.id)} className="text-red-400 hover:text-red-300">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      <div className="mt-4 flex justify-center gap-2">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+      {totalPages > 1 && (
+        <div className="mt-3 flex justify-center gap-1">
           <button
-            key={p}
-            onClick={() => setPage(p)}
-            className={`px-3 py-1 rounded ${page === p ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-gray-600'}`}
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-2 py-0.5 rounded text-xs bg-gray-800 disabled:opacity-40"
           >
-            {p}
+            ‹
           </button>
-        ))}
-      </div>
+          {Array.from({ length: Math.min(totalPages, 8) }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPage(p)}
+              className={`px-2.5 py-0.5 rounded text-xs ${page === p ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-gray-700'}`}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-2 py-0.5 rounded text-xs bg-gray-800 disabled:opacity-40"
+          >
+            ›
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-
-// ==================== QUESTIONS COMPONENT (Master Questions) ====================
 function Questions() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1364,7 +1948,6 @@ function Questions() {
   const [bulkResults, setBulkResults] = useState(null);
   const [toast, setToast] = useState(null);
 
-  // Filters
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
   const [hasSolution, setHasSolution] = useState('');
@@ -1431,14 +2014,14 @@ function Questions() {
         body: JSON.stringify(editData),
       });
       if (res.ok) {
-        showToast('✅ प्रश्न सफलतापूर्वक अपडेट हुआ!');
+        showToast('Question updated successfully');
         setEditMode(false);
         openDetail(selectedQ.id);
         fetchQuestions();
       } else {
-        showToast('❌ Save करने में error आई', 'error');
+        showToast('Error saving question', 'error');
       }
-    } catch (e) { showToast('❌ Network error', 'error'); }
+    } catch (e) { showToast('Network error', 'error'); }
     finally { setSaving(false); }
   };
 
@@ -1456,7 +2039,7 @@ function Questions() {
     });
     setEditMode(true);
     setAiSuggestion(null);
-    showToast('🤖 AI सुझाव apply हुआ! अब review करके Save करें।', 'info');
+    showToast('AI suggestion applied. Review and save.', 'info');
   };
 
   const runAiEdit = async () => {
@@ -1472,11 +2055,11 @@ function Questions() {
       const data = await res.json();
       if (data.suggestion) {
         setAiSuggestion(data.suggestion);
-        showToast('🤖 AI सुझाव मिल गया! नीचे देखें।', 'info');
+        showToast('AI suggestion received!', 'info');
       } else {
-        showToast('❌ AI: ' + (data.error || 'Unknown error'), 'error');
+        showToast('AI: ' + (data.error || 'Unknown error'), 'error');
       }
-    } catch (e) { showToast('❌ AI edit failed', 'error'); }
+    } catch (e) { showToast('AI edit failed', 'error'); }
     finally { setAiLoading(false); }
   };
 
@@ -1497,14 +2080,14 @@ function Questions() {
       const data = await res.json();
       setBulkResults(data);
       if (autoApply) fetchQuestions();
-      showToast(`🤖 ${data.processed} प्रश्नों की bulk edit complete!`, 'info');
-    } catch (e) { showToast('❌ Bulk AI edit failed', 'error'); }
+      showToast(`${data.processed} questions processed via bulk AI edit!`, 'info');
+    } catch (e) { showToast('Bulk AI edit failed', 'error'); }
     finally { setBulkLoading(false); }
   };
 
   const runBulkDeleteQuestions = async () => {
     if (bulkSelected.length === 0) return;
-    if (!confirm(`क्या आप वाकई ${bulkSelected.length} Questions और उनके सारे Responses/Solutions delete करना चाहते हैं?`)) return;
+    if (!confirm(`Are you sure you want to delete ${bulkSelected.length} Questions and all related Responses/Solutions?`)) return;
     
     setBulkLoading(true);
     try {
@@ -1515,7 +2098,7 @@ function Questions() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast(`✅ ${data.deleted} Questions deleted`, 'success');
+        showToast(`${data.deleted} Questions deleted`);
         setBulkSelected([]);
         if (page === 1) {
           fetchQuestions();
@@ -1523,34 +2106,33 @@ function Questions() {
           setPage(1);
         }
       } else {
-        showToast('❌ Error: ' + (data.error || ''), 'error');
+        showToast('Error: ' + (data.error || ''), 'error');
       }
-    } catch (e) { showToast('❌ Delete failed', 'error'); } finally { setBulkLoading(false); }
+    } catch (e) { showToast('Delete failed', 'error'); } finally { setBulkLoading(false); }
   };
 
   const deleteQuestion = async (id, fromDetail = false) => {
-    if (!confirm(`❗ क्या आप MQ #${id} को permanently delete करना चाहते हैं?\nयह question और उससे जुड़े सभी student responses भी delete हो जाएंगे!`)) return;
+    if (!confirm(`Are you sure you want to permanently delete MQ #${id}? All related student responses will also be deleted!`)) return;
     try {
       const res = await fetch(`http://localhost:5000/api/admin/master-questions/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        showToast(`🗑️ MQ #${id} delete हो गया।`, 'info');
+        showToast(`MQ #${id} deleted.`);
         if (fromDetail) setSelectedQ(null);
         fetchQuestions();
         setBulkSelected(prev => prev.filter(x => x !== id));
       } else {
-        showToast('❌ Delete में error: ' + (data.error || ''), 'error');
+        showToast('Delete error: ' + (data.error || ''), 'error');
       }
-    } catch (e) { showToast('❌ Delete failed', 'error'); }
+    } catch (e) { showToast('Delete failed', 'error'); }
   };
 
   const answerColor = { A: 'text-blue-400', B: 'text-purple-400', C: 'text-amber-400', D: 'text-rose-400' };
 
-  // ── Detail Modal ──────────────────────────────────────────────────────────
   if (detailLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
       </div>
     );
   }
@@ -1558,213 +2140,205 @@ function Questions() {
   if (selectedQ) {
     return (
       <div>
-        {/* Toast */}
         {toast && (
-          <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-xl text-sm font-medium transition-all
-            ${toast.type === 'error' ? 'bg-red-600' : toast.type === 'info' ? 'bg-indigo-600' : 'bg-green-600'}`}>
+          <div className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-xl text-xs font-medium transition-all
+            ${toast.type === 'error' ? 'bg-red-600' : toast.type === 'info' ? 'bg-indigo-600' : 'bg-emerald-600'}`}>
             {toast.msg}
           </div>
         )}
 
-        <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => setSelectedQ(null)} className="text-indigo-400 hover:text-indigo-300 flex items-center gap-2 text-sm">
-            ← वापस सूची पर
+        <div className="flex items-center gap-3 mb-4">
+          <button onClick={() => setSelectedQ(null)} className="text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 text-xs">
+            ← Back
           </button>
-          <span className="text-gray-500">|</span>
-          <span className="text-gray-400 text-sm">MQ #{selectedQ.id}</span>
+          <span className="text-gray-600">|</span>
+          <span className="text-gray-500 text-xs">MQ #{selectedQ.id}</span>
           {selectedQ.question_id_html && (
-            <span className="font-mono text-xs bg-gray-700 px-2 py-0.5 rounded text-indigo-300">{selectedQ.question_id_html}</span>
+            <span className="font-mono text-[10px] bg-gray-800 px-1.5 py-0.5 rounded text-indigo-300">{selectedQ.question_id_html}</span>
           )}
-          <div className="ml-auto flex gap-2">
+          <div className="ml-auto flex gap-1.5">
             <button onClick={runAiEdit} disabled={aiLoading}
-              className="px-4 py-2 rounded-xl bg-purple-700 hover:bg-purple-600 text-sm font-medium disabled:opacity-50 flex items-center gap-2">
-              {aiLoading ? <span className="animate-spin">⏳</span> : '🤖'} AI Edit
+              className="px-2.5 py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 text-[10px] font-medium disabled:opacity-50 flex items-center gap-1">
+              {aiLoading ? '...' : 'AI'} Edit
             </button>
             <button onClick={() => setEditMode(!editMode)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium ${editMode ? 'bg-gray-600 hover:bg-gray-500' : 'bg-indigo-600 hover:bg-indigo-500'}`}>
-              {editMode ? '✕ Cancel' : '✏️ Edit'}
+              className={`px-2.5 py-1.5 rounded-lg text-[10px] font-medium ${editMode ? 'bg-gray-600 hover:bg-gray-500' : 'bg-indigo-600 hover:bg-indigo-500'}`}>
+              {editMode ? 'Cancel' : 'Edit'}
             </button>
             {editMode && (
               <button onClick={saveEdit} disabled={saving}
-                className="px-4 py-2 rounded-xl bg-green-600 hover:bg-green-500 text-sm font-medium disabled:opacity-50">
-                {saving ? '⏳...' : '💾 Save'}
+                className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-[10px] font-medium disabled:opacity-50">
+                {saving ? '...' : 'Save'}
               </button>
             )}
             <button onClick={() => deleteQuestion(selectedQ.id, true)}
-              className="px-4 py-2 rounded-xl bg-red-700 hover:bg-red-600 text-sm font-medium">
-              🗑️ Delete
+              className="px-2.5 py-1.5 rounded-lg bg-red-700 hover:bg-red-600 text-[10px] font-medium">
+              Delete
             </button>
           </div>
         </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <div className="bg-gray-800 rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-400 mb-1">Reference Count</p>
-            <p className="text-2xl font-bold text-indigo-400">{selectedQ.reference_count}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div className="bg-gray-900 rounded-lg p-3 text-center border border-gray-800">
+            <p className="text-[10px] text-gray-500 mb-0.5">Reference Count</p>
+            <p className="text-xl font-bold text-indigo-400">{selectedQ.reference_count}</p>
           </div>
-          <div className="bg-gray-800 rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-400 mb-1">Shift Count</p>
-            <p className="text-2xl font-bold text-purple-400">{selectedQ.shift_count}</p>
+          <div className="bg-gray-900 rounded-lg p-3 text-center border border-gray-800">
+            <p className="text-[10px] text-gray-500 mb-0.5">Shift Count</p>
+            <p className="text-xl font-bold text-purple-400">{selectedQ.shift_count}</p>
           </div>
-          <div className="bg-gray-800 rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-400 mb-1">Correct Answer</p>
-            <p className={`text-2xl font-bold ${answerColor[selectedQ.correct_answer] || 'text-green-400'}`}>{selectedQ.correct_answer}</p>
+          <div className="bg-gray-900 rounded-lg p-3 text-center border border-gray-800">
+            <p className="text-[10px] text-gray-500 mb-0.5">Correct Answer</p>
+            <p className={`text-xl font-bold ${answerColor[selectedQ.correct_answer] || 'text-emerald-400'}`}>{selectedQ.correct_answer}</p>
           </div>
-          <div className="bg-gray-800 rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-400 mb-1">AI Solution</p>
-            <p className="text-2xl">{selectedQ.has_solution ? '✅' : '❌'}</p>
+          <div className="bg-gray-900 rounded-lg p-3 text-center border border-gray-800">
+            <p className="text-[10px] text-gray-500 mb-0.5">AI Solution</p>
+            <p className="text-xl">{selectedQ.has_solution ? '✅' : '❌'}</p>
           </div>
         </div>
 
-        {/* Question & Options */}
-        <div className="bg-gray-800 rounded-xl p-6 mb-4">
-          <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">प्रश्न</h3>
+        <div className="bg-gray-900 rounded-lg p-4 mb-3 border border-gray-800">
+          <h3 className="text-[10px] font-semibold text-gray-500 mb-2 uppercase tracking-wider">Question</h3>
           {editMode ? (
             <textarea value={editData.question_text} onChange={e => setEditData(p => ({ ...p, question_text: e.target.value }))}
-              className="w-full bg-gray-900 border border-indigo-500 rounded-lg p-3 text-sm text-white resize-y min-h-[100px] focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              className="w-full bg-gray-950 border border-indigo-500 rounded-lg p-2.5 text-xs text-white resize-y min-h-[80px] focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           ) : (
-            <p className="text-white leading-relaxed">{selectedQ.question_text}</p>
+            <p className="text-white leading-relaxed text-xs">{selectedQ.question_text}</p>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
             {['a', 'b', 'c', 'd'].map((opt) => {
               const key = `option_${opt}_text`;
               const idKey = `option_${opt}_id`;
               const label = opt.toUpperCase();
               const isCorrect = selectedQ.correct_answer === label;
               return (
-                <div key={opt} className={`p-3 rounded-lg border relative ${isCorrect ? 'border-green-500 bg-green-900/20' : 'border-gray-700 bg-gray-900'}`}>
+                <div key={opt} className={`p-2.5 rounded-lg border relative ${isCorrect ? 'border-emerald-500 bg-emerald-900/20' : 'border-gray-800 bg-gray-950'}`}>
                   {selectedQ[idKey] && (
-                    <div className="absolute top-1 right-2 text-[10px] text-gray-500 font-mono">
+                    <div className="absolute top-1 right-1.5 text-[9px] text-gray-600 font-mono">
                       ID: {selectedQ[idKey]}
                     </div>
                   )}
-                  <div className="mt-2">
-                    <span className={`font-bold text-xs mr-2 ${answerColor[label]}`}>{label}.</span>
+                  <div className="mt-1">
+                    <span className={`font-bold text-[11px] mr-1.5 ${answerColor[label]}`}>{label}.</span>
                     {editMode ? (
                       <input value={editData[key]} onChange={e => setEditData(p => ({ ...p, [key]: e.target.value }))}
-                        className="bg-transparent border-b border-gray-600 text-sm text-white w-[85%] focus:outline-none focus:border-indigo-400" />
+                        className="bg-transparent border-b border-gray-700 text-xs text-white w-[85%] focus:outline-none focus:border-indigo-400" />
                     ) : (
-                      <span className={`text-sm ${isCorrect ? 'text-green-300' : 'text-gray-300'}`}>{selectedQ[key] || '—'}</span>
+                      <span className={`text-xs ${isCorrect ? 'text-emerald-300' : 'text-gray-300'}`}>{selectedQ[key] || '—'}</span>
                     )}
-                    {isCorrect && <span className="ml-2 text-xs text-green-400">✓ सही उत्तर</span>}
+                    {isCorrect && <span className="ml-1.5 text-[10px] text-emerald-400">✓ Correct</span>}
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Edit extra fields */}
           {editMode && (
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2">
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">Correct Answer (A/B/C/D)</label>
+                <label className="text-[10px] text-gray-500 mb-0.5 block">Correct Answer (A/B/C/D)</label>
                 <select value={editData.correct_answer} onChange={e => setEditData(p => ({ ...p, correct_answer: e.target.value }))}
-                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white">
+                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs text-white">
                   {['A', 'B', 'C', 'D'].map(v => <option key={v}>{v}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">Correct Option Text</label>
+                <label className="text-[10px] text-gray-500 mb-0.5 block">Correct Option Text</label>
                 <input value={editData.correct_option_text} onChange={e => setEditData(p => ({ ...p, correct_option_text: e.target.value }))}
-                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white" />
+                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs text-white" />
               </div>
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">HTML Element ID</label>
+                <label className="text-[10px] text-gray-500 mb-0.5 block">HTML Element ID</label>
                 <input value={editData.question_id_html} onChange={e => setEditData(p => ({ ...p, question_id_html: e.target.value }))}
-                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm font-mono text-indigo-300" />
+                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs font-mono text-indigo-300" />
               </div>
             </div>
           )}
         </div>
 
-        {/* AI Suggestion */}
         {aiSuggestion && (
-          <div className="bg-purple-900/30 border border-purple-600 rounded-xl p-5 mb-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-purple-300">🤖 AI सुझाव</h3>
-              <div className="flex gap-2">
-                <button onClick={applyAiSuggestion} className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-xs">Apply & Review</button>
-                <button onClick={() => setAiSuggestion(null)} className="px-3 py-1 rounded-lg bg-gray-700 hover:bg-gray-600 text-xs">✕ Close</button>
+          <div className="bg-purple-900/30 border border-purple-600 rounded-lg p-4 mb-3">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xs font-semibold text-purple-300">AI Suggestion</h3>
+              <div className="flex gap-1.5">
+                <button onClick={applyAiSuggestion} className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-[10px]">Apply & Review</button>
+                <button onClick={() => setAiSuggestion(null)} className="px-2.5 py-1 rounded-lg bg-gray-700 hover:bg-gray-600 text-[10px]">Close</button>
               </div>
             </div>
-            {aiSuggestion.notes && <p className="text-xs text-purple-200 mb-3 italic">{aiSuggestion.notes}</p>}
-            <p className="text-sm text-white mb-2"><span className="text-gray-400">Q:</span> {aiSuggestion.question_text}</p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            {aiSuggestion.notes && <p className="text-[10px] text-purple-200 mb-2 italic">{aiSuggestion.notes}</p>}
+            <p className="text-xs text-white mb-1.5"><span className="text-gray-500">Q:</span> {aiSuggestion.question_text}</p>
+            <div className="grid grid-cols-2 gap-1.5 text-[10px]">
               {['a', 'b', 'c', 'd'].map(o => (
-                <div key={o} className="bg-gray-800 rounded p-2">
+                <div key={o} className="bg-gray-900 rounded p-1.5">
                   <span className="text-purple-400 font-bold">{o.toUpperCase()}.</span> {aiSuggestion[`option_${o}`] || '—'}
                 </div>
               ))}
             </div>
-            <p className="text-xs text-green-400 mt-2">✓ Suggested Answer: <strong>{aiSuggestion.correct_answer}</strong></p>
+            <p className="text-[10px] text-emerald-400 mt-1.5">✓ Suggested Answer: <strong>{aiSuggestion.correct_answer}</strong></p>
           </div>
         )}
 
-        {/* Shifts */}
         {selectedQ.shifts && selectedQ.shifts.length > 0 && (
-          <div className="bg-gray-800 rounded-xl p-5 mb-4">
-            <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">📅 Shifts ({selectedQ.shifts.length})</h3>
-            <div className="flex flex-wrap gap-2">
+          <div className="bg-gray-900 rounded-lg p-4 mb-3 border border-gray-800">
+            <h3 className="text-[10px] font-semibold text-gray-500 mb-2 uppercase tracking-wider">Shifts ({selectedQ.shifts.length})</h3>
+            <div className="flex flex-wrap gap-1.5">
               {selectedQ.shifts.map((s, i) => (
-                <div key={i} className="bg-gray-700 rounded-lg px-3 py-2 text-xs">
+                <div key={i} className="bg-gray-800 rounded-lg px-2.5 py-1.5 text-[10px]">
                   <p className="text-indigo-300 font-medium">{s.test_date} · {s.test_time}</p>
-                  <p className="text-gray-400">{s.subject}</p>
+                  <p className="text-gray-500">{s.subject}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* AI Solution */}
         {selectedQ.solution && (
-          <div className="bg-gray-800 rounded-xl p-5 mb-4">
-            <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">💡 AI Solution</h3>
-            <p className="text-sm text-gray-300 mb-2">{selectedQ.solution.explanation}</p>
-            {selectedQ.solution.why_wrong && <p className="text-sm text-red-300"><span className="font-medium">Why Wrong:</span> {selectedQ.solution.why_wrong}</p>}
+          <div className="bg-gray-900 rounded-lg p-4 mb-3 border border-gray-800">
+            <h3 className="text-[10px] font-semibold text-gray-500 mb-2 uppercase tracking-wider">AI Solution</h3>
+            <p className="text-xs text-gray-300 mb-1.5">{selectedQ.solution.explanation}</p>
+            {selectedQ.solution.why_wrong && <p className="text-xs text-red-300"><span className="font-medium">Why Wrong:</span> {selectedQ.solution.why_wrong}</p>}
             {selectedQ.solution.key_takeaways && (
-              <ul className="mt-2 space-y-1">
-                {selectedQ.solution.key_takeaways.map((t, i) => <li key={i} className="text-xs text-green-300">• {t}</li>)}
+              <ul className="mt-1.5 space-y-0.5">
+                {selectedQ.solution.key_takeaways.map((t, i) => <li key={i} className="text-[10px] text-emerald-300">• {t}</li>)}
               </ul>
             )}
           </div>
         )}
 
-        {/* Student Responses */}
         {selectedQ.responses && selectedQ.responses.length > 0 && (
-          <div className="bg-gray-800 rounded-xl overflow-hidden">
-            <div className="p-4 border-b border-gray-700">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">👥 Student Responses ({selectedQ.responses.length})</h3>
+          <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
+            <div className="p-3 border-b border-gray-800">
+              <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Student Responses ({selectedQ.responses.length})</h3>
             </div>
-            <table className="w-full text-xs">
+            <table className="w-full text-[10px]">
               <thead>
-                <tr className="bg-gray-700">
-                  <th className="p-3 text-left">Roll No.</th>
-                  <th className="p-3 text-left">Candidate</th>
-                  <th className="p-3 text-left">Q No.</th>
-                  <th className="p-3 text-left">Student Answer</th>
-                  <th className="p-3 text-left">Status</th>
-                  <th className="p-3 text-left">Marks</th>
+                <tr className="bg-gray-800/50">
+                  <th className="p-2 text-left font-medium text-gray-500">Roll No.</th>
+                  <th className="p-2 text-left font-medium text-gray-500">Candidate</th>
+                  <th className="p-2 text-left font-medium text-gray-500">Q No.</th>
+                  <th className="p-2 text-left font-medium text-gray-500">Student Answer</th>
+                  <th className="p-2 text-left font-medium text-gray-500">Status</th>
+                  <th className="p-2 text-left font-medium text-gray-500">Marks</th>
                 </tr>
               </thead>
               <tbody>
                 {selectedQ.responses.map((r) => (
-                  <tr key={r.response_id} className="border-t border-gray-700">
-                    <td className="p-3 font-mono">{r.roll_number || '—'}</td>
-                    <td className="p-3">{r.candidate_name || '—'}</td>
-                    <td className="p-3">{r.question_no}</td>
-                    <td className="p-3">
-                      <span className={r.student_answer === selectedQ.correct_answer ? 'text-green-400' : r.student_answer ? 'text-red-400' : 'text-gray-500'}>
+                  <tr key={r.response_id} className="border-t border-gray-800">
+                    <td className="p-2 font-mono">{r.roll_number || '—'}</td>
+                    <td className="p-2">{r.candidate_name || '—'}</td>
+                    <td className="p-2">{r.question_no}</td>
+                    <td className="p-2">
+                      <span className={r.student_answer === selectedQ.correct_answer ? 'text-emerald-400' : r.student_answer ? 'text-red-400' : 'text-gray-600'}>
                         {r.student_answer || 'Unattempted'}
                       </span>
                     </td>
-                    <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${r.status === 'correct' ? 'bg-green-800 text-green-300' : r.status === 'wrong' ? 'bg-red-800 text-red-300' : 'bg-gray-700 text-gray-400'}`}>
+                    <td className="p-2">
+                      <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${r.status === 'correct' ? 'bg-emerald-800 text-emerald-300' : r.status === 'wrong' ? 'bg-red-800 text-red-300' : 'bg-gray-800 text-gray-400'}`}>
                         {r.status}
                       </span>
                     </td>
-                    <td className="p-3">{r.marks_awarded}</td>
+                    <td className="p-2">{r.marks_awarded}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1775,90 +2349,85 @@ function Questions() {
     );
   }
 
-  // ── List View ─────────────────────────────────────────────────────────────
   return (
     <div>
-      {/* Toast */}
       {toast && (
-        <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-xl text-sm font-medium
-          ${toast.type === 'error' ? 'bg-red-600' : toast.type === 'info' ? 'bg-indigo-600' : 'bg-green-600'}`}>
+        <div className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-xl text-xs font-medium
+          ${toast.type === 'error' ? 'bg-red-600' : toast.type === 'info' ? 'bg-indigo-600' : 'bg-emerald-600'}`}>
           {toast.msg}
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">❓ Master Questions <span className="text-sm font-normal text-gray-400 ml-2">{total} कुल</span></h1>
+      <div className="flex items-center justify-between mb-3">
+        <h1 className="text-lg font-bold">Master Questions <span className="text-xs font-normal text-gray-500 ml-1">({total})</span></h1>
         {bulkSelected.length > 0 && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-indigo-400">{bulkSelected.length} selected</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-indigo-400">{bulkSelected.length} selected</span>
             <button onClick={() => runBulkAiEdit(false)} disabled={bulkLoading}
-              className="px-3 py-2 rounded-xl bg-purple-700 hover:bg-purple-600 text-xs font-medium disabled:opacity-50">
-              {bulkLoading ? '⏳...' : '🤖 AI Preview'}
+              className="px-2 py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 text-[10px] font-medium disabled:opacity-50">
+              {bulkLoading ? '...' : 'AI Preview'}
             </button>
             <button onClick={() => runBulkAiEdit(true)} disabled={bulkLoading}
-              className="px-3 py-2 rounded-xl bg-purple-900 hover:bg-purple-800 text-xs font-medium disabled:opacity-50">
-              {bulkLoading ? '⏳...' : '🤖 AI Apply All'}
+              className="px-2 py-1.5 rounded-lg bg-purple-900 hover:bg-purple-800 text-[10px] font-medium disabled:opacity-50">
+              {bulkLoading ? '...' : 'AI Apply All'}
             </button>
             <button onClick={runBulkDeleteQuestions} disabled={bulkLoading}
-              className="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-medium disabled:opacity-50">
-              🗑️ Bulk Delete
+              className="px-2 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-[10px] font-medium disabled:opacity-50">
+              Bulk Delete
             </button>
             <button onClick={() => { setBulkSelected([]); setBulkResults(null); }}
-              className="px-3 py-2 rounded-xl bg-gray-700 text-xs">✕ Clear</button>
+              className="px-2 py-1.5 rounded-lg bg-gray-700 text-[10px]">Clear</button>
           </div>
         )}
       </div>
 
-      {/* Filters */}
-      <div className="bg-gray-800 rounded-xl p-4 mb-6 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3">
+      <div className="bg-gray-900 rounded-lg p-3 mb-4 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-2 border border-gray-800">
         <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
-          placeholder="🔍 प्रश्न खोजें..." className="col-span-2 px-3 py-2 rounded-lg bg-gray-900 border border-gray-700 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          placeholder="Search questions..." className="col-span-2 px-2.5 py-1.5 rounded-lg bg-gray-950 border border-gray-800 text-xs text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
         <select value={sortBy} onChange={e => { setSortBy(e.target.value); setPage(1); }}
-          className="px-3 py-2 rounded-lg bg-gray-900 border border-gray-700 text-sm text-white focus:outline-none">
-          <option value="created_at">📅 नवीनतम</option>
-          <option value="reference_count">🔢 Reference Count</option>
-          <option value="shift_count">📋 Shift Count</option>
+          className="px-2.5 py-1.5 rounded-lg bg-gray-950 border border-gray-800 text-xs text-white focus:outline-none">
+          <option value="created_at">Latest</option>
+          <option value="reference_count">Reference Count</option>
+          <option value="shift_count">Shift Count</option>
         </select>
         <select value={hasSolution} onChange={e => { setHasSolution(e.target.value); setPage(1); }}
-          className="px-3 py-2 rounded-lg bg-gray-900 border border-gray-700 text-sm text-white focus:outline-none">
-          <option value="">💡 All Solutions</option>
-          <option value="true">✅ Has Solution</option>
-          <option value="false">❌ No Solution</option>
+          className="px-2.5 py-1.5 rounded-lg bg-gray-950 border border-gray-800 text-xs text-white focus:outline-none">
+          <option value="">All Solutions</option>
+          <option value="true">Has Solution</option>
+          <option value="false">No Solution</option>
         </select>
         <select value={correctAnswer} onChange={e => { setCorrectAnswer(e.target.value); setPage(1); }}
-          className="px-3 py-2 rounded-lg bg-gray-900 border border-gray-700 text-sm text-white focus:outline-none">
-          <option value="">🎯 All Answers</option>
+          className="px-2.5 py-1.5 rounded-lg bg-gray-950 border border-gray-800 text-xs text-white focus:outline-none">
+          <option value="">All Answers</option>
           {['A', 'B', 'C', 'D'].map(v => <option key={v} value={v}>Answer: {v}</option>)}
         </select>
         <input value={subject} onChange={e => { setSubject(e.target.value); setPage(1); }}
-          placeholder="📚 Exam Name..." className="px-3 py-2 rounded-lg bg-gray-900 border border-gray-700 text-sm text-white focus:outline-none" />
+          placeholder="Exam name..." className="px-2.5 py-1.5 rounded-lg bg-gray-950 border border-gray-800 text-xs text-white focus:outline-none" />
         <input type="text" value={shiftDate} onChange={e => { setShiftDate(e.target.value); setPage(1); }}
-          placeholder="🗓️ Date (DD/MM/YYYY)" className="px-3 py-2 rounded-lg bg-gray-900 border border-gray-700 text-sm text-white focus:outline-none" />
+          placeholder="Date (DD/MM/YYYY)" className="px-2.5 py-1.5 rounded-lg bg-gray-950 border border-gray-800 text-xs text-white focus:outline-none" />
       </div>
 
-      {/* Bulk AI Results */}
       {bulkResults && (
-        <div className="bg-purple-900/30 border border-purple-600 rounded-xl p-4 mb-4">
-          <div className="flex justify-between items-center mb-2">
-            <h4 className="text-sm font-semibold text-purple-300">🤖 Bulk AI Results — {bulkResults.processed} processed</h4>
-            <button onClick={() => setBulkResults(null)} className="text-gray-400 text-xs">✕</button>
+        <div className="bg-purple-900/30 border border-purple-600 rounded-lg p-3 mb-3">
+          <div className="flex justify-between items-center mb-1.5">
+            <h4 className="text-xs font-semibold text-purple-300">Bulk AI Results — {bulkResults.processed} processed</h4>
+            <button onClick={() => setBulkResults(null)} className="text-gray-500 text-[10px]">✕</button>
           </div>
-          <div className="max-h-40 overflow-y-auto space-y-1">
+          <div className="max-h-32 overflow-y-auto space-y-0.5">
             {bulkResults.results?.map((r, i) => (
-              <div key={i} className={`text-xs px-3 py-1 rounded ${r.success ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'}`}>
-                MQ #{r.id}: {r.success ? `✅ ${r.data?.notes || 'Edited'}` : `❌ ${r.error}`}
+              <div key={i} className={`text-[10px] px-2 py-0.5 rounded ${r.success ? 'bg-emerald-900/50 text-emerald-300' : 'bg-red-900/50 text-red-300'}`}>
+                MQ #{r.id}: {r.success ? r.data?.notes || 'Edited' : r.error}
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Table */}
-      <div className="bg-gray-800 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
+        <table className="w-full text-xs">
           <thead>
-            <tr className="bg-gray-700">
-              <th className="p-3 w-8">
+            <tr className="bg-gray-800/50">
+              <th className="p-2.5 w-8">
                 <input type="checkbox" onChange={e => {
                   if (e.target.checked) {
                     setBulkSelected(prev => [...new Set([...prev, ...items.map(i => i.id)])]);
@@ -1868,54 +2437,54 @@ function Questions() {
                   }
                 }}
                 checked={items.length > 0 && items.every(i => bulkSelected.includes(i.id))}
-                className="rounded" />
+                className="w-3 h-3" />
               </th>
-              <th className="p-3 text-left">ID / HTML ID</th>
-              <th className="p-3 text-left">प्रश्न</th>
-              <th className="p-3 text-left">Ans</th>
-              <th className="p-3 text-center">Refs</th>
-              <th className="p-3 text-center">Shifts</th>
-              <th className="p-3 text-center">AI Sol.</th>
-              <th className="p-3 text-center">Delete</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">ID</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Question</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Ans</th>
+              <th className="p-2.5 text-center font-medium text-gray-500">Refs</th>
+              <th className="p-2.5 text-center font-medium text-gray-500">Shifts</th>
+              <th className="p-2.5 text-center font-medium text-gray-500">AI</th>
+              <th className="p-2.5 text-center font-medium text-gray-500">Del</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="p-8 text-center">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
+              <tr><td colSpan={8} className="p-6 text-center">
+                <div className="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-indigo-500"></div>
               </td></tr>
             ) : items.length === 0 ? (
-              <tr><td colSpan={7} className="p-6 text-center text-gray-500">कोई प्रश्न नहीं मिला</td></tr>
+              <tr><td colSpan={8} className="p-4 text-center text-gray-500 text-xs">No questions found</td></tr>
             ) : items.map((q) => (
-              <tr key={q.id} className="border-t border-gray-700 hover:bg-gray-750 cursor-pointer"
+              <tr key={q.id} className="border-t border-gray-800 hover:bg-gray-800/30 cursor-pointer"
                 onClick={(e) => { if (e.target.type !== 'checkbox') openDetail(q.id); }}>
-                <td className="p-3" onClick={e => e.stopPropagation()}>
+                <td className="p-2.5" onClick={e => e.stopPropagation()}>
                   <input type="checkbox" checked={bulkSelected.includes(q.id)}
-                    onChange={() => toggleBulkSelect(q.id)} className="rounded" />
+                    onChange={() => toggleBulkSelect(q.id)} className="w-3 h-3" />
                 </td>
-                <td className="p-3">
-                  <p className="text-gray-300">#{q.id}</p>
-                  {q.question_id_html && <p className="font-mono text-xs text-indigo-400 truncate max-w-[100px]">{q.question_id_html}</p>}
+                <td className="p-2.5">
+                  <p className="text-gray-300 text-xs">#{q.id}</p>
+                  {q.question_id_html && <p className="font-mono text-[10px] text-indigo-400 truncate max-w-[80px]">{q.question_id_html}</p>}
                 </td>
-                <td className="p-3 max-w-xs">
-                  <p className="text-gray-200 truncate">{q.question_text || '—'}</p>
+                <td className="p-2.5 max-w-xs">
+                  <p className="text-gray-200 truncate text-xs">{q.question_text || '—'}</p>
                 </td>
-                <td className="p-3">
-                  <span className={`font-bold ${answerColor[q.correct_answer] || 'text-white'}`}>{q.correct_answer}</span>
+                <td className="p-2.5">
+                  <span className={`font-bold text-xs ${answerColor[q.correct_answer] || 'text-white'}`}>{q.correct_answer}</span>
                 </td>
-                <td className="p-3 text-center">
-                  <span className="bg-indigo-900/40 text-indigo-300 px-2 py-0.5 rounded-full text-xs">{q.reference_count}</span>
+                <td className="p-2.5 text-center">
+                  <span className="bg-indigo-900/40 text-indigo-300 px-1.5 py-0.5 rounded-full text-[10px]">{q.reference_count}</span>
                 </td>
-                <td className="p-3 text-center">
-                  <span className="bg-purple-900/40 text-purple-300 px-2 py-0.5 rounded-full text-xs">{q.shift_count}</span>
+                <td className="p-2.5 text-center">
+                  <span className="bg-purple-900/40 text-purple-300 px-1.5 py-0.5 rounded-full text-[10px]">{q.shift_count}</span>
                 </td>
-                <td className="p-3 text-center">
-                  {q.has_solution ? <span className="text-green-400">✅</span> : <span className="text-gray-600">—</span>}
+                <td className="p-2.5 text-center">
+                  {q.has_solution ? <span className="text-emerald-400">✓</span> : <span className="text-gray-700">—</span>}
                 </td>
-                <td className="p-3 text-center" onClick={e => e.stopPropagation()}>
+                <td className="p-2.5 text-center" onClick={e => e.stopPropagation()}>
                   <button onClick={() => deleteQuestion(q.id)}
-                    className="text-red-500 hover:text-red-400 hover:bg-red-900/30 px-2 py-1 rounded-lg text-xs transition">
-                    🗑️
+                    className="text-red-500 hover:text-red-400 hover:bg-red-900/30 px-1.5 py-0.5 rounded text-xs transition">
+                    ✕
                   </button>
                 </td>
               </tr>
@@ -1925,24 +2494,24 @@ function Questions() {
       </div>
 
       {totalPages > 0 && (
-        <div className="mt-4 flex justify-between items-center bg-gray-800 p-3 rounded-xl flex-wrap">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-400">Rows per page:</span>
-            <select value={perPage} onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }} className="bg-gray-700 text-white rounded px-2 py-1">
+        <div className="mt-3 flex justify-between items-center bg-gray-900 p-2.5 rounded-lg border border-gray-800 flex-wrap">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-gray-500">Rows:</span>
+            <select value={perPage} onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }} className="bg-gray-800 text-white rounded px-2 py-0.5 text-xs">
               <option value={20}>20</option>
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
           </div>
-          <div className="flex justify-center gap-2 flex-wrap">
+          <div className="flex justify-center gap-1 flex-wrap">
             <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-              className="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-40">‹</button>
+              className="px-2 py-0.5 rounded bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-xs">‹</button>
             {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map(p => (
               <button key={p} onClick={() => setPage(p)}
-                className={`px-3 py-1 rounded ${page === p ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-gray-600'}`}>{p}</button>
+                className={`px-2 py-0.5 rounded text-xs ${page === p ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-gray-700'}`}>{p}</button>
             ))}
             <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-              className="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-40">›</button>
+              className="px-2 py-0.5 rounded bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-xs">›</button>
           </div>
         </div>
       )}
@@ -1950,7 +2519,6 @@ function Questions() {
   );
 }
 
-// ==================== PARSED DATA COMPONENT ====================
 function ParsedData() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1986,65 +2554,65 @@ function ParsedData() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">🧩 पैरस्ड डेटा</h1>
-        <p className="text-sm text-gray-400">Candidate + Question payloads from HTML parser</p>
+      <div className="flex items-center justify-between mb-3">
+        <h1 className="text-lg font-bold">Parsed Data</h1>
+        <p className="text-xs text-gray-500">Candidate + Question payloads from HTML parser</p>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-3">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="रोल / रजिस्ट्रेशन / नाम / subject से खोजें"
-          className="w-full px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500"
+          placeholder="Search by roll/registration/name/subject..."
+          className="w-full px-3 py-1.5 rounded-lg bg-gray-900 border border-gray-800 text-xs text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
         />
       </div>
 
       {selected ? (
-        <div className="space-y-4">
-          <button onClick={() => setSelected(null)} className="text-indigo-400 hover:text-indigo-300">← वापस</button>
-          <div className="bg-gray-800 rounded-xl p-6">
-            <h2 className="text-lg font-semibold mb-4">Candidate Metadata</h2>
-            <pre className="text-xs whitespace-pre-wrap break-all text-gray-300">{JSON.stringify(selected.result, null, 2)}</pre>
+        <div className="space-y-3">
+          <button onClick={() => setSelected(null)} className="text-indigo-400 hover:text-indigo-300 text-xs">← Back</button>
+          <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+            <h2 className="text-sm font-semibold mb-3">Candidate Metadata</h2>
+            <pre className="text-[11px] whitespace-pre-wrap break-all text-gray-300">{JSON.stringify(selected.result, null, 2)}</pre>
           </div>
-          <div className="bg-gray-800 rounded-xl p-6">
-            <h2 className="text-lg font-semibold mb-4">Question Payloads</h2>
-            <div className="space-y-3 max-h-[500px] overflow-y-auto">
+          <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+            <h2 className="text-sm font-semibold mb-3">Question Payloads</h2>
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {selected.questions?.map((q, index) => (
-                <div key={q.id} className="border border-gray-700 rounded-lg p-3">
-                  <p className="text-sm font-medium text-indigo-300">Q{q.question_no}</p>
-                  <p className="text-sm text-white mt-1">{q.question_text}</p>
-                  <pre className="text-[11px] mt-2 whitespace-pre-wrap break-all text-gray-400">{JSON.stringify(q.parsed_payload || {}, null, 2)}</pre>
+                <div key={q.id} className="border border-gray-800 rounded-lg p-2.5">
+                  <p className="text-xs font-medium text-indigo-300">Q{q.question_no}</p>
+                  <p className="text-xs text-white mt-1">{q.question_text}</p>
+                  <pre className="text-[10px] mt-1.5 whitespace-pre-wrap break-all text-gray-500">{JSON.stringify(q.parsed_payload || {}, null, 2)}</pre>
                 </div>
               ))}
             </div>
           </div>
         </div>
       ) : (
-        <div className="bg-gray-800 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
+          <table className="w-full text-xs">
             <thead>
-              <tr className="bg-gray-700">
-                <th className="p-3 text-left">Roll</th>
-                <th className="p-3 text-left">Candidate</th>
-                <th className="p-3 text-left">Subject</th>
-                <th className="p-3 text-left">Application Photo</th>
-                <th className="p-3 text-left">Parser</th>
-                <th className="p-3 text-left">Action</th>
+              <tr className="bg-gray-800/50">
+                <th className="p-2.5 text-left font-medium text-gray-500">Roll</th>
+                <th className="p-2.5 text-left font-medium text-gray-500">Candidate</th>
+                <th className="p-2.5 text-left font-medium text-gray-500">Subject</th>
+                <th className="p-2.5 text-left font-medium text-gray-500">Photo</th>
+                <th className="p-2.5 text-left font-medium text-gray-500">Parser</th>
+                <th className="p-2.5 text-left font-medium text-gray-500">Action</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} className="p-6 text-center text-gray-400">लोड हो रहा है...</td></tr>
+                <tr><td colSpan={6} className="p-4 text-center text-gray-500 text-xs">Loading...</td></tr>
               ) : results.map((r) => (
-                <tr key={r.id} className="border-t border-gray-700 hover:bg-gray-750">
-                  <td className="p-3 font-mono text-xs">{r.roll_number}</td>
-                  <td className="p-3">{r.candidate_name || '—'}</td>
-                  <td className="p-3">{r.subject || '—'}</td>
-                  <td className="p-3 text-gray-400">{r.application_photograph ? '✅' : '—'}</td>
-                  <td className="p-3 text-gray-400">{r.parser_version || '—'}</td>
-                  <td className="p-3">
-                    <button onClick={() => openDetail(r.id)} className="text-indigo-400 hover:text-indigo-300">देखें</button>
+                <tr key={r.id} className="border-t border-gray-800 hover:bg-gray-800/30">
+                  <td className="p-2.5 font-mono text-[11px]">{r.roll_number}</td>
+                  <td className="p-2.5">{r.candidate_name || '—'}</td>
+                  <td className="p-2.5">{r.subject || '—'}</td>
+                  <td className="p-2.5 text-gray-500">{r.application_photograph ? '✓' : '—'}</td>
+                  <td className="p-2.5 text-gray-500">{r.parser_version || '—'}</td>
+                  <td className="p-2.5">
+                    <button onClick={() => openDetail(r.id)} className="text-indigo-400 hover:text-indigo-300 text-xs">View</button>
                   </td>
                 </tr>
               ))}
@@ -2056,7 +2624,6 @@ function ParsedData() {
   );
 }
 
-// ==================== TRANSACTIONS COMPONENT ====================
 function Transactions() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -2086,58 +2653,58 @@ function Transactions() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">💳 ट्रांजेक्शन हिस्ट्री</h1>
+      <h1 className="text-lg font-bold mb-3">Transaction History</h1>
 
-      <div className="mb-6">
+      <div className="mb-3">
         <input
           type="text"
           value={userId}
           onChange={(e) => { setUserId(e.target.value); setPage(1); }}
-          placeholder="User ID से फ़िल्टर करें..."
-          className="w-full px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500"
+          placeholder="Filter by User ID..."
+          className="w-full px-3 py-1.5 rounded-lg bg-gray-900 border border-gray-800 text-xs text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
         />
       </div>
 
-      <div className="bg-gray-800 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
+        <table className="w-full text-xs">
           <thead>
-            <tr className="bg-gray-700">
-              <th className="p-3 text-left">ID</th>
-              <th className="p-3 text-left">User ID</th>
-              <th className="p-3 text-left">टाइप</th>
-              <th className="p-3 text-left">अमाउंट</th>
-              <th className="p-3 text-left">विवरण</th>
-              <th className="p-3 text-left">तारीख</th>
+            <tr className="bg-gray-800/50">
+              <th className="p-2.5 text-left font-medium text-gray-500">ID</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">User ID</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Type</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Amount</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Description</th>
+              <th className="p-2.5 text-left font-medium text-gray-500">Date</th>
             </tr>
           </thead>
           <tbody>
             {transactions.map((t) => (
-              <tr key={t.id} className="border-t border-gray-700 hover:bg-gray-750">
-                <td className="p-3">{t.id}</td>
-                <td className="p-3">{t.user_id}</td>
-                <td className="p-3">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${t.type === 'earn' || t.type === 'recharge'
-                      ? 'bg-green-600/20 text-green-400'
+              <tr key={t.id} className="border-t border-gray-800 hover:bg-gray-800/30">
+                <td className="p-2.5 text-gray-400">{t.id}</td>
+                <td className="p-2.5">{t.user_id}</td>
+                <td className="p-2.5">
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${t.type === 'earn' || t.type === 'recharge'
+                      ? 'bg-emerald-600/20 text-emerald-400'
                       : 'bg-red-600/20 text-red-400'
                     }`}>
                     {t.type}
                   </span>
                 </td>
-                <td className="p-3 font-medium">{t.type === 'earn' || t.type === 'recharge' ? '+' : '-'}{t.amount}</td>
-                <td className="p-3 text-gray-400">{t.description || '—'}</td>
-                <td className="p-3 text-gray-400 text-xs">{new Date(t.created_at).toLocaleDateString()}</td>
+                <td className="p-2.5 font-medium">{t.type === 'earn' || t.type === 'recharge' ? '+' : '-'}{t.amount}</td>
+                <td className="p-2.5 text-gray-500">{t.description || '—'}</td>
+                <td className="p-2.5 text-gray-500 text-[11px]">{new Date(t.created_at).toLocaleDateString()}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div className="mt-4 flex justify-center gap-2">
+      <div className="mt-3 flex justify-center gap-1">
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
           <button
             key={p}
             onClick={() => setPage(p)}
-            className={`px-3 py-1 rounded ${page === p ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-gray-600'}`}
+            className={`px-2.5 py-0.5 rounded text-xs ${page === p ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-gray-700'}`}
           >
             {p}
           </button>

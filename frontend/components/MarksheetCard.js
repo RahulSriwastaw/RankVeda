@@ -167,48 +167,6 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
             </tbody>
           </table>
         </div>
-
-        {/* Photo box */}
-        <div style={{
-          width: '126px', flexShrink: 0,
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          borderLeft: `1px solid ${BORDER}`,
-          padding: '16px 12px',
-          background: 'rgba(99,102,241,0.05)',
-        }}>
-          {candidate?.photo_url ? (
-            <img
-              src={candidate.photo_url}
-              alt="Candidate Photograph"
-              style={{
-                width: '96px', height: '118px',
-                objectFit: 'cover',
-                border: `2px solid ${INDIGO}`,
-                borderRadius: '8px',
-                boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
-              }}
-              crossOrigin="anonymous"
-            />
-          ) : (
-            <div style={{
-              width: '96px', height: '118px',
-              background: 'linear-gradient(135deg, #1e1b4b, #312e81)',
-              border: `2px solid ${INDIGO}`,
-              borderRadius: '8px',
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
-            }}>
-              <div style={{ fontSize: '36px', opacity: 0.5 }}>👤</div>
-              <div style={{ fontSize: '9px', color: TEXT_DIM, marginTop: '4px', textAlign: 'center' }}>No Photo</div>
-            </div>
-          )}
-          <div style={{
-            marginTop: '8px', fontSize: '9px', color: TEXT_DIM,
-            textAlign: 'center', lineHeight: 1.4, letterSpacing: '0.3px',
-          }}>Application<br />Photograph</div>
-        </div>
       </div>
 
       {/* ── SECTION-WISE SCORE TABLE ─────────────────────────────────────── */}

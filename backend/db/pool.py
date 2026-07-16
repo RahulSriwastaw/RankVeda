@@ -28,22 +28,16 @@ def init_db(app):
                     cursor.close()
 
         db.create_all()
-        # Seed default exam if empty
-        from .models import Exam
-        if Exam.query.count() == 0:
-            from datetime import date
-            default_exam = Exam(
-                id=1,
-                name="RRB NTPC CBT 1",
-                date=date.today(),
-                total_questions=100,
-                price=0,
-                description="Default NTPC Exam"
-            )
-            db.session.add(default_exam)
-            db.session.commit()
-
         if db.engine.dialect.name == 'sqlite':
+            _ensure_columns('exams', {
+                'price': 'price INTEGER DEFAULT 0',
+                'description': 'description TEXT',
+                'disclaimer': 'disclaimer TEXT',
+            })
+            _ensure_columns('user_points', {
+                'total_earned': 'total_earned INTEGER DEFAULT 0',
+                'total_spent': 'total_spent INTEGER DEFAULT 0',
+            })
             _ensure_columns('exam_results', {
                 'application_photograph': 'application_photograph VARCHAR(500)',
                 'candidate_payload': 'candidate_payload JSON',
@@ -61,3 +55,18 @@ def init_db(app):
                 'user_id': 'user_id INTEGER REFERENCES users(id) ON DELETE SET NULL',
                 'likes': 'likes INTEGER DEFAULT 0',
             })
+
+        # Seed default exam if empty
+        from .models import Exam
+        if Exam.query.count() == 0:
+            from datetime import date
+            default_exam = Exam(
+                id=1,
+                name="RRB NTPC CBT 1",
+                date=date.today(),
+                total_questions=100,
+                price=0,
+                description="Default NTPC Exam"
+            )
+            db.session.add(default_exam)
+            db.session.commit()

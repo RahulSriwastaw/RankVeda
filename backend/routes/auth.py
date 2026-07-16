@@ -3,6 +3,7 @@ from db.models import db, User, UserPoints
 import hashlib
 import jwt
 import os
+import requests
 from datetime import datetime, timezone, timedelta
 import traceback
 
@@ -135,3 +136,76 @@ def me():
         'balance': wallet.balance if wallet else 0,
         'created_at': user.created_at.isoformat() if user.created_at else None
     })
+
+@auth_bp.route('/google', methods=['POST'])
+def google_login():
+    try:
+        data = request.get_json() or {}
+        id_token = data.get('credential')
+        if not id_token:
+            return jsonify({'error': 'Credential token is required'}), 400
+
+        email = None
+        name = None
+
+        # 1. Try Firebase Authentication lookup API
+        api_key = os.getenv('FIREBASE_API_KEY', 'AIzaSyDybByBZ7_BEHGaax6KKiKeS8BAT1ObR00')
+        verify_url = f"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={api_key}"
+        try:
+            resp = requests.post(verify_url, json={'idToken': id_token}, timeout=5)
+            if resp.status_code == 200:
+                payload = resp.json()
+                users = payload.get('users', [])
+                if users:
+                    user_info = users[0]
+                    email = user_info.get('email')
+                    name = user_info.get('displayName')
+        except Exception as fe:
+            print(f"[Auth] Firebase verify fail: {fe}")
+
+        # 2. Fall back to standard Google tokeninfo API if email not resolved
+        if not email:
+            verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
+            try:
+                resp = requests.get(verify_url, timeout=5)
+                if resp.status_code == 200:
+                    payload = resp.json()
+                    email = payload.get('email')
+                    name = payload.get('name')
+            except Exception as ge:
+                print(f"[Auth] Google tokeninfo verify fail: {ge}")
+
+        if not email:
+            return jsonify({'error': 'Invalid or expired authentication credential'}), 400
+
+        email = email.lower().strip()
+        user = User.query.filter_by(email=email).first()
+        is_new = False
+        if not user:
+            user = User(email=email, name=name or email.split('@')[0])
+            db.session.add(user)
+            db.session.flush()
+
+            wallet = UserPoints(user_id=user.id, balance=0, total_earned=0, total_spent=0)
+            db.session.add(wallet)
+            db.session.commit()
+            is_new = True
+
+        wallet = UserPoints.query.filter_by(user_id=user.id).first()
+        token = _make_token(user.id, user.email)
+        
+        return jsonify({
+            'success': True,
+            'token': token,
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'name': user.name,
+                'balance': wallet.balance if wallet else 0
+            },
+            'is_new': is_new
+        })
+    except Exception as e:
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+
