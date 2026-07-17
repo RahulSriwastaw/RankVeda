@@ -743,23 +743,24 @@ export default function ResultPage() {
                     <span className="w-6 h-6 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-black">🎯</span>
                     <h3 className="font-extrabold text-indigo-950 text-[13px]">Attempt Distribution</h3>
                   </div>
-                  <div className="w-36 h-36 relative my-auto">
+                  <div className="w-full h-[200px] relative flex justify-center">
                     <Doughnut
                       data={donutData}
                       options={{
                         cutout: '76%',
                         maintainAspectRatio: false,
+                        layout: { padding: { bottom: 10 } },
                         animation: {
                           animateScale: true,
                           animateRotate: true,
                           duration: 1500,
                           easing: 'easeOutBounce'
                         },
-                        plugins: { legend: { position: 'bottom', labels: { color: '#475569', font: { size: 10, weight: 'bold' }, padding: 10, usePointStyle: true, boxWidth: 6 } } }
+                        plugins: { legend: { position: 'bottom', labels: { color: '#475569', font: { size: 10, weight: 'bold' }, padding: 15, usePointStyle: true, boxWidth: 6 } } }
                       }}
                     />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style={{ marginTop: '-20px' }}>
-                      <div className="text-xl font-black text-indigo-950">{accuracy}%</div>
+                    <div className="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none w-full">
+                      <div className="text-[22px] leading-none font-black text-indigo-950 mb-0.5">{accuracy}%</div>
                       <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Accuracy</div>
                     </div>
                   </div>
