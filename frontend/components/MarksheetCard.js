@@ -44,7 +44,7 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
         background: BG_WHITE,
         fontFamily: "'Segoe UI', Inter, Arial, sans-serif",
         color: TEXT_MAIN,
-        borderRadius: '16px',
+        borderRadius: '08px',
         overflow: 'hidden',
         boxSizing: 'border-box',
         border: '1px solid #cbd5e1',
@@ -119,18 +119,18 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
         gap: 'clamp(4px, 1vw, 12px)',
-        padding: '8px 12px',
+        padding: '4px 6px',
         background: '#ffffff',
         borderBottom: `1px solid ${BORDER}`,
       }}>
         {/* Left Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
           {[
             {
               label: 'Candidate Name',
               value: candidate?.name || 'RAHUL KUMAR',
               icon: (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
@@ -265,7 +265,7 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
                     <path d="M12 5v14M5 12h14" />
                   </svg>
                 );
-                
+
                 if (sec.name?.toLowerCase().includes('general awareness') || sec.name?.toLowerCase().includes('gk')) {
                   iconColor = '#3b82f6';
                   iconSvg = (
@@ -346,109 +346,44 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
         </div>
       </div>
 
-      {/* ── 4 STAT CARDS ────────────────────────────────────────────────── */}
+      {/* ── CLEAN STATS ROW ────────────────────────────────────────────────── */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
         gap: '8px',
-        padding: '0 12px 12px 12px',
+        padding: '8px 12px 16px 12px',
         background: '#ffffff',
       }}>
-        {/* Card 1: LIVE RANK */}
-        <div style={{
-          background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
-          border: '1px solid #bbf7d0', borderRadius: '12px', padding: '12px 10px',
-          display: 'flex', alignItems: 'center', gap: '8px', position: 'relative', overflow: 'hidden'
-        }}>
-          {/* Trophy Icon */}
-          <div style={{ fontSize: '32px' }}>🏆</div>
-          <div>
-            <div style={{ fontSize: '9px', fontWeight: '800', color: '#166534', letterSpacing: '0.5px' }}>LIVE RANK</div>
-            <div style={{ fontSize: '20px', fontWeight: '900', color: '#14532d', margin: '2px 0 0 0', lineHeight: 1 }}>
-              {rank?.rank ? `#${rank.rank}` : '#1'}
-            </div>
-            <div style={{ fontSize: '9px', color: '#15803d', fontWeight: '600', marginTop: '2px' }}>
-              of {rank?.total_appeared ? Number(rank.total_appeared).toLocaleString() : '2'} candidates
-            </div>
-          </div>
-          {/* Small bar chart visual representation on right */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '2px', marginLeft: 'auto', opacity: 0.3 }}>
-            <div style={{ width: '4px', height: '10px', background: '#166534', borderRadius: '1px' }}></div>
-            <div style={{ width: '4px', height: '16px', background: '#166534', borderRadius: '1px' }}></div>
-            <div style={{ width: '4px', height: '22px', background: '#166534', borderRadius: '1px' }}></div>
-          </div>
+        {/* Stat 1: LIVE RANK */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '8px', background: '#f8fafc', borderRadius: '8px' }}>
+          <div style={{ fontSize: '22px', marginBottom: '4px' }}>🏆</div>
+          <div style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', fontWeight: '900', color: '#16a34a', lineHeight: 1 }}>{rank?.rank ? `#${rank.rank}` : '#1'}</div>
+          <div style={{ fontSize: '9px', fontWeight: '800', color: '#14532d', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Live Rank</div>
+          <div style={{ fontSize: '8px', color: '#64748b', fontWeight: '700', marginTop: '3px' }}>Of {rank?.total_appeared ? Number(rank.total_appeared).toLocaleString() : '2'}</div>
+        </div>
+        
+        {/* Stat 2: PERCENTILE */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '8px', background: '#f8fafc', borderRadius: '8px' }}>
+          <div style={{ fontSize: '22px', marginBottom: '4px' }}>🎯</div>
+          <div style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', fontWeight: '900', color: '#0284c7', lineHeight: 1 }}>{rank?.percentile ? `${Number(rank.percentile).toFixed(1)}%` : '100.0%'}</div>
+          <div style={{ fontSize: '9px', fontWeight: '800', color: '#0c4a6e', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Percentile</div>
+          <div style={{ fontSize: '8px', color: '#64748b', fontWeight: '700', marginTop: '3px' }}>Top {rank?.percentile ? (100 - rank.percentile).toFixed(1) : '0.0'}%</div>
         </div>
 
-        {/* Card 2: PERCENTILE */}
-        <div style={{
-          background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-          border: '1px solid #bae6fd', borderRadius: '12px', padding: '12px 10px',
-          display: 'flex', alignItems: 'center', gap: '8px'
-        }}>
-          {/* Pie Donut Graphic */}
-          <div style={{ width: '32px', height: '32px', position: 'relative' }}>
-            <svg width="32" height="32" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="15.91" fill="none" stroke="#bae6fd" strokeWidth="4" />
-              <circle cx="18" cy="18" r="15.91" fill="none" stroke="#3b82f6" strokeWidth="4.2"
-                strokeDasharray="100 0" strokeDashoffset="25" />
-            </svg>
-          </div>
-          <div>
-            <div style={{ fontSize: '9px', fontWeight: '800', color: '#075985', letterSpacing: '0.5px' }}>PERCENTILE</div>
-            <div style={{ fontSize: '20px', fontWeight: '900', color: '#0c4a6e', margin: '2px 0 0 0', lineHeight: 1 }}>
-              {rank?.percentile ? `${Number(rank.percentile).toFixed(1)}%` : '100.0%'}
-            </div>
-            <div style={{ fontSize: '9px', color: '#0369a1', fontWeight: '600', marginTop: '2px' }}>
-              Top {rank?.percentile ? (100 - rank.percentile).toFixed(1) : '0.0'}%
-            </div>
-          </div>
+        {/* Stat 3: OFFICIAL SCORE */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '8px', background: '#f8fafc', borderRadius: '8px' }}>
+          <div style={{ fontSize: '22px', marginBottom: '4px' }}>🛡️</div>
+          <div style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', fontWeight: '900', color: '#d97706', lineHeight: 1 }}>{totalMarks}</div>
+          <div style={{ fontSize: '9px', fontWeight: '800', color: '#78350f', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Official Score</div>
+          <div style={{ fontSize: '8px', color: '#64748b', fontWeight: '700', marginTop: '3px' }}>Out of {maxMarks}</div>
         </div>
 
-        {/* Card 3: OFFICIAL SCORE */}
-        <div style={{
-          background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
-          border: '1px solid #fde68a', borderRadius: '12px', padding: '12px 10px',
-          display: 'flex', alignItems: 'center', gap: '8px', position: 'relative', overflow: 'hidden'
-        }}>
-          {/* Badge Icon */}
-          <div style={{ fontSize: '32px' }}>🛡️</div>
-          <div>
-            <div style={{ fontSize: '9px', fontWeight: '800', color: '#92400e', letterSpacing: '0.5px' }}>OFFICIAL SCORE</div>
-            <div style={{ fontSize: '20px', fontWeight: '900', color: '#78350f', margin: '2px 0 0 0', lineHeight: 1 }}>
-              {totalMarks}
-            </div>
-            <div style={{ fontSize: '9px', color: '#b45309', fontWeight: '600', marginTop: '2px' }}>
-              Out of {maxMarks} Max Marks
-            </div>
-          </div>
-          {/* Trendline curve visualization */}
-          <svg style={{ position: 'absolute', bottom: 0, right: 0, opacity: 0.15, width: '48px', height: '24px' }} viewBox="0 0 50 20">
-            <path d="M0 20 Q12 5 25 15 T50 0 L50 20 Z" fill="#b45309" />
-          </svg>
-        </div>
-
-        {/* Card 4: ACCURACY RATE */}
-        <div style={{
-          background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
-          border: '1px solid #e9d5ff', borderRadius: '12px', padding: '12px 10px',
-          display: 'flex', flexDirection: 'column', gap: '4px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ fontSize: '28px' }}>🎯</div>
-            <div>
-              <div style={{ fontSize: '9px', fontWeight: '800', color: '#6b21a8', letterSpacing: '0.5px' }}>ACCURACY RATE</div>
-              <div style={{ fontSize: '20px', fontWeight: '900', color: '#581c87', margin: '2px 0 0 0', lineHeight: 1 }}>
-                {accuracy}%
-              </div>
-              <div style={{ fontSize: '9px', color: '#7e22ce', fontWeight: '600', marginTop: '2px' }}>
-                {correct} Correct / {totalAttempted} Att.
-              </div>
-            </div>
-          </div>
-          {/* Progress bar */}
-          <div style={{ width: '100%', height: '3px', background: '#e9d5ff', borderRadius: '2px', overflow: 'hidden', marginTop: '2px' }}>
-            <div style={{ width: `${accuracy}%`, height: '100%', background: '#a855f7' }}></div>
-          </div>
+        {/* Stat 4: ACCURACY RATE */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '8px', background: '#f8fafc', borderRadius: '8px' }}>
+          <div style={{ fontSize: '22px', marginBottom: '4px' }}>✅</div>
+          <div style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', fontWeight: '900', color: '#9333ea', lineHeight: 1 }}>{accuracy}%</div>
+          <div style={{ fontSize: '9px', fontWeight: '800', color: '#581c87', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Accuracy Rate</div>
+          <div style={{ fontSize: '8px', color: '#64748b', fontWeight: '700', marginTop: '3px' }}>{correct} / {totalAttempted} Correct</div>
         </div>
       </div>
 
