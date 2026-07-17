@@ -236,37 +236,46 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
             </tbody>
           </table>
 
-      {/* ── OVERALL STATS TABLE ────────────────────────────────────────────────── */}
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'clamp(10px, 2.5vw, 13px)' }}>
-        <thead>
-          <tr style={{ background: '#f1f5f9', color: '#475569', fontSize: 'clamp(7.5px, 2vw, 10px)' }}>
-            <th style={{ padding: '8px 4px', border: '1px solid #cbd5e1', width: '25%' }}>LIVE RANK</th>
-            <th style={{ padding: '8px 4px', border: '1px solid #cbd5e1', width: '25%' }}>PERCENTILE</th>
-            <th style={{ padding: '8px 4px', border: '1px solid #cbd5e1', width: '25%' }}>OFFICIAL SCORE</th>
-            <th style={{ padding: '8px 4px', border: '1px solid #cbd5e1', width: '25%' }}>ACCURACY RATE</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style={{ padding: '12px 4px', textAlign: 'center', border: '1px solid #cbd5e1' }}>
-              <div style={{ fontWeight: '900', color: '#16a34a', fontSize: 'clamp(14px, 3.5vw, 18px)' }}>{rank?.rank ? `#${rank.rank}` : '#1'}</div>
-              <div style={{ fontSize: '7.5px', color: '#64748b', fontWeight: '700', marginTop: '2px' }}>Out of {rank?.total_appeared ? Number(rank.total_appeared).toLocaleString() : '2'}</div>
-            </td>
-            <td style={{ padding: '12px 4px', textAlign: 'center', border: '1px solid #cbd5e1' }}>
-              <div style={{ fontWeight: '900', color: '#0284c7', fontSize: 'clamp(14px, 3.5vw, 18px)' }}>{rank?.percentile ? `${Number(rank.percentile).toFixed(1)}%` : '100.0%'}</div>
-              <div style={{ fontSize: '7.5px', color: '#64748b', fontWeight: '700', marginTop: '2px' }}>Top {rank?.percentile ? (100 - rank.percentile).toFixed(1) : '0.0'}%</div>
-            </td>
-            <td style={{ padding: '12px 4px', textAlign: 'center', border: '1px solid #cbd5e1' }}>
-              <div style={{ fontWeight: '900', color: '#d97706', fontSize: 'clamp(14px, 3.5vw, 18px)' }}>{totalMarks}</div>
-              <div style={{ fontSize: '7.5px', color: '#64748b', fontWeight: '700', marginTop: '2px' }}>Max: {maxMarks}</div>
-            </td>
-            <td style={{ padding: '12px 4px', textAlign: 'center', border: '1px solid #cbd5e1' }}>
-              <div style={{ fontWeight: '900', color: '#9333ea', fontSize: 'clamp(14px, 3.5vw, 18px)' }}>{accuracy}%</div>
-              <div style={{ fontSize: '7.5px', color: '#64748b', fontWeight: '700', marginTop: '2px' }}>{correct} / {totalAttempted} Correct</div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      {/* ── CLEAN STATS ROW ────────────────────────────────────────────────── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
+        gap: '8px',
+        padding: '8px 12px 16px 12px',
+        background: '#ffffff',
+      }}>
+        {/* Stat 1: LIVE RANK */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '8px', background: '#f8fafc', borderRadius: '8px' }}>
+          <div style={{ fontSize: '22px', marginBottom: '4px' }}>🏆</div>
+          <div style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', fontWeight: '900', color: '#16a34a', lineHeight: 1 }}>{rank?.rank ? `#${rank.rank}` : '#1'}</div>
+          <div style={{ fontSize: '9px', fontWeight: '800', color: '#14532d', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Live Rank</div>
+          <div style={{ fontSize: '8px', color: '#64748b', fontWeight: '700', marginTop: '3px' }}>Of {rank?.total_appeared ? Number(rank.total_appeared).toLocaleString() : '2'}</div>
+        </div>
+        
+        {/* Stat 2: PERCENTILE */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '8px', background: '#f8fafc', borderRadius: '8px' }}>
+          <div style={{ fontSize: '22px', marginBottom: '4px' }}>🎯</div>
+          <div style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', fontWeight: '900', color: '#0284c7', lineHeight: 1 }}>{rank?.percentile ? `${Number(rank.percentile).toFixed(1)}%` : '100.0%'}</div>
+          <div style={{ fontSize: '9px', fontWeight: '800', color: '#0c4a6e', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Percentile</div>
+          <div style={{ fontSize: '8px', color: '#64748b', fontWeight: '700', marginTop: '3px' }}>Top {rank?.percentile ? (100 - rank.percentile).toFixed(1) : '0.0'}%</div>
+        </div>
+
+        {/* Stat 3: OFFICIAL SCORE */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '8px', background: '#f8fafc', borderRadius: '8px' }}>
+          <div style={{ fontSize: '22px', marginBottom: '4px' }}>🛡️</div>
+          <div style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', fontWeight: '900', color: '#d97706', lineHeight: 1 }}>{totalMarks}</div>
+          <div style={{ fontSize: '9px', fontWeight: '800', color: '#78350f', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Official Score</div>
+          <div style={{ fontSize: '8px', color: '#64748b', fontWeight: '700', marginTop: '3px' }}>Out of {maxMarks}</div>
+        </div>
+
+        {/* Stat 4: ACCURACY RATE */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '8px', background: '#f8fafc', borderRadius: '8px' }}>
+          <div style={{ fontSize: '22px', marginBottom: '4px' }}>✅</div>
+          <div style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', fontWeight: '900', color: '#9333ea', lineHeight: 1 }}>{accuracy}%</div>
+          <div style={{ fontSize: '9px', fontWeight: '800', color: '#581c87', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Accuracy Rate</div>
+          <div style={{ fontSize: '8px', color: '#64748b', fontWeight: '700', marginTop: '3px' }}>{correct} / {totalAttempted} Correct</div>
+        </div>
+      </div>
 
       {/* ── FOOTER TABLE ────────────────────────────────── */}
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'clamp(8px, 2.2vw, 11px)' }}>
