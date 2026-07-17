@@ -54,10 +54,10 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
       {/* ── TOP ACCENT HEADER GRADIENT ─────────────────────────────────── */}
       <div style={{
         background: headerGrad,
-        padding: '12px 16px',
+        padding: '10px 12px',
         display: 'flex',
         flexWrap: 'wrap',
-        gap: '12px',
+        gap: '8px',
         alignItems: 'center',
         justifyContent: 'space-between',
         color: '#ffffff',
@@ -117,9 +117,9 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
       {/* ── CANDIDATE DETAILS GRID ─────────────────────────────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '16px',
-        padding: '12px 16px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+        gap: '8px',
+        padding: '8px 12px',
         background: '#ffffff',
         borderBottom: `1px solid ${BORDER}`,
       }}>
@@ -241,18 +241,18 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
       </div>
 
       {/* ── SECTION TABLE ──────────────────────────────────────────────── */}
-      <div style={{ padding: '12px 16px', background: '#ffffff' }}>
-        <div style={{ borderRadius: '12px', overflowX: 'auto', border: '1px solid #e2e8f0' }}>
-          <table style={{ width: '100%', minWidth: '450px', borderCollapse: 'collapse', fontSize: '12px' }}>
+      <div style={{ padding: '8px 10px', background: '#ffffff' }}>
+        <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+          <table style={{ width: '100%', tableLayout: 'auto', borderCollapse: 'collapse', fontSize: 'clamp(9px, 2.5vw, 12px)' }}>
             <thead>
               <tr style={{ background: '#1e1b4b', color: '#ffffff' }}>
-                {['SECTION', 'TOTAL QS', 'SKIPPED', 'CORRECT', 'WRONG', 'NET MARKS'].map((h, i) => (
+                {['SECTION', 'TOTAL', 'SKIP', 'RIGHT', 'WRONG', 'SCORE'].map((h, i) => (
                   <th key={i} style={{
-                    padding: '10px 14px',
+                    padding: '8px 4px',
                     fontWeight: '800',
                     textAlign: i === 0 ? 'left' : 'center',
-                    fontSize: '10px',
-                    letterSpacing: '0.5px',
+                    fontSize: 'clamp(7.5px, 2vw, 10px)',
+                    letterSpacing: '0.2px',
                   }}>{h}</th>
                 ))}
               </tr>
@@ -293,38 +293,38 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
 
                 return (
                   <tr key={i} style={{ borderBottom: '1px solid #f1f5f9', background: '#ffffff' }}>
-                    <td style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <td style={{ padding: '8px 4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <div style={{
-                        width: '24px', height: '24px', borderRadius: '50%',
+                        width: '20px', height: '20px', borderRadius: '50%', flexShrink: 0,
                         background: iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center'
                       }}>{iconSvg}</div>
-                      <span style={{ fontWeight: '700', color: TEXT_DARK }}>{sec.name || `Section ${i + 1}`}</span>
+                      <span style={{ fontWeight: '700', color: TEXT_DARK, fontSize: 'clamp(8.5px, 2.5vw, 12px)', whiteSpace: 'normal', wordBreak: 'break-word' }}>{sec.name || `Section ${i + 1}`}</span>
                     </td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: '700', color: TEXT_MAIN }}>
+                    <td style={{ padding: '8px 4px', textAlign: 'center', fontWeight: '700', color: TEXT_MAIN }}>
                       {sec.total ?? '—'}
                     </td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: '700', color: TEXT_MUTED }}>
+                    <td style={{ padding: '8px 4px', textAlign: 'center', fontWeight: '700', color: TEXT_MUTED }}>
                       {sec.na ?? '—'}
                     </td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#16a34a', fontWeight: '800' }}>
+                    <td style={{ padding: '8px 4px', textAlign: 'center', color: '#16a34a', fontWeight: '800' }}>
                       {sec.right ?? sec.correct ?? '—'}
                     </td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#dc2626', fontWeight: '800' }}>
+                    <td style={{ padding: '8px 4px', textAlign: 'center', color: '#dc2626', fontWeight: '800' }}>
                       {sec.wrong ?? '—'}
                     </td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#4f46e5', fontWeight: '800' }}>
+                    <td style={{ padding: '8px 4px', textAlign: 'center', color: '#4f46e5', fontWeight: '800' }}>
                       {sec.marks != null ? Number(sec.marks).toFixed(2) : '—'}
                     </td>
                   </tr>
                 );
               }) : (
                 <tr style={{ background: '#ffffff' }}>
-                  <td style={{ padding: '12px 14px', fontWeight: '700', color: TEXT_DARK }}>Overall Performance</td>
-                  <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: '700' }}>{maxMarks}</td>
-                  <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: '700', color: TEXT_MUTED }}>{unattempted}</td>
-                  <td style={{ padding: '12px 14px', textAlign: 'center', color: '#16a34a', fontWeight: '800' }}>{correct}</td>
-                  <td style={{ padding: '12px 14px', textAlign: 'center', color: '#dc2626', fontWeight: '800' }}>{wrong}</td>
-                  <td style={{ padding: '12px 14px', textAlign: 'center', color: '#4f46e5', fontWeight: '800' }}>{totalMarks}</td>
+                  <td style={{ padding: '8px 4px', fontWeight: '700', color: TEXT_DARK, fontSize: 'clamp(8.5px, 2.5vw, 12px)' }}>Overall Performance</td>
+                  <td style={{ padding: '8px 4px', textAlign: 'center', fontWeight: '700' }}>{maxMarks}</td>
+                  <td style={{ padding: '8px 4px', textAlign: 'center', fontWeight: '700', color: TEXT_MUTED }}>{unattempted}</td>
+                  <td style={{ padding: '8px 4px', textAlign: 'center', color: '#16a34a', fontWeight: '800' }}>{correct}</td>
+                  <td style={{ padding: '8px 4px', textAlign: 'center', color: '#dc2626', fontWeight: '800' }}>{wrong}</td>
+                  <td style={{ padding: '8px 4px', textAlign: 'center', color: '#4f46e5', fontWeight: '800' }}>{totalMarks}</td>
                 </tr>
               )}
 
@@ -334,12 +334,12 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
                 borderTop: '2px solid #c084fc',
                 fontWeight: '900',
               }}>
-                <td style={{ padding: '12px 14px', color: '#581c87', letterSpacing: '0.5px', textTransform: 'uppercase', fontWeight: '900' }}>OVERALL TOTAL</td>
-                <td style={{ padding: '12px 14px', textAlign: 'center', color: '#1e1b4b', fontSize: '13px' }}>{totalQs}</td>
-                <td style={{ padding: '12px 14px', textAlign: 'center', color: '#1e1b4b', fontSize: '13px' }}>{totalNA}</td>
-                <td style={{ padding: '12px 14px', textAlign: 'center', color: '#16a34a', fontSize: '13px' }}>{totalRight}</td>
-                <td style={{ padding: '12px 14px', textAlign: 'center', color: '#dc2626', fontSize: '13px' }}>{totalWrong}</td>
-                <td style={{ padding: '12px 14px', textAlign: 'center', color: '#4f46e5', fontSize: '13.5px' }}>{totalMarks}</td>
+                <td style={{ padding: '10px 4px', color: '#581c87', letterSpacing: '0.5px', textTransform: 'uppercase', fontWeight: '900', fontSize: 'clamp(8px, 2.2vw, 11px)' }}>OVERALL TOTAL</td>
+                <td style={{ padding: '10px 4px', textAlign: 'center', color: '#1e1b4b', fontSize: 'clamp(10px, 2.8vw, 13px)' }}>{totalQs}</td>
+                <td style={{ padding: '10px 4px', textAlign: 'center', color: '#1e1b4b', fontSize: 'clamp(10px, 2.8vw, 13px)' }}>{totalNA}</td>
+                <td style={{ padding: '10px 4px', textAlign: 'center', color: '#16a34a', fontSize: 'clamp(10px, 2.8vw, 13px)' }}>{totalRight}</td>
+                <td style={{ padding: '10px 4px', textAlign: 'center', color: '#dc2626', fontSize: 'clamp(10px, 2.8vw, 13px)' }}>{totalWrong}</td>
+                <td style={{ padding: '10px 4px', textAlign: 'center', color: '#4f46e5', fontSize: 'clamp(10px, 2.8vw, 13.5px)' }}>{totalMarks}</td>
               </tr>
             </tbody>
           </table>
@@ -349,9 +349,9 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
       {/* ── 4 STAT CARDS ────────────────────────────────────────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-        gap: '12px',
-        padding: '0 16px 16px 16px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
+        gap: '8px',
+        padding: '0 12px 12px 12px',
         background: '#ffffff',
       }}>
         {/* Card 1: LIVE RANK */}
@@ -454,7 +454,7 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
 
       {/* ── DETAILED VERIFICATION FOOTER ────────────────────────────────── */}
       <div style={{
-        padding: '12px 16px',
+        padding: '10px 12px',
         background: '#f8fafc',
         borderTop: '1px solid #cbd5e1',
         display: 'flex',
