@@ -236,44 +236,116 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
             </tbody>
           </table>
 
-      {/* ── CLEAN STATS ROW ────────────────────────────────────────────────── */}
+      {/* ── PREMIUM STATS ROW WITH GRAPHICS ────────────────────────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
-        gap: '8px',
-        padding: '8px 12px 16px 12px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+        gap: '12px',
+        padding: '12px',
         background: '#ffffff',
       }}>
-        {/* Stat 1: LIVE RANK */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '8px', background: '#f8fafc', borderRadius: '8px' }}>
-          <div style={{ fontSize: '22px', marginBottom: '4px' }}>🏆</div>
-          <div style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', fontWeight: '900', color: '#16a34a', lineHeight: 1 }}>{rank?.rank ? `#${rank.rank}` : '#1'}</div>
-          <div style={{ fontSize: '9px', fontWeight: '800', color: '#14532d', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Live Rank</div>
-          <div style={{ fontSize: '8px', color: '#64748b', fontWeight: '700', marginTop: '3px' }}>Of {rank?.total_appeared ? Number(rank.total_appeared).toLocaleString() : '2'}</div>
-        </div>
-        
-        {/* Stat 2: PERCENTILE */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '8px', background: '#f8fafc', borderRadius: '8px' }}>
-          <div style={{ fontSize: '22px', marginBottom: '4px' }}>🎯</div>
-          <div style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', fontWeight: '900', color: '#0284c7', lineHeight: 1 }}>{rank?.percentile ? `${Number(rank.percentile).toFixed(1)}%` : '100.0%'}</div>
-          <div style={{ fontSize: '9px', fontWeight: '800', color: '#0c4a6e', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Percentile</div>
-          <div style={{ fontSize: '8px', color: '#64748b', fontWeight: '700', marginTop: '3px' }}>Top {rank?.percentile ? (100 - rank.percentile).toFixed(1) : '0.0'}%</div>
+        {/* Card 1: LIVE RANK */}
+        <div style={{
+          position: 'relative', overflow: 'hidden', padding: '12px 14px', borderRadius: '12px',
+          background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+          border: '1px solid rgba(34, 197, 94, 0.2)',
+          boxShadow: '0 4px 15px rgba(22, 163, 74, 0.05)'
+        }}>
+          {/* Bar Chart Background Graphic */}
+          <div style={{ position: 'absolute', right: '12px', bottom: '12px', display: 'flex', alignItems: 'flex-end', gap: '3px', opacity: 0.15, pointerEvents: 'none' }}>
+            <div style={{ width: '6px', height: '14px', background: '#15803d', borderRadius: '2px' }}></div>
+            <div style={{ width: '6px', height: '22px', background: '#15803d', borderRadius: '2px' }}></div>
+            <div style={{ width: '6px', height: '30px', background: '#15803d', borderRadius: '2px' }}></div>
+            <div style={{ width: '6px', height: '42px', background: '#16a34a', borderRadius: '2px' }}></div>
+          </div>
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <div style={{ fontSize: '18px' }}>🏆</div>
+              <div style={{ fontSize: '9px', fontWeight: '800', color: '#166534', letterSpacing: '0.5px' }}>LIVE RANK</div>
+            </div>
+            <div style={{ fontSize: 'clamp(18px, 4vw, 24px)', fontWeight: '900', color: '#14532d', lineHeight: 1 }}>
+              {rank?.rank ? `#${rank.rank}` : '#1'}
+            </div>
+            <div style={{ fontSize: '9px', color: '#15803d', fontWeight: '700', marginTop: '6px' }}>
+              of {rank?.total_appeared ? Number(rank.total_appeared).toLocaleString() : '2'} candidates
+            </div>
+          </div>
         </div>
 
-        {/* Stat 3: OFFICIAL SCORE */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '8px', background: '#f8fafc', borderRadius: '8px' }}>
-          <div style={{ fontSize: '22px', marginBottom: '4px' }}>🛡️</div>
-          <div style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', fontWeight: '900', color: '#d97706', lineHeight: 1 }}>{totalMarks}</div>
-          <div style={{ fontSize: '9px', fontWeight: '800', color: '#78350f', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Official Score</div>
-          <div style={{ fontSize: '8px', color: '#64748b', fontWeight: '700', marginTop: '3px' }}>Out of {maxMarks}</div>
+        {/* Card 2: PERCENTILE */}
+        <div style={{
+          position: 'relative', overflow: 'hidden', padding: '12px 14px', borderRadius: '12px',
+          background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+          border: '1px solid rgba(14, 165, 233, 0.2)',
+          boxShadow: '0 4px 15px rgba(2, 132, 199, 0.05)'
+        }}>
+          {/* Donut Chart Background Graphic */}
+          <svg style={{ position: 'absolute', right: '-8px', top: '50%', transform: 'translateY(-50%)', opacity: 0.1, pointerEvents: 'none' }} width="70" height="70" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.91" fill="none" stroke="#0369a1" strokeWidth="6" />
+            <circle cx="18" cy="18" r="15.91" fill="none" stroke="#0ea5e9" strokeWidth="6" strokeDasharray="100 0" strokeDashoffset="25" />
+          </svg>
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <div style={{ fontSize: '18px' }}>🎯</div>
+              <div style={{ fontSize: '9px', fontWeight: '800', color: '#075985', letterSpacing: '0.5px' }}>PERCENTILE</div>
+            </div>
+            <div style={{ fontSize: 'clamp(18px, 4vw, 24px)', fontWeight: '900', color: '#0c4a6e', lineHeight: 1 }}>
+              {rank?.percentile ? `${Number(rank.percentile).toFixed(1)}%` : '100.0%'}
+            </div>
+            <div style={{ fontSize: '9px', color: '#0369a1', fontWeight: '700', marginTop: '6px' }}>
+              Top {rank?.percentile ? (100 - rank.percentile).toFixed(1) : '0.0'}% scorers
+            </div>
+          </div>
         </div>
 
-        {/* Stat 4: ACCURACY RATE */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '8px', background: '#f8fafc', borderRadius: '8px' }}>
-          <div style={{ fontSize: '22px', marginBottom: '4px' }}>✅</div>
-          <div style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', fontWeight: '900', color: '#9333ea', lineHeight: 1 }}>{accuracy}%</div>
-          <div style={{ fontSize: '9px', fontWeight: '800', color: '#581c87', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Accuracy Rate</div>
-          <div style={{ fontSize: '8px', color: '#64748b', fontWeight: '700', marginTop: '3px' }}>{correct} / {totalAttempted} Correct</div>
+        {/* Card 3: OFFICIAL SCORE */}
+        <div style={{
+          position: 'relative', overflow: 'hidden', padding: '12px 14px', borderRadius: '12px',
+          background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+          border: '1px solid rgba(245, 158, 11, 0.2)',
+          boxShadow: '0 4px 15px rgba(217, 119, 6, 0.05)'
+        }}>
+          {/* Trendline Background Graphic */}
+          <svg style={{ position: 'absolute', bottom: 0, right: 0, opacity: 0.08, width: '100%', height: '45px', pointerEvents: 'none' }} preserveAspectRatio="none" viewBox="0 0 100 20">
+            <path d="M0 20 Q 25 5, 50 12 T 100 0 L 100 20 Z" fill="#b45309" />
+          </svg>
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <div style={{ fontSize: '18px' }}>🛡️</div>
+              <div style={{ fontSize: '9px', fontWeight: '800', color: '#92400e', letterSpacing: '0.5px' }}>OFFICIAL SCORE</div>
+            </div>
+            <div style={{ fontSize: 'clamp(18px, 4vw, 24px)', fontWeight: '900', color: '#78350f', lineHeight: 1 }}>
+              {totalMarks}
+            </div>
+            <div style={{ fontSize: '9px', color: '#b45309', fontWeight: '700', marginTop: '6px' }}>
+              Out of {maxMarks} maximum marks
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: ACCURACY RATE */}
+        <div style={{
+          position: 'relative', overflow: 'hidden', padding: '12px 14px', borderRadius: '12px',
+          background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
+          border: '1px solid rgba(168, 85, 247, 0.2)',
+          boxShadow: '0 4px 15px rgba(147, 51, 234, 0.05)'
+        }}>
+          {/* Progress Bar Graphic */}
+          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '4px', background: 'rgba(168, 85, 247, 0.15)' }}>
+            <div style={{ width: `${accuracy}%`, height: '100%', background: '#9333ea', borderRadius: '0 2px 2px 0' }}></div>
+          </div>
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <div style={{ fontSize: '18px' }}>✅</div>
+              <div style={{ fontSize: '9px', fontWeight: '800', color: '#6b21a8', letterSpacing: '0.5px' }}>ACCURACY RATE</div>
+            </div>
+            <div style={{ fontSize: 'clamp(18px, 4vw, 24px)', fontWeight: '900', color: '#581c87', lineHeight: 1 }}>
+              {accuracy}%
+            </div>
+            <div style={{ fontSize: '9px', color: '#7e22ce', fontWeight: '700', marginTop: '6px' }}>
+              {correct} correct / {totalAttempted} attempted
+            </div>
+          </div>
         </div>
       </div>
 
