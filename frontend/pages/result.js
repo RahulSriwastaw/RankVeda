@@ -254,6 +254,94 @@ const QuestionItem = ({ q, resultId, onUnlock, authUser, balance }) => {
   );
 };
 
+const loadingMessages = [
+  "Analyzing your exam responses...",
+  "Running predictive algorithms...",
+  "Calculating category percentiles...",
+  "Generating official scorecard...",
+  "Just a moment, finalizing results..."
+];
+
+const LoadingScreen = () => {
+  const [msgIndex, setMsgIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMsgIndex((prev) => (prev + 1) % loadingMessages.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-950 text-white overflow-hidden relative">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-[100px] mix-blend-screen animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px] mix-blend-screen animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
+
+      <div className="relative z-10 flex flex-col items-center max-w-md w-full px-6 text-center">
+        <div className="relative w-24 h-24 mb-8">
+          <motion.div
+            className="absolute inset-0 rounded-full border-t-2 border-indigo-500 border-r-2 border-transparent"
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+          />
+          <motion.div
+            className="absolute inset-2 rounded-full border-b-2 border-purple-500 border-l-2 border-transparent"
+            animate={{ rotate: -360 }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+          />
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center text-2xl"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          >
+            📊
+          </motion.div>
+        </div>
+
+        <motion.h2 
+          className="text-2xl font-black mb-3 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          Preparing Your Result
+        </motion.h2>
+
+        <div className="h-6 relative w-full flex justify-center mb-6">
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={msgIndex}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              className="text-gray-400 text-sm font-medium absolute"
+            >
+              {loadingMessages[msgIndex]}
+            </motion.p>
+          </AnimatePresence>
+        </div>
+
+        <div className="w-full bg-gray-800 rounded-full h-1.5 mb-8 overflow-hidden">
+          <motion.div 
+            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+            initial={{ width: "10%" }}
+            animate={{ width: "95%" }}
+            transition={{ duration: 15, ease: "easeOut" }}
+          />
+        </div>
+
+        <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 w-full backdrop-blur-sm">
+          <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">Did You Know?</p>
+          <p className="text-sm text-gray-300 font-medium leading-relaxed">
+            RankVeda's AI engine analyzes millions of data points to predict your normalized score and all-India rank with high precision.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function ResultPage() {
   const router = useRouter();
   const { url, exam } = router.query;
@@ -402,12 +490,7 @@ export default function ResultPage() {
     toast.success('Share text copied!');
   };
 
-  if (loading) return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gray-950">
-      <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-      <p className="text-gray-400 text-sm animate-pulse">Fetching your result...</p>
-    </div>
-  );
+  if (loading) return <LoadingScreen />;
 
   if (!data) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white">
