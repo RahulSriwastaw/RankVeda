@@ -341,23 +341,20 @@ export default function ResultPage() {
         link.click();
         toast.success('✅ Score card downloaded!');
       } else {
-        // Request server-rendered PDF (preserves selectable text and quality)
-        const resultId = data?.result?.id || data?.id;
-        if (!resultId) throw new Error('Result id missing');
-        // Use frontend proxy route to avoid CORS / network issues in dev
-        const axRes = await axios.get(`/api/results/${encodeURIComponent(resultId)}/pdf`, { responseType: 'blob', headers: { Accept: 'application/pdf' } });
-        if (!axRes || !axRes.data) {
-          throw new Error('PDF generation failed on server');
-        }
-        const blob = axRes.data;
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `RankVeda_Scorecard_${rollNo}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(url);
+        // Generate PDF on frontend to match UI perfectly
+        const html2canvas = (await import('html2canvas')).default;
+        const { jsPDF } = await import('jspdf');
+        const canvas = await html2canvas(marksheetRef.current, {
+          backgroundColor: '#ffffff', scale: 2, useCORS: true, allowTaint: true
+        });
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'px',
+          format: [canvas.width / 2, canvas.height / 2]
+        });
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
+        pdf.save(`RankVeda_Scorecard_${rollNo}.pdf`);
         toast.success('✅ PDF downloaded!');
       }
     } catch (e) { toast.error('Download failed: ' + e.message); }
