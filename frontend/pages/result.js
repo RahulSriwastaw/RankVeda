@@ -429,9 +429,34 @@ export default function ResultPage() {
         link.click();
         toast.success('✅ Score card downloaded!');
       } else {
-        // Generate real-text vector PDF using native browser print
-        window.print();
-        toast.success('✅ Please save as PDF in the print dialog.');
+        // Generate high-resolution PDF perfectly sized to the card
+        const html2canvas = (await import('html2canvas')).default;
+        const { jsPDF } = await import('jspdf');
+        
+        // Use a very high scale (4) to ensure text remains crisp when zoomed in
+        const canvas = await html2canvas(marksheetRef.current, {
+          backgroundColor: '#ffffff', 
+          scale: 4, 
+          useCORS: true, 
+          allowTaint: true
+        });
+        
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        
+        // Calculate dimensions in points (px is usually fine for jsPDF but pt is standard)
+        // Divide by 4 because we scaled by 4
+        const pdfWidth = canvas.width / 4;
+        const pdfHeight = canvas.height / 4;
+        
+        const pdf = new jsPDF({
+          orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
+          unit: 'px',
+          format: [pdfWidth, pdfHeight]
+        });
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`RankVeda_Scorecard_${rollNo}.pdf`);
+        toast.success('✅ High-Quality PDF downloaded!');
       }
     } catch (e) { toast.error('Download failed: ' + e.message); }
     finally { setDownloading(false); }
