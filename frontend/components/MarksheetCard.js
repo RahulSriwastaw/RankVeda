@@ -54,8 +54,10 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
       {/* ── TOP ACCENT HEADER GRADIENT ─────────────────────────────────── */}
       <div style={{
         background: headerGrad,
-        padding: '16px 20px',
+        padding: '12px 16px',
         display: 'flex',
+        flexWrap: 'wrap',
+        gap: '12px',
         alignItems: 'center',
         justifyContent: 'space-between',
         color: '#ffffff',
@@ -115,9 +117,9 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
       {/* ── CANDIDATE DETAILS GRID ─────────────────────────────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '20px',
-        padding: '16px 20px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '16px',
+        padding: '12px 16px',
         background: '#ffffff',
         borderBottom: `1px solid ${BORDER}`,
       }}>
@@ -239,9 +241,9 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
       </div>
 
       {/* ── SECTION TABLE ──────────────────────────────────────────────── */}
-      <div style={{ padding: '16px 20px', background: '#ffffff' }}>
-        <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+      <div style={{ padding: '12px 16px', background: '#ffffff' }}>
+        <div style={{ borderRadius: '12px', overflowX: 'auto', border: '1px solid #e2e8f0' }}>
+          <table style={{ width: '100%', minWidth: '450px', borderCollapse: 'collapse', fontSize: '12px' }}>
             <thead>
               <tr style={{ background: '#1e1b4b', color: '#ffffff' }}>
                 {['SECTION', 'TOTAL QS', 'SKIPPED', 'CORRECT', 'WRONG', 'NET MARKS'].map((h, i) => (
@@ -347,9 +349,9 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
       {/* ── 4 STAT CARDS ────────────────────────────────────────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr 1fr 1fr',
-        gap: '14px',
-        padding: '0 20px 16px 20px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+        gap: '12px',
+        padding: '0 16px 16px 16px',
         background: '#ffffff',
       }}>
         {/* Card 1: LIVE RANK */}
@@ -452,7 +454,7 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
 
       {/* ── DETAILED VERIFICATION FOOTER ────────────────────────────────── */}
       <div style={{
-        padding: '16px 20px',
+        padding: '12px 16px',
         background: '#f8fafc',
         borderTop: '1px solid #cbd5e1',
         display: 'flex',
