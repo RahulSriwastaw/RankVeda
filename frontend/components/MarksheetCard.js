@@ -117,8 +117,8 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
       {/* ── CANDIDATE DETAILS GRID ─────────────────────────────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-        gap: '8px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+        gap: 'clamp(4px, 1vw, 12px)',
         padding: '8px 12px',
         background: '#ffffff',
         borderBottom: `1px solid ${BORDER}`,
@@ -172,17 +172,17 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
             },
           ].map((item, idx) => (
             <div key={idx} style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px',
               padding: '6px 0', borderBottom: idx < 3 ? '1px solid #f1f5f9' : 'none'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                 <div style={{
-                  width: '28px', height: '28px', borderRadius: '50%',
+                  width: 'clamp(22px, 6vw, 28px)', height: 'clamp(22px, 6vw, 28px)', borderRadius: '50%', flexShrink: 0,
                   background: purpleCircle, display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>{item.icon}</div>
-                <span style={{ fontSize: '11px', fontWeight: '700', color: TEXT_MUTED }}>{item.label}</span>
+                <span style={{ fontSize: 'clamp(8.5px, 2vw, 11px)', fontWeight: '700', color: TEXT_MUTED }}>{item.label}</span>
               </div>
-              <span style={{ fontSize: '12px', fontWeight: '800', color: TEXT_DARK, fontFamily: idx >= 1 && idx <= 2 ? 'monospace' : 'inherit' }}>{item.value}</span>
+              <span style={{ fontSize: 'clamp(9.5px, 2.4vw, 12px)', fontWeight: '800', color: TEXT_DARK, textAlign: 'right', wordBreak: 'break-word', fontFamily: idx >= 1 && idx <= 2 ? 'monospace' : 'inherit' }}>{item.value}</span>
             </div>
           ))}
         </div>
@@ -224,17 +224,17 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
             },
           ].map((item, idx) => (
             <div key={idx} style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '8px 0', borderBottom: idx < 2 ? '1px solid #f1f5f9' : 'none'
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px',
+              padding: '6px 0', borderBottom: idx < 2 ? '1px solid #f1f5f9' : 'none'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                 <div style={{
-                  width: '28px', height: '28px', borderRadius: '50%',
+                  width: 'clamp(22px, 6vw, 28px)', height: 'clamp(22px, 6vw, 28px)', borderRadius: '50%', flexShrink: 0,
                   background: purpleCircle, display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>{item.icon}</div>
-                <span style={{ fontSize: '11px', fontWeight: '700', color: TEXT_MUTED }}>{item.label}</span>
+                <span style={{ fontSize: 'clamp(8.5px, 2vw, 11px)', fontWeight: '700', color: TEXT_MUTED }}>{item.label}</span>
               </div>
-              <span style={{ fontSize: '12px', fontWeight: '800', color: TEXT_DARK, textAlign: 'right', maxWidth: '180px' }}>{item.value}</span>
+              <span style={{ fontSize: 'clamp(9.5px, 2.4vw, 12px)', fontWeight: '800', color: TEXT_DARK, textAlign: 'right', wordBreak: 'break-word', maxWidth: '65%' }}>{item.value}</span>
             </div>
           ))}
         </div>
