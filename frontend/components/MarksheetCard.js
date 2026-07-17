@@ -54,60 +54,60 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
       {/* ── TOP ACCENT HEADER GRADIENT ─────────────────────────────────── */}
       <div style={{
         background: headerGrad,
-        padding: '10px 12px',
+        padding: 'clamp(6px, 1.5vw, 10px) clamp(8px, 2vw, 12px)',
         display: 'flex',
-        flexWrap: 'wrap',
-        gap: '8px',
+        flexWrap: 'nowrap',
+        gap: 'clamp(4px, 1vw, 8px)',
         alignItems: 'center',
         justifyContent: 'space-between',
         color: '#ffffff',
         position: 'relative',
       }}>
         {/* Left Side: Shield + Verified Badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(6px, 1.5vw, 14px)' }}>
           <div style={{
-            width: '48px', height: '48px', borderRadius: '50%',
+            width: 'clamp(28px, 7vw, 48px)', height: 'clamp(28px, 7vw, 48px)', borderRadius: '50%', flexShrink: 0,
             background: 'rgba(255, 255, 255, 0.15)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             backdropFilter: 'blur(4px)',
           }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg style={{ width: 'clamp(14px, 4vw, 24px)', height: 'clamp(14px, 4vw, 24px)' }} viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               <path d="m9 11 2 2 4-4" />
             </svg>
           </div>
           <div>
-            <div style={{ fontSize: '10px', fontWeight: '800', letterSpacing: '0.8px', color: '#cbd5e1', textTransform: 'uppercase' }}>
-              VERIFIED SCORE & RANK CERTIFICATE
+            <div style={{ fontSize: 'clamp(5.5px, 1.6vw, 10px)', fontWeight: '800', letterSpacing: '0.5px', color: '#cbd5e1', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+              VERIFIED SCORE & RANK
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-              <span style={{ color: '#4ade80', fontSize: '12px' }}>●</span>
-              <span style={{ fontSize: '12px', fontWeight: '700', color: '#4ade80' }}>Digital Verified</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginTop: '1px' }}>
+              <span style={{ color: '#4ade80', fontSize: 'clamp(7px, 2vw, 12px)' }}>●</span>
+              <span style={{ fontSize: 'clamp(7px, 2vw, 12px)', fontWeight: '700', color: '#4ade80', whiteSpace: 'nowrap' }}>Digital Verified</span>
             </div>
           </div>
         </div>
 
         {/* Center: Exam Name */}
-        <div style={{ textAlign: 'center', flex: 1, padding: '0 20px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: '800', margin: 0, letterSpacing: '0.2px', color: '#ffffff', textTransform: 'uppercase' }}>
+        <div style={{ textAlign: 'center', flex: 1, padding: '0 clamp(4px, 1vw, 20px)', minWidth: 0 }}>
+          <h2 style={{ fontSize: 'clamp(7.5px, 2.2vw, 16px)', fontWeight: '900', margin: 0, letterSpacing: '0.2px', color: '#ffffff', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {candidate?.exam_name || 'RRB NTPC UNDERGRADUATE CBT I'}
           </h2>
-          <div style={{ fontSize: '11px', color: '#cbd5e1', marginTop: '3px', fontWeight: '500' }}>
+          <div style={{ fontSize: 'clamp(6px, 1.8vw, 11px)', color: '#cbd5e1', marginTop: '3px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {candidate?.subject || 'RRB NTPC UnderGraduate CBT I'}
           </div>
         </div>
 
         {/* Right Side: Calendar & Verified Date */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255, 255, 255, 0.08)', padding: '8px 12px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(4px, 1vw, 10px)', background: 'rgba(255, 255, 255, 0.08)', padding: 'clamp(4px, 1vw, 8px) clamp(6px, 1.5vw, 12px)', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.15)', flexShrink: 0 }}>
+          <svg style={{ width: 'clamp(12px, 3vw, 18px)', height: 'clamp(12px, 3vw, 18px)' }} viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
             <line x1="16" y1="2" x2="16" y2="6" />
             <line x1="8" y1="2" x2="8" y2="6" />
             <line x1="3" y1="10" x2="21" y2="10" />
           </svg>
           <div style={{ textAlign: 'left' }}>
-            <div style={{ fontSize: '7.5px', fontWeight: '800', color: '#cbd5e1', letterSpacing: '0.5px', textTransform: 'uppercase' }}>VERIFIED ON</div>
-            <div style={{ fontSize: '11px', fontWeight: '800', color: '#ffffff', marginTop: '1px' }}>
+            <div style={{ fontSize: 'clamp(5px, 1.4vw, 7.5px)', fontWeight: '800', color: '#cbd5e1', letterSpacing: '0.5px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>VERIFIED ON</div>
+            <div style={{ fontSize: 'clamp(7px, 1.8vw, 11px)', fontWeight: '800', color: '#ffffff', marginTop: '1px', whiteSpace: 'nowrap' }}>
               {candidate?.test_date ? candidate.test_date : new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
             </div>
           </div>
