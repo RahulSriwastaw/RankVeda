@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import MarksheetCard from '../components/MarksheetCard';
 import Logo from '../components/Logo';
+import Navbar from '../components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaShareAlt, FaMoon, FaSun, FaCoins, FaChevronDown, FaChevronUp,
@@ -129,23 +130,23 @@ const QuestionItem = ({ q, resultId, onUnlock, authUser, balance }) => {
   };
 
   return (
-    <div className={`border-l-4 ${borderMap[status]} rounded-xl bg-white/5 dark:bg-black/20 border border-white/10 dark:border-gray-700/30 overflow-hidden transition`}>
-      <div className="flex items-center justify-between p-3 cursor-pointer select-none" onClick={() => setExpanded(!expanded)}>
+    <div className={`border-l-4 ${borderMap[status]} rounded-xl bg-white border border-slate-200/80 hover:border-slate-300 shadow-xs overflow-hidden transition`}>
+      <div className="flex items-center justify-between p-3.5 cursor-pointer select-none bg-slate-50/50 hover:bg-slate-100/50 transition" onClick={() => setExpanded(!expanded)}>
         <div className="flex items-center gap-3 min-w-0">
-          <span className="text-xs font-bold text-gray-500 w-8 shrink-0">Q{q.question_no}</span>
-          <span className="text-sm text-gray-300 truncate" dangerouslySetInnerHTML={{ __html: q.question_text || `Question ${q.question_no}` }}></span>
+          <span className="text-xs font-bold text-slate-500 bg-slate-200/70 px-2 py-1 rounded-md w-9 text-center shrink-0">Q{q.question_no}</span>
+          <span className="text-sm font-semibold text-slate-800 truncate" dangerouslySetInnerHTML={{ __html: q.question_text || `Question ${q.question_no}` }}></span>
         </div>
         <div className="flex items-center gap-2 shrink-0 ml-2">
-          <span className={`text-xs px-2 py-0.5 rounded-full text-white font-bold ${badge[status]}`}>
-            {status === 'correct' ? '+1' : status === 'wrong' ? '-0.33' : '0'}
+          <span className={`text-xs px-2.5 py-0.5 rounded-full text-white font-bold shadow-xs ${badge[status]}`}>
+            {status === 'correct' ? '+1.0' : status === 'wrong' ? '-0.33' : '0.0'}
           </span>
-          {expanded ? <FaChevronUp className="text-gray-500 text-xs" /> : <FaChevronDown className="text-gray-500 text-xs" />}
+          {expanded ? <FaChevronUp className="text-slate-400 text-xs" /> : <FaChevronDown className="text-slate-400 text-xs" />}
         </div>
       </div>
       <AnimatePresence>
         {expanded && (
           <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
-            <div className="px-4 pb-3 pt-3 border-t border-white/10 text-sm space-y-3">
+            <div className="px-4 pb-4 pt-3 border-t border-slate-100 text-sm space-y-3.5">
               {/* Options rendering */}
               <div className="space-y-2 mt-2">
                 {['a', 'b', 'c', 'd'].map(opt => {
@@ -154,40 +155,39 @@ const QuestionItem = ({ q, resultId, onUnlock, authUser, balance }) => {
                   if (!optText) return null;
                   const isOptCorrect = q.parsed_payload?.correct_option_text === optText;
                   const isOptSelected = q.student_option_text === optText;
-                  let optStyle = 'border-gray-700 bg-gray-800/30 text-gray-300';
-                  if (isOptCorrect) optStyle = 'border-green-500 bg-green-900/30 text-green-300 font-bold';
-                  else if (isOptSelected && !isOptCorrect) optStyle = 'border-red-500 bg-red-900/30 text-red-300';
+                  let optStyle = 'border-slate-200 bg-slate-50/60 text-slate-700';
+                  if (isOptCorrect) optStyle = 'border-emerald-500 bg-emerald-50 text-emerald-800 font-bold shadow-xs';
+                  else if (isOptSelected && !isOptCorrect) optStyle = 'border-rose-500 bg-rose-50 text-rose-800';
                   
                   return (
-                    <div key={opt} className={`p-2 border rounded-lg ${optStyle} flex gap-2 items-start`}>
-                      <span className="font-medium shrink-0 uppercase">{opt}.</span>
-                      <span dangerouslySetInnerHTML={{ __html: optText }}></span>
-                      {isOptSelected && <span className="ml-auto text-xs opacity-70">(Your Answer)</span>}
-                      {isOptCorrect && <span className="ml-auto text-xs opacity-70">(Correct Answer)</span>}
+                    <div key={opt} className={`p-2.5 border rounded-xl ${optStyle} flex gap-2.5 items-start text-xs sm:text-sm`}>
+                      <span className="font-extrabold shrink-0 uppercase w-5 text-center">{opt}.</span>
+                      <span dangerouslySetInnerHTML={{ __html: optText }} className="flex-1"></span>
+                      {isOptSelected && <span className="ml-auto text-[11px] font-bold uppercase tracking-wider text-rose-600 bg-rose-100/80 px-2 py-0.5 rounded-md">(Your Answer)</span>}
+                      {isOptCorrect && <span className="ml-auto text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md">(Correct Answer)</span>}
                     </div>
                   );
                 })}
               </div>
 
-              <div className="pt-2 border-t border-gray-700/50 flex flex-wrap gap-4 text-xs text-gray-400">
-                 <p><span className="text-gray-500">Marks:</span> <span className="font-bold">{q.marks_awarded}</span></p>
-                 <p><span className="text-gray-500">Question ID:</span> <span>{q.question_id_html || 'N/A'}</span></p>
-                 <p><span className="text-gray-500">Chosen Option ID:</span> <span>{q.option_id || 'N/A'}</span></p>
+              <div className="pt-2.5 border-t border-slate-100 flex flex-wrap gap-4 text-xs font-medium text-slate-500">
+                 <p><span className="text-slate-400">Marks:</span> <span className="font-bold text-slate-700">{q.marks_awarded}</span></p>
+                 <p><span className="text-slate-400">Question ID:</span> <span className="font-mono text-slate-600">{q.question_id_html || 'N/A'}</span></p>
+                 <p><span className="text-slate-400">Chosen Option ID:</span> <span className="font-mono text-slate-600">{q.option_id || 'N/A'}</span></p>
               </div>
               
               {/* AI Solution Section */}
-              <div className="mt-2 pt-2 border-t border-white/10">
+              <div className="mt-3 pt-3 border-t border-slate-100">
                 {isUnlocked ? (
-                  <div className="p-3 bg-indigo-900/40 rounded-xl border border-indigo-700/30">
-                    <div className="flex justify-between items-center mb-2">
-                      <p className="font-bold text-indigo-400 flex items-center gap-2">
-                        🤖 AI Solutions {solutions.length > 0 && <span className="text-xs text-indigo-300">({solIndex + 1}/{solutions.length})</span>}
+                  <div className="p-4 bg-indigo-50/70 rounded-2xl border border-indigo-100">
+                    <div className="flex justify-between items-center mb-2.5">
+                      <p className="font-extrabold text-indigo-950 flex items-center gap-2 text-sm">
+                        🤖 AI Detailed Solution {solutions.length > 0 && <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-md">({solIndex + 1}/{solutions.length})</span>}
                       </p>
                       
-                      {/* Only allow generation if total saved solutions < 5 and we haven't hit the limit of temps */}
                       {solutions.filter(s => !s.is_temporary).length < 5 && (
-                        <button onClick={handleGenerate} disabled={loading} className="text-xs bg-indigo-600 hover:bg-indigo-500 px-2 py-1 rounded text-white disabled:opacity-50">
-                          {loading ? '...' : '+ Generate Your Own (5 pts)'}
+                        <button onClick={handleGenerate} disabled={loading} className="text-xs font-bold bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-xl text-white shadow-sm transition disabled:opacity-50">
+                          {loading ? 'Generating...' : '+ Generate New Solution (5 pts)'}
                         </button>
                       )}
                     </div>
@@ -196,34 +196,36 @@ const QuestionItem = ({ q, resultId, onUnlock, authUser, balance }) => {
                       <div className="relative mt-3">
                         {solutions.length > 1 && (
                           <>
-                            <button onClick={() => setSolIndex(prev => Math.max(0, prev - 1))} disabled={solIndex === 0} className="absolute left-[-10px] top-1/2 -translate-y-1/2 p-1.5 bg-black/50 text-white rounded-full disabled:opacity-0 hover:bg-black/80 transition z-10">
+                            <button onClick={() => setSolIndex(prev => Math.max(0, prev - 1))} disabled={solIndex === 0} className="absolute left-[-10px] top-1/2 -translate-y-1/2 p-1.5 bg-slate-900 text-white rounded-full disabled:opacity-0 hover:bg-indigo-900 transition shadow-md z-10">
                               <FaChevronLeft className="text-xs" />
                             </button>
-                            <button onClick={() => setSolIndex(prev => Math.min(solutions.length - 1, prev + 1))} disabled={solIndex === solutions.length - 1} className="absolute right-[-10px] top-1/2 -translate-y-1/2 p-1.5 bg-black/50 text-white rounded-full disabled:opacity-0 hover:bg-black/80 transition z-10">
+                            <button onClick={() => setSolIndex(prev => Math.min(solutions.length - 1, prev + 1))} disabled={solIndex === solutions.length - 1} className="absolute right-[-10px] top-1/2 -translate-y-1/2 p-1.5 bg-slate-900 text-white rounded-full disabled:opacity-0 hover:bg-indigo-900 transition shadow-md z-10">
                               <FaChevronRight className="text-xs" />
                             </button>
                           </>
                         )}
                         
-                        <div className="px-6 min-h-[60px]">
+                        <div className="px-4 py-2 min-h-[60px]">
                           {solutions[solIndex].is_temporary && (
-                            <div className="mb-2 inline-block bg-yellow-600/30 text-yellow-300 text-[10px] px-2 py-0.5 rounded border border-yellow-600/50 uppercase font-bold">
-                              Temporary Preview
+                            <div className="mb-2 inline-block bg-amber-500/20 text-amber-800 text-[10px] px-2.5 py-0.5 rounded-md border border-amber-300 uppercase font-extrabold tracking-wider">
+                              Temporary AI Preview
                             </div>
                           )}
-                          <p className="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">{solutions[solIndex].explanation}</p>
+                          <p className="text-slate-700 text-sm whitespace-pre-wrap leading-relaxed font-medium">{solutions[solIndex].explanation}</p>
                           {solutions[solIndex].why_wrong && (
-                            <p className="mt-2 text-orange-300 text-xs"><span className="font-medium">Insights:</span> {solutions[solIndex].why_wrong}</p>
+                            <div className="mt-3 p-2.5 bg-amber-50 rounded-xl border border-amber-200/60 text-amber-900 text-xs font-medium">
+                              <span className="font-bold uppercase tracking-wide text-amber-700">Exam Insights:</span> {solutions[solIndex].why_wrong}
+                            </div>
                           )}
-                          <div className="mt-3 flex justify-between items-center">
-                             <div className="text-xs text-gray-500">By: {solutions[solIndex].user_name || 'AI'}</div>
+                          <div className="mt-4 pt-3 border-t border-indigo-100 flex justify-between items-center">
+                             <div className="text-xs font-semibold text-slate-500">Author: <strong className="text-indigo-900">{solutions[solIndex].user_name || 'RankVeda AI Engine'}</strong></div>
                              <div className="flex gap-2 items-center">
                                {solutions[solIndex].is_temporary ? (
-                                  <button onClick={() => handlePublish(solutions[solIndex])} disabled={loading} className="text-xs bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg transition font-medium">
-                                    {loading ? 'Saving...' : 'Save to Public'}
+                                  <button onClick={() => handlePublish(solutions[solIndex])} disabled={loading} className="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl transition font-bold shadow-sm">
+                                    {loading ? 'Saving...' : 'Publish to Question Bank'}
                                   </button>
                                ) : (
-                                  <button onClick={() => handleLike(solutions[solIndex].id)} className="flex items-center gap-1.5 text-xs font-bold text-indigo-300 hover:text-indigo-200 bg-indigo-900/50 hover:bg-indigo-800/50 border border-indigo-700/50 px-3 py-1.5 rounded-full transition">
+                                  <button onClick={() => handleLike(solutions[solIndex].id)} className="flex items-center gap-1.5 text-xs font-bold text-indigo-700 hover:text-indigo-900 bg-white border border-indigo-200 px-3.5 py-1.5 rounded-xl shadow-xs transition">
                                     <FaThumbsUp /> {solutions[solIndex].likes || 0}
                                   </button>
                                )}
@@ -232,15 +234,15 @@ const QuestionItem = ({ q, resultId, onUnlock, authUser, balance }) => {
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center py-4 text-sm text-gray-400">
+                      <div className="text-center py-6 text-sm font-semibold text-slate-400">
                          No public solutions yet. Be the first to generate one!
                       </div>
                     )}
                   </div>
                 ) : (
                   <button onClick={handleUnlock} disabled={loading}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg text-xs transition disabled:opacity-50 flex items-center gap-2">
-                    <FaCoins /> {loading ? 'Unlocking...' : 'Show Solutions (5 pts)'}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm disabled:opacity-50 flex items-center gap-2">
+                    <FaCoins className="text-amber-300" /> {loading ? 'Unlocking Solution...' : 'Show Detailed AI Solution (5 pts)'}
                   </button>
                 )}
               </div>
@@ -492,49 +494,23 @@ export default function ResultPage() {
         <meta name="twitter:title" content={pageTitle} />
       </Head>
 
-      <div className="min-h-screen bg-gray-950 text-white">
-        {/* NAV */}
-        <nav className="sticky top-0 z-50 bg-[#080b24]/95 backdrop-blur-md border-b border-indigo-900/40 px-4 py-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-lg">
-          <Logo size="sm" />
-          <div className="flex items-center gap-2 flex-wrap">
-            {authUser && <span className="text-xs text-gray-400 hidden sm:block">👤 {authUser.name}</span>}
-            <button onClick={handleShare}
-              className="flex items-center gap-1.5 bg-green-700 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
-              <FaShareAlt className="text-xs" /> Share
-            </button>
-            <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition">
-              {theme === 'dark' ? <FaSun className="text-yellow-400 text-sm" /> : <FaMoon className="text-indigo-400 text-sm" />}
-            </button>
-          </div>
-        </nav>
+      <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col justify-between">
+        <div>
+          {/* ── UNIFORM NAVBAR ───────────────────────────────────────────── */}
+          <Navbar user={authUser ? { ...authUser, balance } : null} setUser={setAuthUser} />
 
-        <div className="max-w-6xl mx-auto px-3 py-4 space-y-5">
-
-          {/* STAT CARDS */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {[
-              { icon: FaTrophy, label: 'Score', value: Number(result.score || 0).toFixed(2), color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/30' },
-              { icon: FaTrophy, label: 'Rank', value: `#${rank?.rank ?? result.rank ?? '—'}`, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/30' },
-              { icon: FaPercent, label: 'Percentile', value: `${Number(rank?.percentile ?? result.percentile ?? 0).toFixed(1)}%`, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/30' },
-              { icon: FaCheckCircle, label: 'Correct', value: correctCount, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/30' },
-              { icon: FaTimesCircle, label: 'Wrong', value: wrongCount, color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/30' },
-              { icon: FaBullseye, label: 'Accuracy', value: `${accuracy}%`, color: 'text-cyan-400', bg: 'bg-cyan-500/10 border-cyan-500/30' },
-            ].map(({ icon: Icon, label, value, color, bg }, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-                className={`${bg} border rounded-xl p-2 text-center`}>
-                <Icon className={`${color} text-base mx-auto mb-1`} />
-                <div className={`text-base sm:text-lg font-black ${color}`}>{value}</div>
-                <div className="text-[10px] sm:text-[11px] text-gray-500 mt-0.5">{label}</div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* MARKSHEET CARD — full width */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
-              <h2 className="text-sm sm:text-base font-bold">🎫 Official Score Card</h2>
-              <div className="flex flex-wrap gap-2 items-center">
+          {/* ── BREADCRUMB & PAGE HEADER ─────────────────────────────────── */}
+          <div className="max-w-6xl mx-auto px-4 pt-6 pb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-4 mb-6">
+              <div>
+                <nav className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
+                  <Link href="/" className="hover:text-indigo-600 transition">Home</Link> / <Link href="/exams" className="hover:text-indigo-600 transition">Exams</Link> / <span className="text-slate-600">Official Score & Rank</span>
+                </nav>
+                <h1 className="text-xl sm:text-2xl font-black text-indigo-950 tracking-tight flex items-center gap-2">
+                  <span>📊 Exam Result Analysis & Rank Prediction</span>
+                </h1>
+              </div>
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
                     if (window.history.length > 1) {
@@ -543,115 +519,211 @@ export default function ResultPage() {
                       router.push('/');
                     }
                   }}
-                  className="flex items-center gap-1.5 bg-gray-800 hover:bg-gray-700 text-white px-2.5 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium transition"
+                  className="flex items-center gap-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition"
                 >
-                  <FaChevronLeft className="text-[10px]" /> Check Another
+                  <FaChevronLeft className="text-[10px] text-slate-400" /> Check Another Exam
                 </button>
-                <div className="flex items-center gap-2">
-                  <select value={downloadFormat} onChange={e => setDownloadFormat(e.target.value)}
-                    className="bg-gray-800 border border-gray-700 text-white text-[10px] sm:text-xs rounded-xl px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="pdf">PDF</option>
-                    <option value="image">PNG</option>
-                  </select>
-                  <button onClick={() => handleDownload(downloadFormat)} disabled={downloading}
-                    className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium transition disabled:opacity-50">
-                    <FaDownload className="text-[11px]" /> {downloading ? 'Downloading...' : `Download ${downloadFormat.toUpperCase()}`}
-                  </button>
-                </div>
-                <button onClick={handleShare}
-                  className="flex items-center gap-1.5 bg-gray-700 hover:bg-gray-600 text-white px-2.5 py-1.5 rounded-xl text-[10px] sm:text-xs font-medium transition">
-                  <FaShareAlt className="text-[11px]" /> Share Result
+                <button
+                  onClick={handleShare}
+                  className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition"
+                >
+                  <FaShareAlt className="text-xs" /> Share Result
                 </button>
               </div>
             </div>
-            <div className="w-full shadow-2xl ring-1 ring-white/10 rounded-2xl overflow-hidden">
-              <MarksheetCard ref={marksheetRef} candidate={candidateForCard} score={scoreForCard} rank={rankForCard} />
-            </div>
-          </motion.div>
 
-          {/* CHARTS */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl p-4">
-              <h3 className="font-bold mb-4 text-gray-200">{sections.length > 1 ? '📊 Section-wise Breakdown' : '📊 Overall Breakdown'}</h3>
-              <Bar data={sectionBarData} options={{
-                responsive: true,
-                plugins: { legend: { labels: { color: '#9ca3af', font: { size: 11 } } } },
-                scales: {
-                  y: { beginAtZero: true, ticks: { color: '#6b7280' }, grid: { color: '#1f2937' } },
-                  x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
-                }
-              }} height={120} />
-            </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex flex-col items-center">
-              <h3 className="font-bold mb-4 text-gray-200 self-start">🎯 Attempt Distribution</h3>
-              <div className="w-48 relative">
-                <Doughnut data={donutData} options={{
-                  cutout: '72%',
-                  plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af', font: { size: 10 }, padding: 8 } } }
-                }} />
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <div className="text-2xl font-black text-white">{accuracy}%</div>
-                  <div className="text-xs text-gray-500">Accuracy</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* QUESTION ANALYSIS */}
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-              <h3 className="font-bold text-gray-200">📝 Question Analysis <span className="text-gray-500 font-normal text-sm">({filteredQs.length} questions)</span></h3>
-              <div className="flex gap-1 flex-wrap">
+            <div className="space-y-6">
+              {/* ── 6 STAT CARDS ───────────────────────────────────────────── */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 {[
-                  { key: 'all', label: 'All', active: 'bg-gray-600', inactive: 'bg-gray-800 text-gray-400' },
-                  { key: 'correct', label: '✅ Correct', active: 'bg-green-700 text-white', inactive: 'bg-gray-800 text-gray-400' },
-                  { key: 'wrong', label: '❌ Wrong', active: 'bg-red-700 text-white', inactive: 'bg-gray-800 text-gray-400' },
-                  { key: 'unattempted', label: '⏳ Skipped', active: 'bg-gray-700 text-white', inactive: 'bg-gray-800 text-gray-400' },
-                ].map(f => (
-                  <button key={f.key} onClick={() => setFilter(f.key)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition hover:opacity-90 ${filter === f.key ? f.active : f.inactive}`}>
-                    {f.label}
-                  </button>
+                  { icon: FaTrophy, label: 'Score', value: Number(result.score || 0).toFixed(2), color: 'text-indigo-600', bg: 'bg-indigo-50/80 border-indigo-100' },
+                  { icon: FaTrophy, label: 'Rank', value: `#${rank?.rank ?? result.rank ?? '—'}`, color: 'text-amber-600', bg: 'bg-amber-50/80 border-amber-100' },
+                  { icon: FaPercent, label: 'Percentile', value: `${Number(rank?.percentile ?? result.percentile ?? 0).toFixed(1)}%`, color: 'text-purple-600', bg: 'bg-purple-50/80 border-purple-100' },
+                  { icon: FaCheckCircle, label: 'Correct', value: correctCount, color: 'text-emerald-600', bg: 'bg-emerald-50/80 border-emerald-100' },
+                  { icon: FaTimesCircle, label: 'Wrong', value: wrongCount, color: 'text-rose-600', bg: 'bg-rose-50/80 border-rose-100' },
+                  { icon: FaBullseye, label: 'Accuracy', value: `${accuracy}%`, color: 'text-sky-600', bg: 'bg-sky-50/80 border-sky-100' },
+                ].map(({ icon: Icon, label, value, color, bg }, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="bg-white border border-slate-200/80 rounded-2xl p-3.5 text-center shadow-xs hover:shadow-md transition-all"
+                  >
+                    <div className={`w-9 h-9 rounded-xl ${bg} border flex items-center justify-center mx-auto mb-2`}>
+                      <Icon className={`${color} text-sm`} />
+                    </div>
+                    <div className={`text-lg sm:text-xl font-black ${color} tracking-tight`}>{value}</div>
+                    <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">{label}</div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
-            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-700">
-              {Array.from(new Set(filteredQs.map(q => q.parsed_payload?.section_name || 'Overall'))).map((sectionName) => {
-                const sectionQs = filteredQs.filter(q => (q.parsed_payload?.section_name || 'Overall') === sectionName);
-                if (sectionQs.length === 0) return null;
-                return (
-                  <div key={sectionName} className="space-y-2">
-                    <h4 className="text-indigo-300 font-semibold text-sm bg-gray-800/50 p-2 rounded-lg">{sectionName}</h4>
-                    <div className="space-y-2">
-                      {sectionQs.map((q, idx) => (
-                        <motion.div key={q.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.008 }}>
-                          <QuestionItem q={q} resultId={result.id} onUnlock={(nb) => setBalance(nb)} authUser={authUser} balance={balance} />
-                        </motion.div>
-                      ))}
+
+              {/* ── MARKSHEET CARD SECTION ─────────────────────────────────── */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm font-black shadow-xs shadow-indigo-200">🎫</span>
+                    <div>
+                      <h2 className="text-base sm:text-lg font-black text-indigo-950">Official Score Card</h2>
+                      <p className="text-[11px] font-bold text-slate-400">High-resolution verified certificate matching your official RRB / Exam format</p>
                     </div>
                   </div>
-                );
-              })}
-              {filteredQs.length === 0 && <p className="text-center text-gray-600 py-10 text-sm">No questions in this filter</p>}
-            </div>
-          </div>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={downloadFormat}
+                      onChange={e => setDownloadFormat(e.target.value)}
+                      className="bg-slate-100 border border-slate-200/80 text-slate-700 text-xs font-bold rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                    >
+                      <option value="pdf">PDF Format</option>
+                      <option value="image">PNG Image</option>
+                    </select>
+                    <button
+                      onClick={() => handleDownload(downloadFormat)}
+                      disabled={downloading}
+                      className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition disabled:opacity-50"
+                    >
+                      <FaDownload className="text-xs" /> {downloading ? 'Downloading...' : `Download ${downloadFormat.toUpperCase()}`}
+                    </button>
+                  </div>
+                </div>
+                <div className="w-full shadow-2xl ring-1 ring-slate-900/10 rounded-2xl overflow-hidden bg-[#0a0a1a]">
+                  <MarksheetCard ref={marksheetRef} candidate={candidateForCard} score={scoreForCard} rank={rankForCard} />
+                </div>
+              </motion.div>
 
-          {/* POINTS SECTION */}
-          <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 border border-indigo-700/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <FaCoins className="text-yellow-400" />
-                <span className="font-bold text-gray-200">Your Points Balance</span>
+              {/* ── CHARTS ─────────────────────────────────────────────────── */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-black">📊</span>
+                    <h3 className="font-extrabold text-indigo-950 text-base">{sections.length > 1 ? 'Section-wise Performance Breakdown' : 'Overall Performance Breakdown'}</h3>
+                  </div>
+                  <Bar
+                    data={sectionBarData}
+                    options={{
+                      responsive: true,
+                      plugins: { legend: { labels: { color: '#475569', font: { size: 11, weight: 'bold' } } } },
+                      scales: {
+                        y: { beginAtZero: true, ticks: { color: '#64748b' }, grid: { color: '#f1f5f9' } },
+                        x: { ticks: { color: '#475569', font: { weight: 'bold' } }, grid: { display: false } }
+                      }
+                    }}
+                    height={110}
+                  />
+                </div>
+                <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col items-center justify-between">
+                  <div className="flex items-center gap-2 self-start mb-4">
+                    <span className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-black">🎯</span>
+                    <h3 className="font-extrabold text-indigo-950 text-base">Attempt Distribution</h3>
+                  </div>
+                  <div className="w-44 relative my-auto">
+                    <Doughnut
+                      data={donutData}
+                      options={{
+                        cutout: '74%',
+                        plugins: { legend: { position: 'bottom', labels: { color: '#475569', font: { size: 11, weight: 'bold' }, padding: 12 } } }
+                      }}
+                    />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-6">
+                      <div className="text-2xl font-black text-indigo-950">{accuracy}%</div>
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Accuracy</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="text-4xl font-black text-yellow-400">{balance}</div>
-              <div className="text-xs text-gray-500 mt-1">5 pts per AI solution unlock</div>
-            </div>
-            <Link href="/marketplace" className="bg-purple-700 hover:bg-purple-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-xs sm:text-sm font-medium transition">
-              <FaShoppingBag /> Question Bank
-            </Link>
-          </div>
 
+              {/* ── QUESTION ANALYSIS ──────────────────────────────────────── */}
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 border-b border-slate-100 pb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-black">📝</span>
+                    <h3 className="font-extrabold text-indigo-950 text-base">Detailed Question Analysis <span className="text-slate-400 font-bold text-xs ml-1">({filteredQs.length} questions)</span></h3>
+                  </div>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {[
+                      { key: 'all', label: 'All Questions', active: 'bg-indigo-600 text-white shadow-xs', inactive: 'bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium' },
+                      { key: 'correct', label: '✅ Correct', active: 'bg-emerald-600 text-white shadow-xs', inactive: 'bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium' },
+                      { key: 'wrong', label: '❌ Wrong', active: 'bg-rose-600 text-white shadow-xs', inactive: 'bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium' },
+                      { key: 'unattempted', label: '⏳ Skipped', active: 'bg-slate-700 text-white shadow-xs', inactive: 'bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium' },
+                    ].map(f => (
+                      <button
+                        key={f.key}
+                        onClick={() => setFilter(f.key)}
+                        className={`px-3.5 py-1.5 rounded-xl text-xs transition font-bold ${filter === f.key ? f.active : f.inactive}`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-4 max-h-[650px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200">
+                  {Array.from(new Set(filteredQs.map(q => q.parsed_payload?.section_name || 'Overall'))).map((sectionName) => {
+                    const sectionQs = filteredQs.filter(q => (q.parsed_payload?.section_name || 'Overall') === sectionName);
+                    if (sectionQs.length === 0) return null;
+                    return (
+                      <div key={sectionName} className="space-y-2.5">
+                        <h4 className="text-indigo-900 font-extrabold text-xs uppercase tracking-wider bg-indigo-50/80 border border-indigo-100 px-3.5 py-2 rounded-xl">{sectionName}</h4>
+                        <div className="space-y-2.5">
+                          {sectionQs.map((q, idx) => (
+                            <motion.div key={q.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.008 }}>
+                              <QuestionItem q={q} resultId={result.id} onUnlock={(nb) => setBalance(nb)} authUser={authUser} balance={balance} />
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {filteredQs.length === 0 && <p className="text-center text-slate-400 font-bold py-12 text-sm">No questions match this filter selection.</p>}
+                </div>
+              </div>
+
+              {/* ── POINTS & QUESTION BANK BANNER ──────────────────────────── */}
+              <div className="bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 border border-indigo-800/80 rounded-2xl p-6 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-2xl shrink-0 shadow-inner">
+                    🪙
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-slate-200 text-sm">Your AI Solutions Balance</span>
+                      <span className="text-xs font-black bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-md border border-amber-500/30">Active</span>
+                    </div>
+                    <div className="text-3xl sm:text-4xl font-black text-amber-400 mt-0.5 flex items-baseline gap-1.5">
+                      {balance} <span className="text-sm font-bold text-slate-300">points</span>
+                    </div>
+                    <div className="text-xs text-slate-400 mt-1">Unlock AI solutions for any question at just 5 points each or earn by contributing.</div>
+                  </div>
+                </div>
+                <Link
+                  href="/marketplace"
+                  className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-5 py-3 rounded-xl flex items-center gap-2 text-xs sm:text-sm shadow-lg shadow-amber-500/20 transition shrink-0"
+                >
+                  <FaShoppingBag className="text-sm" /> Explore Question Bank & Points
+                </Link>
+              </div>
+
+            </div>
+          </div>
         </div>
+
+        {/* ── UNIFORM FOOTER ───────────────────────────────────────────── */}
+        <footer className="bg-slate-900 text-slate-400 pt-12 pb-8 px-4 mt-16 border-t border-slate-800">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+            <div className="flex items-center gap-3">
+              <Logo size="sm" />
+              <span className="text-slate-500">| Official Result & Rank Engine</span>
+            </div>
+            <div className="flex items-center gap-6 text-slate-400 font-medium">
+              <Link href="/exams" className="hover:text-white transition">Exams</Link>
+              <Link href="/marketplace" className="hover:text-white transition">Question Bank</Link>
+              <Link href="/#pricing" className="hover:text-white transition">Pricing</Link>
+            </div>
+            <div className="text-slate-500 text-[11px]">
+              © {new Date().getFullYear()} RankVeda. All rights reserved.
+            </div>
+          </div>
+        </footer>
       </div>
     </>
   );
