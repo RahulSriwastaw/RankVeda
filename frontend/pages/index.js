@@ -98,7 +98,7 @@ export default function Home({ exams = [] }) {
   useEffect(() => {
     const fetchCount = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/live-stats?exam=1');
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/live-stats?exam=1`);
         setLiveCount(res.data.totalViews || 0);
       } catch {
         setLiveCount(prev => prev || 24580);

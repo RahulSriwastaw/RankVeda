@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaEye, FaEyeSlash, FaUser, FaEnvelope, FaLock, FaRocket } from 'react-icons/fa';
 import { auth, googleProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from '../utils/firebase';
 
-const API = 'http://localhost:5000';
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function LoginPage() {
   const router = useRouter();

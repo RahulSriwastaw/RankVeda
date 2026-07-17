@@ -52,7 +52,7 @@ const QuestionItem = ({ q, resultId, onUnlock, authUser, balance }) => {
     }
     setLoading(true);
     try {
-      const res = await axios.post(`http://localhost:5000/api/questions/${resultId}/questions/${q.id}/unlock`, { 
+      const res = await axios.post(`${API}/api/questions/${resultId}/questions/${q.id}/unlock`, { 
         user_id: authUser.id 
       });
       setSolutions(res.data.solutions);
@@ -77,7 +77,7 @@ const QuestionItem = ({ q, resultId, onUnlock, authUser, balance }) => {
     }
     setLoading(true);
     try {
-      const res = await axios.post(`http://localhost:5000/api/questions/${resultId}/questions/${q.id}/generate`, { 
+      const res = await axios.post(`${API}/api/questions/${resultId}/questions/${q.id}/generate`, { 
         user_id: authUser.id 
       });
       const tempSol = res.data.solution;
@@ -97,7 +97,7 @@ const QuestionItem = ({ q, resultId, onUnlock, authUser, balance }) => {
     }
     setLoading(true);
     try {
-      const res = await axios.post(`http://localhost:5000/api/questions/${resultId}/questions/${q.id}/publish`, {
+      const res = await axios.post(`${API}/api/questions/${resultId}/questions/${q.id}/publish`, {
         user_id: authUser.id,
         solution: tempSol
       });
@@ -117,7 +117,7 @@ const QuestionItem = ({ q, resultId, onUnlock, authUser, balance }) => {
     // Cannot like temporary solutions
     if (String(solId).startsWith('temp_')) return;
     try {
-      const res = await axios.post(`http://localhost:5000/api/questions/solutions/${solId}/like`, { user_id: authUser?.id || 1 });
+      const res = await axios.post(`${API}/api/questions/solutions/${solId}/like`, { user_id: authUser?.id || 1 });
       setSolutions(prev => {
         const updated = prev.map(s => s.id === solId ? { ...s, likes: res.data.likes } : s);
         return updated.sort((a, b) => (b.likes || 0) - (a.likes || 0));
@@ -279,7 +279,7 @@ export default function ResultPage() {
     if (!url) return;
     const fetchResult = async () => {
       try {
-        const res = await axios.post('http://localhost:5000/api/results/', {
+        const res = await axios.post(`${API}/api/results/`, {
           url: decodeURIComponent(url),
           exam_id: exam || 1
         });
@@ -287,13 +287,13 @@ export default function ResultPage() {
         try {
           const score = res.data?.result?.score;
           if (score !== undefined && score !== null) {
-            const rankRes = await axios.get(`http://localhost:5000/api/results/rank?exam_id=${exam || 1}&score=${score}`);
+            const rankRes = await axios.get(`${API}/api/results/rank?exam_id=${exam || 1}&score=${score}`);
             setRank(rankRes.data);
           }
         } catch {}
         if (authUser && authUser.id) {
           try {
-            const pRes = await axios.get(`http://localhost:5000/api/user/${authUser.id}/points`);
+            const pRes = await axios.get(`${API}/api/user/${authUser.id}/points`);
             setBalance(pRes.data.balance);
           } catch {}
         } else {

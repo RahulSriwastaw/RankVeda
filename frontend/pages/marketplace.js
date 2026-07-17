@@ -9,7 +9,7 @@ import {
 } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 
-const API = 'http://localhost:5000';
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 function useAuth() {
   const [user, setUser] = useState(null);

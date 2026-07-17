@@ -7,7 +7,7 @@ import {
   FaArrowLeft, FaChartLine, FaDownload, FaFilePdf, FaFilter, FaUsers, FaTrophy, FaCalendarAlt, FaBriefcase, FaEdit, FaSave
 } from 'react-icons/fa';
 
-const API = 'http://localhost:5000';
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 function useAuth() {
   const [user, setUser] = useState(null);
