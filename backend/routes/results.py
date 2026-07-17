@@ -48,7 +48,7 @@ def get_result_from_url():
 
         if html:
             print("[API] Parsing HTML...")
-            parsed = parse_result_html(html)
+            parsed = parse_result_html(html, base_url=url if url.startswith('http') else None)
             if parsed and len(parsed.get('questions', [])) > 0:
                 print(f"[API] Parsed {len(parsed['questions'])} questions OK")
             else:

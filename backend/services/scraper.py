@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import json
+import urllib.parse
+import copy
 from datetime import datetime, timezone
 
 def fetch_html(url, use_curl=True):
@@ -106,7 +108,70 @@ def _coerce_float(value):
         return None
 
 
-def parse_result_html(html):
+def _clean_and_resolve_html(element, base_url=None):
+    if not element:
+        return ""
+    element_copy = BeautifulSoup(str(element), 'html.parser')
+    for img in element_copy.find_all('img'):
+        if img.has_attr('src'):
+            src = img['src'].strip()
+            if not src.startswith('http://') and not src.startswith('https://') and not src.startswith('data:'):
+                if base_url:
+                    img['src'] = urllib.parse.urljoin(base_url, src)
+                else:
+                    img['src'] = urllib.parse.urljoin('https://rrb.digialm.com/', src)
+    try:
+        tag = element_copy.find()
+        if tag:
+            html_content = tag.decode_contents().strip()
+        else:
+            html_content = element_copy.decode_contents().strip()
+    except Exception:
+        html_content = element_copy.get_text(separator=' ', strip=True)
+    return html_content
+
+
+def _clean_option_td(td, base_url=None):
+    if not td:
+        return ""
+    td_copy = BeautifulSoup(str(td), 'html.parser')
+    for img in list(td_copy.find_all('img')):
+        if not img:
+            continue
+        src = img.get('src', '')
+        if src is None:
+            src = ''
+        src = src.lower()
+        img_class = img.get('class', [])
+        if not isinstance(img_class, list):
+            img_class = [img_class]
+        if 'tick' in img_class or any(x in src for x in ['tick.png', 'cross.png', 'wrong.png', 'right.png']):
+            img.decompose()
+            
+    for img in td_copy.find_all('img'):
+        if img.has_attr('src'):
+            src = img['src'].strip()
+            if not src.startswith('http://') and not src.startswith('https://') and not src.startswith('data:'):
+                if base_url:
+                    img['src'] = urllib.parse.urljoin(base_url, src)
+                else:
+                    img['src'] = urllib.parse.urljoin('https://rrb.digialm.com/', src)
+    try:
+        tag = td_copy.find()
+        if tag:
+            html_content = tag.decode_contents().strip()
+        else:
+            html_content = td_copy.decode_contents().strip()
+    except Exception:
+        html_content = td_copy.get_text(separator=' ', strip=True)
+        
+    m = re.match(r'^(?:[A-D]|\d+)\s*[\.)]\s*(.*)$', html_content, re.I | re.DOTALL)
+    if m:
+        html_content = m.group(1).strip()
+    return html_content
+
+
+def parse_result_html(html, base_url=None):
     """
     Parse RRB/digialm exam result HTML.
 
@@ -286,12 +351,13 @@ def parse_result_html(html):
         question_row_tbl = q_div.find('table', class_='questionRowTbl')
         if question_row_tbl:
             for td in question_row_tbl.find_all('td', class_='bold'):
-                text = td.get_text(separator=' ', strip=True)
-                if not text:
+                text_check = td.get_text(separator=' ', strip=True)
+                if not text_check:
                     continue
-                if re.match(r'^(Q\.\d+|Ans|Question Type|Question ID|Option \d+ ID|Status|Chosen Option)$', text, re.I):
+                if re.match(r'^(Q\.\d+|Ans|Question Type|Question ID|Option \d+ ID|Status|Chosen Option)$', text_check, re.I):
                     continue
-                question_text = text
+                question_text = _clean_and_resolve_html(td, base_url)
+                question_text = re.sub(r'^Q\.\d+\s*', '', question_text)
                 break
 
         if not question_text:
@@ -299,19 +365,20 @@ def parse_result_html(html):
             if bold_tds:
                 candidate_texts = []
                 for td in bold_tds:
-                    text = td.get_text(separator=' ', strip=True)
-                    if text and re.match(r'^(Q\.|Q\.\d+|Question ID|\d+\.|\d+|Ans)$', text, re.I) is None:
-                        text = re.sub(r'^\d+\.\s*', '', text)
-                        candidate_texts.append(text)
+                    text_check = td.get_text(separator=' ', strip=True)
+                    if text_check and re.match(r'^(Q\.|Q\.\d+|Question ID|\d+\.|\d+|Ans)$', text_check, re.I) is None:
+                        html_text = _clean_and_resolve_html(td, base_url)
+                        html_text = re.sub(r'^\d+\.\s*', '', html_text)
+                        candidate_texts.append(html_text)
                 if candidate_texts:
                     question_text = candidate_texts[0]
         if not question_text:
-            body_text = q_div.get_text(separator=' ', strip=True)
-            if body_text:
-                cleaned = re.sub(r'Question ID\s*\d+', '', body_text)
-                cleaned = re.sub(r'\b(?:[A-D]|1|2|3|4)\s*[\.)]\s*', '', cleaned)
-                cleaned = re.sub(r'\s+', ' ', cleaned).strip()
-                question_text = cleaned or body_text
+            question_text = _clean_and_resolve_html(q_div, base_url)
+            menu_tbl_tag = q_div.find('table', class_='menu-tbl')
+            if menu_tbl_tag:
+                menu_html = _clean_and_resolve_html(menu_tbl_tag, base_url)
+                if menu_html:
+                    question_text = question_text.replace(menu_html, '').strip()
 
         # Question HTML ID from the div itself
         question_id_html = q_div.get('id') or None
@@ -348,7 +415,6 @@ def parse_result_html(html):
             section_name = section_lbl.get_text(strip=True)
             section_id = section_lbl.get('id') or section_name
 
-
         menu_tbl = q_div.find('table', class_='menu-tbl')
         if menu_tbl:
             tds = menu_tbl.find_all('td')
@@ -377,28 +443,32 @@ def parse_result_html(html):
                             student_option = _normalize_option_value(value)
 
         if right_td:
-            text = right_td.get_text(separator=' ', strip=True)
-            opt_num, opt_text = _parse_option_label(text)
-            normalized = _normalize_option_value(opt_num or text)
+            text_check = right_td.get_text(separator=' ', strip=True)
+            opt_num, _ = _parse_option_label(text_check)
+            normalized = _normalize_option_value(opt_num or text_check)
+            
+            opt_html = _clean_option_td(right_td, base_url)
             if normalized:
                 correct_option = normalized
-                correct_option_text = opt_text or text.strip()
+                correct_option_text = opt_html or text_check.strip()
             else:
-                correct_option = text.strip()
-                correct_option_text = text.strip()
+                correct_option = text_check.strip()
+                correct_option_text = opt_html or text_check.strip()
 
         for td in all_option_tds:
-            text = td.get_text(separator=' ', strip=True)
-            opt_num, opt_text = _parse_option_label(text)
-            normalized = _normalize_option_value(opt_num or text)
+            text_check = td.get_text(separator=' ', strip=True)
+            opt_num, _ = _parse_option_label(text_check)
+            normalized = _normalize_option_value(opt_num or text_check)
+            opt_html = _clean_option_td(td, base_url)
+            
             if normalized == '1':
-                option_a_text = opt_text
+                option_a_text = opt_html or text_check.strip()
             elif normalized == '2':
-                option_b_text = opt_text
+                option_b_text = opt_html or text_check.strip()
             elif normalized == '3':
-                option_c_text = opt_text
+                option_c_text = opt_html or text_check.strip()
             elif normalized == '4':
-                option_d_text = opt_text
+                option_d_text = opt_html or text_check.strip()
 
         if student_option == '1':
             student_option_text_raw = option_a_text
@@ -434,6 +504,34 @@ def parse_result_html(html):
 
         total_marks += marks
 
+        # Extract main question image if any img tag exists in the question text block
+        image_url = None
+        option_imgs = []
+        for opt_td in all_option_tds:
+            option_imgs.extend(opt_td.find_all('img'))
+            
+        all_imgs = q_div.find_all('img')
+        question_imgs = [img for img in all_imgs if img not in option_imgs]
+        
+        valid_q_imgs = []
+        for img in question_imgs:
+            src = img.get('src', '').lower()
+            img_class = img.get('class', [])
+            if not isinstance(img_class, list):
+                img_class = [img_class]
+            if 'tick' not in img_class and not any(x in src for x in ['tick.png', 'cross.png', 'wrong.png', 'right.png']):
+                valid_q_imgs.append(img)
+                
+        if valid_q_imgs and valid_q_imgs[0].has_attr('src'):
+            src = valid_q_imgs[0]['src'].strip()
+            if not src.startswith('http://') and not src.startswith('https://') and not src.startswith('data:'):
+                if base_url:
+                    image_url = urllib.parse.urljoin(base_url, src)
+                else:
+                    image_url = urllib.parse.urljoin('https://rrb.digialm.com/', src)
+            else:
+                image_url = src
+
         generic_question_fields = _collect_generic_html_fields(q_div)
         question_data = {
             'qno': qno,
@@ -444,7 +542,7 @@ def parse_result_html(html):
             'raw_question_html': str(q_div),
             'raw_option_html': str(q_div.find('table', class_='menu-tbl') or ''),
             'raw_answer_html': str(q_div.find('td', class_='rightAns') or ''),
-            'image_url': None,
+            'image_url': image_url,
             'audio_url': None,
             'video_url': None,
             'question_type': 'unknown',
