@@ -89,10 +89,10 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
 
         {/* Center: Exam Name */}
         <div style={{ textAlign: 'center', flex: 1, padding: '0 clamp(4px, 1vw, 20px)', minWidth: 0 }}>
-          <h2 style={{ fontSize: 'clamp(7.5px, 2.2vw, 16px)', fontWeight: '900', margin: 0, letterSpacing: '0.2px', color: '#ffffff', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <h2 style={{ fontSize: 'clamp(7.5px, 2.2vw, 16px)', lineHeight: 1.4, paddingBottom: '2px', fontWeight: '900', margin: 0, letterSpacing: '0.2px', color: '#ffffff', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {candidate?.exam_name || 'RRB NTPC UNDERGRADUATE CBT I'}
           </h2>
-          <div style={{ fontSize: 'clamp(6px, 1.8vw, 11px)', color: '#cbd5e1', marginTop: '3px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <div style={{ fontSize: 'clamp(6px, 1.8vw, 11px)', lineHeight: 1.4, paddingBottom: '2px', color: '#cbd5e1', marginTop: '3px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {candidate?.subject || 'RRB NTPC UnderGraduate CBT I'}
           </div>
         </div>
