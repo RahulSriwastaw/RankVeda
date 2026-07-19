@@ -688,9 +688,14 @@ export default function ResultPage() {
       const sn = q.parsed_payload?.section_name || 'Overall';
       if (!groups[sn]) groups[sn] = { name: sn, total: 0, na: 0, right: 0, wrong: 0, marks: 0 };
       groups[sn].total++;
-      if (q.status === 'correct') { groups[sn].right++; groups[sn].marks = +(groups[sn].marks + 1).toFixed(3); }
-      else if (q.status === 'wrong') { groups[sn].wrong++; groups[sn].marks = +(groups[sn].marks - 1/3).toFixed(3); }
+      if (q.status === 'correct') { groups[sn].right++; }
+      else if (q.status === 'wrong') { groups[sn].wrong++; }
       else groups[sn].na++;
+    });
+    Object.values(groups).forEach(g => {
+      const rawMarks = g.right * 1.0 - g.wrong / 3.0;
+      const factor = 1000;
+      g.marks = rawMarks >= 0 ? Math.floor(rawMarks * factor) / factor : Math.ceil(rawMarks * factor) / factor;
     });
     return Object.values(groups);
   };
@@ -938,7 +943,7 @@ export default function ResultPage() {
               {/* ── 6 STAT CARDS ───────────────────────────────────────────── */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 {[
-                  { icon: FaTrophy, label: 'Score', value: Number(result.score || 0).toFixed(3), color: 'text-indigo-600', bg: 'bg-indigo-50/80 border-indigo-100' },
+                  { icon: FaTrophy, label: 'Score', value: (() => { const num = Number(result.score || 0); const factor = 1000; const truncated = num >= 0 ? Math.floor(num * factor) / factor : Math.ceil(num * factor) / factor; return truncated.toFixed(3); })(), color: 'text-indigo-600', bg: 'bg-indigo-50/80 border-indigo-100' },
                   { icon: FaTrophy, label: 'Rank', value: `#${rank?.rank ?? result.rank ?? '—'}`, color: 'text-amber-600', bg: 'bg-amber-50/80 border-amber-100' },
                   { icon: FaPercent, label: 'Percentile', value: `${Number(rank?.percentile ?? result.percentile ?? 0).toFixed(1)}%`, color: 'text-purple-600', bg: 'bg-purple-50/80 border-purple-100' },
                   { icon: FaCheckCircle, label: 'Correct', value: correctCount, color: 'text-emerald-600', bg: 'bg-emerald-50/80 border-emerald-100' },

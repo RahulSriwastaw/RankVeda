@@ -108,6 +108,17 @@ def _coerce_float(value):
         return None
 
 
+def truncate_float(val, decimals=3):
+    if val is None:
+        return 0.0
+    factor = 10 ** decimals
+    import math
+    if val >= 0:
+        return math.floor(val * factor) / factor
+    else:
+        return math.ceil(val * factor) / factor
+
+
 def _clean_and_resolve_html(element, base_url=None):
     if not element:
         return ""
@@ -247,7 +258,7 @@ def parse_result_html(html, base_url=None):
             elif 'percentile' in key:
                 percentile_value = _coerce_float(val)
                 if percentile_value is not None:
-                    result['percentile'] = round(percentile_value, 2)
+                    result['percentile'] = truncate_float(percentile_value, 3)
             elif 'categoryrank' in key:
                 category_rank_value = _coerce_int(val)
                 if category_rank_value is not None:
@@ -255,7 +266,7 @@ def parse_result_html(html, base_url=None):
             elif 'score' in key or 'marksobtained' in key or 'totalmarks' in key:
                 score_value = _coerce_float(val)
                 if score_value is not None:
-                    result['score'] = round(score_value, 3)
+                    result['score'] = truncate_float(score_value, 3)
             elif key == 'category':
                 result['category'] = val or result['category']
 
@@ -581,13 +592,13 @@ def parse_result_html(html, base_url=None):
             'correct_answer': correct_option,
             'student_option_text': student_option_text_raw or None,
             'correct_option_text': correct_option_text,
-            'marks': round(marks, 3),
+            'marks': truncate_float(marks, 3),
             'status': status
         }
         result['questions'].append(question_data)
 
     # Calculate final stats
-    result['score'] = round(total_marks, 3)
+    result['score'] = truncate_float(total_marks, 3)
     result['total_correct'] = correct_count
     result['total_wrong'] = wrong_count
     result['total_unattempted'] = unattempted_count
@@ -654,7 +665,7 @@ def parse_result_html(html, base_url=None):
                         'na': sec_na,
                         'right': sec_right,
                         'wrong': sec_wrong,
-                        'marks': round(sec_marks, 3) if sec_marks is not None else None,
+                        'marks': truncate_float(sec_marks, 3) if sec_marks is not None else None,
                     })
             
             if section_summary:
@@ -671,11 +682,11 @@ def parse_result_html(html, base_url=None):
             st = q.get('status', 'unattempted')
             if st == 'correct':
                 section_groups[sname]['right'] += 1
-                section_groups[sname]['marks'] = round(section_groups[sname]['marks'] + 1.0, 3)
+                section_groups[sname]['marks'] = truncate_float(section_groups[sname]['marks'] + 1.0, 3)
             elif st == 'wrong':
                 section_groups[sname]['wrong'] += 1
                 section_groups[sname]['na'] += 0
-                section_groups[sname]['marks'] = round(section_groups[sname]['marks'] - 1/3, 3)
+                section_groups[sname]['marks'] = truncate_float(section_groups[sname]['marks'] - 1/3, 3)
             else:
                 section_groups[sname]['na'] += 1
         section_summary = list(section_groups.values())

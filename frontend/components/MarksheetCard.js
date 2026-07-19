@@ -17,7 +17,14 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
   const totalAttempted = correct + wrong;
   const accuracy = totalAttempted > 0 ? Math.round((correct / totalAttempted) * 100) : 0;
   const maxMarks = score?.max_marks || 100;
-  const totalMarks = score?.total_marks != null ? Number(score.total_marks).toFixed(3) : '—';
+  const truncateTo3DecimalsStr = (val) => {
+    if (val == null || isNaN(val)) return '—';
+    const num = Number(val);
+    const factor = 1000;
+    const truncated = num >= 0 ? Math.floor(num * factor) / factor : Math.ceil(num * factor) / factor;
+    return truncated.toFixed(3);
+  };
+  const totalMarks = truncateTo3DecimalsStr(score?.total_marks);
   const sections = score?.sections || [];
 
   const totalRight = sections.length > 0 ? sections.reduce((s, r) => s + (r.right || r.correct || 0), 0) : correct;
@@ -217,7 +224,7 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
                       {sec.wrong ?? '—'}
                     </td>
                     <td style={{ padding: '8px 4px', textAlign: 'center', color: '#4f46e5', fontWeight: '800' }}>
-                      {sec.marks != null ? Number(sec.marks).toFixed(3) : '—'}
+                      {truncateTo3DecimalsStr(sec.marks)}
                     </td>
                   </tr>
                 );

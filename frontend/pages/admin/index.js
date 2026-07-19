@@ -1223,7 +1223,12 @@ function Results() {
       if (sw && typeof sw === 'object' && Object.keys(sw).length > 0) return Object.entries(sw).map(([name, marks]) => ({ name, marks, total: null, na: null, right: null, wrong: null }));
       if (!qs?.length) return [];
       const groups = {};
-      qs.forEach(q => { const sn = q.parsed_payload?.section_name || 'Overall'; if (!groups[sn]) groups[sn] = { name: sn, total: 0, na: 0, right: 0, wrong: 0, marks: 0 }; groups[sn].total++; if (q.student_answer && q.student_answer === q.correct_answer) { groups[sn].right++; groups[sn].marks = +(groups[sn].marks + 1).toFixed(3); } else if (q.student_answer) { groups[sn].wrong++; groups[sn].marks = +(groups[sn].marks - 1 / 3).toFixed(3); } else groups[sn].na++; });
+      qs.forEach(q => { const sn = q.parsed_payload?.section_name || 'Overall'; if (!groups[sn]) groups[sn] = { name: sn, total: 0, na: 0, right: 0, wrong: 0, marks: 0 }; groups[sn].total++; if (q.student_answer && q.student_answer === q.correct_answer) { groups[sn].right++; } else if (q.student_answer) { groups[sn].wrong++; } else groups[sn].na++; });
+      Object.values(groups).forEach(g => {
+        const rawMarks = g.right * 1.0 - g.wrong / 3.0;
+        const factor = 1000;
+        g.marks = rawMarks >= 0 ? Math.floor(rawMarks * factor) / factor : Math.ceil(rawMarks * factor) / factor;
+      });
       return Object.values(groups);
     })();
 
