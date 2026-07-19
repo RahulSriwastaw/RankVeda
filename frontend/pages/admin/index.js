@@ -1223,7 +1223,7 @@ function Results() {
       if (sw && typeof sw === 'object' && Object.keys(sw).length > 0) return Object.entries(sw).map(([name, marks]) => ({ name, marks, total: null, na: null, right: null, wrong: null }));
       if (!qs?.length) return [];
       const groups = {};
-      qs.forEach(q => { const sn = q.parsed_payload?.section_name || 'Overall'; if (!groups[sn]) groups[sn] = { name: sn, total: 0, na: 0, right: 0, wrong: 0, marks: 0 }; groups[sn].total++; if (q.student_answer && q.student_answer === q.correct_answer) { groups[sn].right++; groups[sn].marks = +(groups[sn].marks + 1).toFixed(2); } else if (q.student_answer) { groups[sn].wrong++; groups[sn].marks = +(groups[sn].marks - 1 / 3).toFixed(2); } else groups[sn].na++; });
+      qs.forEach(q => { const sn = q.parsed_payload?.section_name || 'Overall'; if (!groups[sn]) groups[sn] = { name: sn, total: 0, na: 0, right: 0, wrong: 0, marks: 0 }; groups[sn].total++; if (q.student_answer && q.student_answer === q.correct_answer) { groups[sn].right++; groups[sn].marks = +(groups[sn].marks + 1).toFixed(3); } else if (q.student_answer) { groups[sn].wrong++; groups[sn].marks = +(groups[sn].marks - 1 / 3).toFixed(3); } else groups[sn].na++; });
       return Object.values(groups);
     })();
 
@@ -1272,7 +1272,7 @@ function Results() {
           </div>
           {sections.length > 0 && <div className="card p-4"><h3 className="text-sm font-semibold mb-3 flex items-center gap-2"><FaChartBar className="text-indigo-400" /> Section-wise</h3>
             <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="text-xs text-[rgb(var(--muted-foreground))]"><tr><th className="px-2 py-2 text-left">Section</th><th className="px-2 py-2 text-center">Total</th><th className="px-2 py-2 text-center">Right</th><th className="px-2 py-2 text-center">Wrong</th><th className="px-2 py-2 text-center">Marks</th></tr></thead><tbody>{sections.map((sec, i) => (
-              <tr key={i} className="border-t border-[rgb(var(--border))]"><td className="px-2 py-2 text-xs">{sec.name}</td><td className="px-2 py-2 text-center text-[rgb(var(--muted-foreground))]">{sec.total ?? '--'}</td><td className="px-2 py-2 text-center text-emerald-400 font-semibold">{sec.right ?? '--'}</td><td className="px-2 py-2 text-center text-red-400 font-semibold">{sec.wrong ?? '--'}</td><td className="px-2 py-2 text-center text-indigo-400 font-semibold">{sec.marks != null ? Number(sec.marks).toFixed(2) : '--'}</td></tr>
+              <tr key={i} className="border-t border-[rgb(var(--border))]"><td className="px-2 py-2 text-xs">{sec.name}</td><td className="px-2 py-2 text-center text-[rgb(var(--muted-foreground))]">{sec.total ?? '--'}</td><td className="px-2 py-2 text-center text-emerald-400 font-semibold">{sec.right ?? '--'}</td><td className="px-2 py-2 text-center text-red-400 font-semibold">{sec.wrong ?? '--'}</td><td className="px-2 py-2 text-center text-indigo-400 font-semibold">{sec.marks != null ? Number(sec.marks).toFixed(3) : '--'}</td></tr>
             ))}</tbody></table></div>
           </div>}
         </div>

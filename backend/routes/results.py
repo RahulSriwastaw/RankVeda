@@ -733,7 +733,7 @@ def upload_pdf_result():
             if is_correct:
                 marks_awarded = 1.0
             elif is_wrong:
-                marks_awarded = -0.33
+                marks_awarded = -1/3
 
             q_res = {
                 'question_no': q['question_no'],
@@ -755,8 +755,8 @@ def upload_pdf_result():
             }
             matched_questions.append(q_res)
 
-        score = float(correct_count) - (float(wrong_count) * 0.33)
-        score = round(score, 2)
+        score = float(correct_count) - (float(wrong_count) / 3.0)
+        score = round(score, 3)
 
         roll_number = parsed_data.get('roll_number')
         registration_number = parsed_data.get('registration_number')
