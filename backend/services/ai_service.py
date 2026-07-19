@@ -140,13 +140,27 @@ Return ONLY a valid JSON object with these exact keys:
         )
 
     # Model fallback chain — tries each model in order until one succeeds
-    MODELS = [
-        'gemini-flash-latest',
-        'gemini-3.1-flash-lite',
-        'gemini-flash-lite-latest',
-        'gemini-2.0-flash',
-        'gemini-2.0-flash-lite',
-    ]
+    configured_model = os.getenv('GEMINI_MODEL')
+    if configured_model:
+        MODELS = [configured_model] + [
+            'gemini-3.5-flash',
+            'gemini-flash-latest',
+            'gemini-3.1-flash-lite',
+            'gemini-flash-lite-latest',
+            'gemini-2.0-flash',
+            'gemini-2.0-flash-lite',
+        ]
+        # Remove duplicates while keeping order
+        MODELS = list(dict.fromkeys(MODELS))
+    else:
+        MODELS = [
+            'gemini-3.5-flash',
+            'gemini-flash-latest',
+            'gemini-3.1-flash-lite',
+            'gemini-flash-lite-latest',
+            'gemini-2.0-flash',
+            'gemini-2.0-flash-lite',
+        ]
     headers = {'Content-Type': 'application/json'}
     data = {
         "contents": [{"parts": [{"text": prompt}]}],
@@ -159,6 +173,7 @@ Return ONLY a valid JSON object with these exact keys:
 
     last_error = None
     for model in MODELS:
+        response = None
         url = (
             f"https://generativelanguage.googleapis.com/v1beta/models/"
             f"{model}:generateContent?key={gemini_api_key}"
@@ -223,7 +238,7 @@ Return ONLY a valid JSON object with these exact keys:
         except Exception as e:
             last_error = e
             print(f'[AI] Model {model} error: {e}')
-            if 'response' in locals() and hasattr(response, 'text'):
+            if response is not None and hasattr(response, 'text'):
                 print('Response:', response.text[:300])
             continue
 
@@ -271,25 +286,46 @@ Return ONLY a valid JSON object with these exact keys:
   "notes": "brief notes on what was changed"
 }}"""
 
-    url = (
-        f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{os.getenv('GEMINI_MODEL', 'gemini-2.0-flash')}:generateContent?key={api_key}"
-    )
-    payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 1024}
-    }
-    try:
-        resp = requests.post(url, json=payload, timeout=30)
-        resp.raise_for_status()
-        text_out = resp.json()['candidates'][0]['content']['parts'][0]['text']
-        parsed = _extract_json_payload(text_out)
-        if parsed:
-            return parsed
-        return {'error': 'Could not parse AI response', 'raw': text_out}
-    except Exception as e:
-        print('Gemini AI edit error:', e)
-        return {'error': str(e)}
+    configured_model = os.getenv('GEMINI_MODEL')
+    if configured_model:
+        models_to_try = [configured_model]
+    else:
+        models_to_try = [
+            'gemini-3.5-flash',
+            'gemini-flash-latest',
+            'gemini-3.1-flash-lite',
+            'gemini-flash-lite-latest',
+            'gemini-2.0-flash',
+            'gemini-2.0-flash-lite',
+        ]
+
+    last_error = None
+    for model in models_to_try:
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{model}:generateContent?key={api_key}"
+        )
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"temperature": 0.2, "maxOutputTokens": 1024}
+        }
+        try:
+            resp = requests.post(url, json=payload, timeout=30)
+            if resp.status_code == 429:
+                print(f"[AI Edit] Model {model} rate-limited or quota exceeded (429), trying next model...")
+                continue
+            resp.raise_for_status()
+            text_out = resp.json()['candidates'][0]['content']['parts'][0]['text']
+            parsed = _extract_json_payload(text_out)
+            if parsed:
+                return parsed
+            print(f"[AI Edit] Model {model} returned unparseable JSON, trying next model...")
+        except Exception as e:
+            last_error = e
+            print(f'[AI Edit] Model {model} error:', e)
+            continue
+
+    return {'error': f'Could not complete edit. Last error: {last_error}'}
 
 
 def bulk_ai_edit_questions(questions: list, delay_seconds: float = 1.0) -> list:

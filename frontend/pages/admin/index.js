@@ -9,7 +9,7 @@ import {
   FaChevronLeft, FaChevronRight, FaCog, FaExclamationTriangle,
   FaRobot, FaUserPlus, FaChartBar, FaCheckCircle,
   FaHome, FaChartLine, FaBookOpen, FaMagic, FaRegFileAlt, FaGlobe,
-  FaPen, FaSave
+  FaPen, FaSave, FaExpand, FaCompress
 } from 'react-icons/fa';
 import { cn } from '../../lib/utils';
 import dynamic from 'next/dynamic';
@@ -1791,6 +1791,10 @@ function Blog() {
   // Search filter
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Content Editor extra features
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [editHtml, setEditHtml] = useState(false);
+
   useEffect(() => {
     fetchPosts();
   }, []);
@@ -2159,19 +2163,48 @@ function Blog() {
 
                 <div className="space-y-1.5">
                   <div className="flex justify-between items-center mb-1">
-                    <label className="label text-xs font-bold uppercase tracking-wider text-slate-400">Content Editor (WYSIWYG)</label>
-                    <span className="text-[10px] font-bold text-indigo-600">Rich text enabled</span>
+                    <label className="label text-xs font-bold uppercase tracking-wider text-slate-400">Content Editor</label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setEditHtml(!editHtml)}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg border text-[10px] font-bold transition flex items-center gap-1",
+                          editHtml 
+                            ? "bg-amber-500 border-amber-500 text-white shadow-sm" 
+                            : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white"
+                        )}
+                      >
+                        {editHtml ? '👁️ WYSIWYG Mode' : '💻 HTML Code Mode'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsExpanded(true)}
+                        className="px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 text-[10px] font-bold hover:bg-slate-700 hover:text-white transition flex items-center gap-1"
+                      >
+                        <FaExpand size={9} /> Fullscreen
+                      </button>
+                    </div>
                   </div>
-                  <div className="prose max-w-none">
-                    <ReactQuill
-                      value={content}
-                      onChange={setContent}
-                      modules={quillModules}
-                      formats={quillFormats}
-                      className="bg-white rounded-xl overflow-hidden shadow-sm h-[320px] pb-12"
-                      placeholder="Write your article with formatting..."
-                      theme="snow"
-                    />
+                  <div className={cn(editHtml ? "" : "prose max-w-none")}>
+                    {editHtml ? (
+                      <textarea
+                        value={content}
+                        onChange={e => setContent(e.target.value)}
+                        className="w-full h-[320px] p-4 rounded-xl border border-slate-700 bg-slate-900 text-slate-200 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none shadow-inner"
+                        placeholder="Write raw HTML content..."
+                      />
+                    ) : (
+                      <ReactQuill
+                        value={content}
+                        onChange={setContent}
+                        modules={quillModules}
+                        formats={quillFormats}
+                        className="bg-white rounded-xl overflow-hidden shadow-sm h-[320px] pb-12"
+                        placeholder="Write your article with formatting..."
+                        theme="snow"
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -2430,6 +2463,69 @@ function Blog() {
           </div>
         </form>
       )}
+
+      {/* Fullscreen Editor Modal/Overlay */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-slate-950 flex flex-col p-6 space-y-4"
+          >
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h2 className="text-base font-extrabold text-white flex items-center gap-2">
+                  ✍️ Fullscreen Editor
+                </h2>
+                <p className="text-xs text-slate-400">Editing: <span className="text-indigo-400 font-bold">{title || 'Untitled Article'}</span></p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditHtml(!editHtml)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1.5",
+                    editHtml 
+                      ? "bg-amber-500 border-amber-500 text-white shadow-sm" 
+                      : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white"
+                  )}
+                >
+                  {editHtml ? '👁️ WYSIWYG Mode' : '💻 HTML Code Mode'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsExpanded(false)}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white shadow transition flex items-center gap-1.5"
+                >
+                  <FaCompress size={12} /> Exit Fullscreen
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex-1 min-h-0 relative">
+              {editHtml ? (
+                <textarea
+                  value={content}
+                  onChange={e => setContent(e.target.value)}
+                  className="w-full h-full p-6 rounded-xl border border-slate-700 bg-slate-900 text-slate-200 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none shadow-inner"
+                  placeholder="Write raw HTML content..."
+                />
+              ) : (
+                <ReactQuill
+                  value={content}
+                  onChange={setContent}
+                  modules={quillModules}
+                  formats={quillFormats}
+                  className="bg-white rounded-xl overflow-hidden shadow-sm h-full pb-[48px]"
+                  placeholder="Write your article with formatting..."
+                  theme="snow"
+                />
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

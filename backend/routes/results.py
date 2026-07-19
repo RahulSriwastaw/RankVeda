@@ -4,6 +4,7 @@ from services.scraper import fetch_html, parse_result_html
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 import uuid
+import re
 from flask import render_template, make_response
 import pdfkit
 
@@ -504,3 +505,394 @@ def get_live_rank():
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
+
+# ── PDF Parse and Upload Endpoint ─────────────────────────────────────────────
+
+def parse_pdf_text(text):
+    result = {
+        'candidate_name': None,
+        'registration_number': None,
+        'roll_number': None,
+        'community': None,
+        'test_centre_name': None,
+        'test_date': None,
+        'test_time': None,
+        'subject': None,
+        'questions': []
+    }
+
+    # ── Candidate Info ────────────────────────────────────────────────────────
+    # PDF format: "Registration Number T82401 1 13424" (space in reg number, no colon)
+    # We take just the first token after "Registration Number"
+    reg_match = re.search(r"Registration\s+Number\s*:?\s*(\S+)", text, re.I)
+    if reg_match:
+        result['registration_number'] = reg_match.group(1)
+
+    roll_match = re.search(r"Roll\s+Number\s*:?\s*(\S+)", text, re.I)
+    if roll_match:
+        result['roll_number'] = roll_match.group(1)
+
+    name_match = re.search(r"Candidate\s+Name\s*:?\s*(.+?)(?=\n|Community|Registration|$)", text, re.I)
+    if name_match:
+        result['candidate_name'] = ' '.join(name_match.group(1).strip().split())
+
+    comm_match = re.search(r"Community\s*:?\s*(\S+)", text, re.I)
+    if comm_match:
+        result['community'] = comm_match.group(1).strip()
+
+    # "T est Center Name" — PDF splits "Test" into "T est"
+    center_match = re.search(r"T\s*est\s+C\s*ent(?:er|re)\s+Name\s*:?\s*(.+?)(?=\n|T\s*est\s+Date|$)", text, re.I)
+    if center_match:
+        result['test_centre_name'] = ' '.join(center_match.group(1).strip().split())
+
+    # "T est Date 05/12/2025"
+    date_match = re.search(r"T\s*est\s+Date\s*:?\s*(\d{1,2}/\d{1,2}/\d{4})", text, re.I)
+    if date_match:
+        result['test_date'] = date_match.group(1).strip()
+
+    # "T est T ime 4:30 PM - 6:00 PM"
+    time_match = re.search(r"T\s*est\s+T\s*ime\s*:?\s*(.+?)(?=\n|Subject|$)", text, re.I)
+    if time_match:
+        result['test_time'] = ' '.join(time_match.group(1).strip().split())
+
+    sub_match = re.search(r"Subject\s*:?\s*(.+?)(?=\n|Application|$)", text, re.I)
+    if sub_match:
+        result['subject'] = ' '.join(sub_match.group(1).strip().split())
+
+    # ── Questions ─────────────────────────────────────────────────────────────
+    # Split on "Question ID :" — each segment starts with the ID digits
+    segments = re.split(r"Question\s+ID\s*:\s*", text, flags=re.I)
+    for idx, seg in enumerate(segments[1:]):
+        # Question ID may have spaces injected by PDF renderer, e.g. "441009370651 1"
+        # Grab digits (with possible spaces) at the start and collapse them
+        q_id_match = re.match(r"^([\d\s]+)", seg)
+        if not q_id_match:
+            continue
+        q_id = re.sub(r'\s+', '', q_id_match.group(1)).strip()
+        if not q_id:
+            continue
+
+        # Option IDs — also may contain spaces inside the digit string
+        def _get_opt_id(label, segment):
+            m = re.search(rf"Option\s+{label}\s+ID\s*:\s*([\d\s]+)", segment, re.I)
+            if m:
+                return re.sub(r'\s+', '', m.group(1)).strip()
+            return None
+
+        opt1 = _get_opt_id('1', seg)
+        opt2 = _get_opt_id('2', seg)
+        opt3 = _get_opt_id('3', seg)
+        opt4 = _get_opt_id('4', seg)
+
+        # Chosen Option: "A", "B", "C", "D", or "--" (not answered)
+        chosen_m = re.search(r"Chosen\s+Option\s*:\s*([A-D\-]+)", seg, re.I)
+        chosen_raw = chosen_m.group(1).strip() if chosen_m else None
+        chosen = None if (not chosen_raw or chosen_raw == '--') else chosen_raw.upper()
+
+        # Status
+        status_m = re.search(r"Status\s*:\s*([^\r\n]+)", seg, re.I)
+        status_str = status_m.group(1).strip() if status_m else ''
+
+        q_data = {
+            'question_no': idx + 1,
+            'question_id_html': q_id,
+            'option_a_id': opt1,
+            'option_b_id': opt2,
+            'option_c_id': opt3,
+            'option_d_id': opt4,
+            'chosen_option': chosen,
+            'status': status_str,
+        }
+        result['questions'].append(q_data)
+
+    return result
+
+
+@results_bp.route('/upload-pdf', methods=['POST'])
+def upload_pdf_result():
+    from routes.auth import get_current_user
+    current_user = get_current_user()
+    unlocked_mq_ids = set()
+    if current_user:
+        from db.models import UserUnlockedQuestion
+        unlocked = UserUnlockedQuestion.query.filter_by(user_id=current_user.id).all()
+        unlocked_mq_ids = {u.master_question_id for u in unlocked}
+
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+        
+    try:
+        exam_id = int(request.form.get('exam_id', 1))
+    except (ValueError, TypeError):
+        exam_id = 1
+
+    if not file.filename.lower().endswith('.pdf'):
+        return jsonify({'error': 'Only PDF files are supported'}), 400
+
+    try:
+        from pypdf import PdfReader
+        reader = PdfReader(file)
+        full_text = ""
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                full_text += page_text + "\n"
+        
+        if not full_text.strip():
+            return jsonify({'error': 'The uploaded PDF is empty or contains only scanned images. Only text-searchable PDFs printed from the candidate portal are supported.'}), 400
+            
+        print(f"[API PDF] Extracted {len(full_text)} characters.")
+        
+        parsed_data = parse_pdf_text(full_text)
+        
+        if not parsed_data['questions']:
+            return jsonify({'error': 'No questions could be parsed from the PDF. Make sure the PDF is printed from a supported candidate response sheet (TCS iON).'}), 400
+
+        print(f"[API PDF] Parsed {len(parsed_data['questions'])} questions.")
+        
+        matched_questions = []
+        correct_count = 0
+        wrong_count = 0
+        unattempted_count = 0
+        
+        current_shift = {
+            'exam_id': exam_id,
+            'test_date': parsed_data.get('test_date') or '',
+            'test_time': parsed_data.get('test_time') or '',
+            'subject': parsed_data.get('subject') or '',
+        }
+        
+        for q in parsed_data['questions']:
+            q_id = q['question_id_html']
+            chosen_opt = q['chosen_option']
+            status_str = q['status'] or ''
+            
+            mq = MasterQuestion.query.filter_by(question_id_html=q_id).first()
+            
+            chosen_val = None
+            # chosen_opt is now None (unattempted) or "A"/"B"/"C"/"D" (answered)
+            if chosen_opt and chosen_opt in ['A', 'B', 'C', 'D']:
+                chosen_val = str(ord(chosen_opt) - ord('A') + 1)  # A→1, B→2, C→3, D→4
+
+            correct_val = None
+            q_text = "Question " + str(q['question_no'])
+            opt_a_text = "Option A"
+            opt_b_text = "Option B"
+            opt_c_text = "Option C"
+            opt_d_text = "Option D"
+
+            if mq:
+                correct_val = mq.correct_answer
+                # Normalize correct_answer A/B/C/D → 1/2/3/4
+                if correct_val and correct_val.upper() in ['A', 'B', 'C', 'D']:
+                    correct_val = str(ord(correct_val.upper()) - ord('A') + 1)
+
+                q_text = mq.question_text or q_text
+                opt_a_text = mq.option_a_text or opt_a_text
+                opt_b_text = mq.option_b_text or opt_b_text
+                opt_c_text = mq.option_c_text or opt_c_text
+                opt_d_text = mq.option_d_text or opt_d_text
+
+                mq.reference_count += 1
+                shifts_list = mq.shifts or []
+                is_new_shift = True
+                for s in shifts_list:
+                    if (s.get('exam_id') == current_shift['exam_id'] and
+                        s.get('test_date') == current_shift['test_date'] and
+                        s.get('test_time') == current_shift['test_time'] and
+                        s.get('subject') == current_shift['subject']):
+                        is_new_shift = False
+                        break
+                if is_new_shift:
+                    mq.shifts = shifts_list + [current_shift]
+                    mq.shift_count = len(mq.shifts)
+
+            is_correct = False
+            is_wrong = False
+
+            if chosen_val:  # candidate answered this question
+                if correct_val:
+                    if chosen_val == correct_val:
+                        is_correct = True
+                        correct_count += 1
+                    else:
+                        is_wrong = True
+                        wrong_count += 1
+                else:
+                    # Answer unknown (stub MQ) — treat as unattempted for scoring
+                    unattempted_count += 1
+            else:
+                unattempted_count += 1
+
+            marks_awarded = 0.0
+            if is_correct:
+                marks_awarded = 1.0
+            elif is_wrong:
+                marks_awarded = -0.33
+
+            q_res = {
+                'question_no': q['question_no'],
+                'question_id_html': q_id,
+                'question_text': q_text,
+                'option_a_text': opt_a_text,
+                'option_b_text': opt_b_text,
+                'option_c_text': opt_c_text,
+                'option_d_text': opt_d_text,
+                'option_a_id': q['option_a_id'],
+                'option_b_id': q['option_b_id'],
+                'option_c_id': q['option_c_id'],
+                'option_d_id': q['option_d_id'],
+                'correct_answer': correct_val,
+                'student_answer': chosen_val,
+                'marks_awarded': marks_awarded,
+                'status': 'correct' if is_correct else 'wrong' if is_wrong else 'unattempted',
+                'master_question_id': mq.id if mq else None
+            }
+            matched_questions.append(q_res)
+
+        score = float(correct_count) - (float(wrong_count) * 0.33)
+        score = round(score, 2)
+
+        roll_number = parsed_data.get('roll_number')
+        registration_number = parsed_data.get('registration_number')
+        
+        existing_result = None
+        if roll_number:
+            existing_result = ExamResult.query.filter_by(exam_id=exam_id, roll_number=roll_number).first()
+        elif registration_number:
+            existing_result = ExamResult.query.filter_by(exam_id=exam_id, registration_number=registration_number).first()
+
+        if existing_result:
+            QuestionResponse.query.filter_by(result_id=existing_result.id).delete()
+            res_obj = existing_result
+        else:
+            res_obj = ExamResult(
+                exam_id=exam_id,
+                roll_number=roll_number,
+                registration_number=registration_number,
+                candidate_name=parsed_data.get('candidate_name') or 'Candidate ' + str(uuid.uuid4())[:8],
+                community=parsed_data.get('community') or 'UR',
+                test_centre_name=parsed_data.get('test_centre_name') or '',
+                test_date=parsed_data.get('test_date') or '',
+                test_time=parsed_data.get('test_time') or '',
+                subject=parsed_data.get('subject') or '',
+                parser_version='rankveda-pdf-parser-v1.0',
+                parsed_at=datetime.utcnow(),
+                score=score,
+                total_correct=correct_count,
+                total_wrong=wrong_count,
+                total_unattempted=unattempted_count,
+                source_html='[PDF Uploaded Text Content]',
+                candidate_payload={}
+            )
+            db.session.add(res_obj)
+            db.session.flush()
+
+        res_obj.score = score
+        res_obj.total_correct = correct_count
+        res_obj.total_wrong = wrong_count
+        res_obj.total_unattempted = unattempted_count
+        res_obj.parsed_at = datetime.utcnow()
+        res_obj.source_html = "[PDF Uploaded Text Content]"
+
+        # QuestionResponse model links to MasterQuestion — ensure every parsed question
+        # has a MasterQuestion row (create a stub for unknown questions).
+        for idx, mq_data in enumerate(matched_questions):
+            mq = None
+            if mq_data['master_question_id']:
+                mq = MasterQuestion.query.get(mq_data['master_question_id'])
+
+            if mq is None:
+                # Create a stub MasterQuestion so the FK constraint is satisfied
+                q_id = mq_data['question_id_html']
+                stub_hash = MasterQuestion.generate_hash(
+                    mq_data.get('question_text', '') or f'PDF-Q{mq_data["question_no"]}',
+                    q_id
+                )
+                # Check one more time by hash to avoid duplicates
+                mq = MasterQuestion.query.filter_by(question_hash=stub_hash).first()
+                if mq is None:
+                    mq = MasterQuestion(
+                        question_id_html=q_id,
+                        question_hash=stub_hash,
+                        question_text=mq_data.get('question_text') or f'PDF Question {mq_data["question_no"]}',
+                        correct_answer=mq_data.get('correct_answer'),
+                        option_a_id=mq_data.get('option_a_id'),
+                        option_b_id=mq_data.get('option_b_id'),
+                        option_c_id=mq_data.get('option_c_id'),
+                        option_d_id=mq_data.get('option_d_id'),
+                        reference_count=1,
+                        shift_count=1,
+                        shifts=[current_shift],
+                        parsed_payload={},
+                    )
+                    db.session.add(mq)
+                    db.session.flush()  # get mq.id
+
+            # Determine student_option_id (the chosen option ID string)
+            chosen_val = mq_data.get('student_answer')
+            student_opt_id = None
+            if chosen_val == '1':
+                student_opt_id = mq_data.get('option_a_id')
+            elif chosen_val == '2':
+                student_opt_id = mq_data.get('option_b_id')
+            elif chosen_val == '3':
+                student_opt_id = mq_data.get('option_c_id')
+            elif chosen_val == '4':
+                student_opt_id = mq_data.get('option_d_id')
+
+            qr = QuestionResponse(
+                result_id=res_obj.id,
+                question_no=mq_data['question_no'],
+                master_question_id=mq.id,
+                option_id=student_opt_id,
+                student_answer=mq_data.get('student_answer'),
+                marks_awarded=mq_data.get('marks_awarded', 0),
+                status=mq_data.get('status', 'unattempted'),
+            )
+            db.session.add(qr)
+
+        db.session.commit()
+
+        db_questions = QuestionResponse.query.filter_by(result_id=res_obj.id).order_by(QuestionResponse.question_no).all()
+        return jsonify({
+            'success': True,
+            'result': res_obj.to_dict(),
+            'questions': [q.to_dict(unlocked_mq_ids) for q in db_questions]
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'PDF Parsing Error: {str(e)}'}), 500
+
+
+@results_bp.route('/<int:result_id>', methods=['GET'])
+def get_result_by_id(result_id):
+    from routes.auth import get_current_user
+    current_user = get_current_user()
+    unlocked_mq_ids = set()
+    if current_user:
+        from db.models import UserUnlockedQuestion
+        unlocked = UserUnlockedQuestion.query.filter_by(user_id=current_user.id).all()
+        unlocked_mq_ids = {u.master_question_id for u in unlocked}
+
+    res_obj = ExamResult.query.get_or_404(result_id)
+    questions = (
+        QuestionResponse.query
+        .filter_by(result_id=res_obj.id)
+        .order_by(QuestionResponse.question_no)
+        .all()
+    )
+    return jsonify({
+        'result': res_obj.to_dict(),
+        'questions': [q.to_dict(unlocked_mq_ids) for q in questions]
+    })
+
+

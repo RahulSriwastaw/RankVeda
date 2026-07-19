@@ -90,7 +90,7 @@ export default function Home({ exams = [] }) {
     if (typeof window !== 'undefined') {
       const u = localStorage.getItem('rv_user');
       if (u) {
-        try { setUser(JSON.parse(u)); } catch {}
+        try { setUser(JSON.parse(u)); } catch { }
       }
     }
   }, []);
@@ -129,7 +129,7 @@ export default function Home({ exams = [] }) {
         <meta name="language" content="en-IN" />
         <meta name="theme-color" content="#4f46e5" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        
+
         <meta name="geo.region" content="IN" />
         <meta name="geo.country" content="India" />
         <meta name="geo.placename" content="India" />
@@ -175,7 +175,7 @@ export default function Home({ exams = [] }) {
           <div className="absolute bottom-0 left-10 w-[300px] h-[300px] bg-sky-100/30 rounded-full blur-[80px] pointer-events-none" />
 
           <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative">
-            
+
             {/* Left copy */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
               <div className="inline-flex items-center gap-1.5 bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-sm">
@@ -186,7 +186,7 @@ export default function Home({ exams = [] }) {
                 Select Your Exam <br />
                 Get Instant <span className="text-orange-500">Score</span> &amp; <span className="text-indigo-600">Rank</span>
               </h1>
-              
+
               <p className="text-slate-500 text-sm md:text-base leading-relaxed max-w-xl mx-auto lg:mx-0">
                 RRB NTPC UG, SSC CGL, CHSL, Bank PO, RRB ALP — choose your exam from below and check the answer key. Free, fast with a professional score card.
               </p>
@@ -228,7 +228,7 @@ export default function Home({ exams = [] }) {
             {/* Right side - 3D CSS / SVG Mockup illustration */}
             <div className="lg:col-span-5 relative flex items-center justify-center pt-8 lg:pt-0">
               <div className="relative w-full max-w-[380px]">
-                
+
                 {/* Main Scorecard container */}
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
@@ -241,7 +241,7 @@ export default function Home({ exams = [] }) {
                   </div>
 
                   {/* Conic-gradient Score Gauge */}
-                  <div 
+                  <div
                     className="relative w-36 h-36 mx-auto mb-6 flex items-center justify-center rounded-full shadow-md"
                     style={{ background: 'conic-gradient(#6366f1 0% 76%, #f1f5f9 76% 100%)' }}
                   >
@@ -333,7 +333,7 @@ export default function Home({ exams = [] }) {
 
         {/* ── Choose Your Exam Section ───────────────────────────────────── */}
         <section className="max-w-7xl mx-auto px-4 py-16">
-          
+
           {/* Section Header */}
           <div className="text-center mb-12 select-none">
             <div className="flex items-center justify-center gap-3 text-indigo-600 mb-2">
@@ -352,35 +352,35 @@ export default function Home({ exams = [] }) {
               const isActive = exam.status === 'active';
               const Wrapper = isActive ? Link : 'div';
               const wrapperProps = isActive ? { href: `/exams/${exam.slug}` } : {};
-              
+
               // Custom default fallbacks
               const badgeText = exam.badge || (isActive ? 'Active' : 'Coming Soon');
               const examIcon = exam.icon || '📋';
               const examYear = exam.year || '2025';
               const descText = exam.desc_card || exam.description || '';
-              
+
               const totalQuestions = exam.total_questions || 100;
               const duration = exam.highlights?.find(h => h.label === 'Duration')?.value?.split(' ')[0] || '100';
               const marking = exam.highlights?.find(h => h.label === 'Negative Marking')?.value?.includes('1/3') ? '1/3 Negative' : '0.25 Negative';
               const topics = (exam.sections || []).map(s => s.name);
 
               // Status styles
-              const badgeStyle = isActive 
-                ? 'bg-emerald-50 text-emerald-600 border-emerald-250' 
+              const badgeStyle = isActive
+                ? 'bg-emerald-50 text-emerald-600 border-emerald-250'
                 : 'bg-orange-50 text-orange-500 border-orange-250';
 
               const iconBg = isActive ? 'bg-indigo-50 text-indigo-600' : 'bg-sky-50 text-sky-500';
 
               return (
-                <motion.div 
-                  key={exam.slug || exam.id} 
-                  initial={{ opacity: 0, y: 15 }} 
-                  animate={{ opacity: 1, y: 0 }} 
+                <motion.div
+                  key={exam.slug || exam.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.04 }}
                 >
                   <Wrapper {...wrapperProps} className="block group h-full">
                     <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 relative flex flex-col h-full">
-                      
+
                       {/* Header: Icon + Title + Year */}
                       <div className="flex items-start gap-2.5 mb-3">
                         <div className={`w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center text-lg shrink-0`}>
@@ -461,7 +461,7 @@ export default function Home({ exams = [] }) {
         {/* ── How It Works Section ───────────────────────────────────────── */}
         <section className="bg-white border-y border-slate-100 py-16">
           <div className="max-w-7xl mx-auto px-4">
-            
+
             {/* Section Header */}
             <div className="text-center mb-12 select-none">
               <div className="flex items-center justify-center gap-3 text-indigo-600 mb-2">
@@ -476,7 +476,7 @@ export default function Home({ exams = [] }) {
 
             {/* Steps Container */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-              
+
               {/* Step 1 */}
               <div className="relative flex flex-col md:flex-row items-center gap-4 bg-slate-50 border border-slate-100/50 rounded-2xl p-5 shadow-sm">
                 <div className="w-12 h-12 rounded-xl bg-purple-500 text-white flex items-center justify-center font-black text-sm shrink-0">
@@ -516,7 +516,7 @@ export default function Home({ exams = [] }) {
 
         {/* ── Why RankVeda Section ───────────────────────────────────────── */}
         <section className="max-w-7xl mx-auto px-4 py-16">
-          
+
           {/* Section Header */}
           <div className="text-center mb-12 select-none">
             <div className="flex items-center justify-center gap-3 text-indigo-600 mb-2">
@@ -539,11 +539,11 @@ export default function Home({ exams = [] }) {
               { icon: FaCheckCircle, title: 'Negative Marking', desc: 'Automatic -1/3, -0.5, -0.25 negative marking as per official pattern.', color: 'text-sky-500', bg: 'bg-sky-50/40 border-sky-100/50' },
               { icon: FaBookOpen, title: 'Question Bank', desc: 'All shifts questions in one place. Practice and revise.', color: 'text-orange-500', bg: 'bg-orange-50/40 border-orange-100/50' },
             ].map(({ icon: Icon, title, desc, color, bg }, i) => (
-              <motion.div 
-                key={i} 
-                initial={{ opacity: 0, y: 15 }} 
-                animate={{ opacity: 1, y: 0 }} 
-                transition={{ delay: 0.05 + i * 0.05 }} 
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 + i * 0.05 }}
                 className={`${bg} border rounded-2xl p-6 shadow-sm`}
               >
                 <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-slate-100 mb-4">
@@ -559,7 +559,7 @@ export default function Home({ exams = [] }) {
         {/* ── Double Card Promo Section ──────────────────────────────────── */}
         <section className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
+
             {/* Promo Card 1 */}
             <div className="bg-indigo-950 text-white rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between shadow-xl min-h-[220px]">
               <div className="flex gap-4 items-start">
@@ -594,9 +594,9 @@ export default function Home({ exams = [] }) {
                 </div>
               </div>
               <div className="mt-6 flex justify-start">
-                <button 
+                <button
                   type="button"
-                  onClick={() => alert("Check score card inside your exam prediction results page!")} 
+                  onClick={() => alert("Check score card inside your exam prediction results page!")}
                   className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 font-bold text-xs text-slate-800 transition flex items-center gap-1.5 shadow-sm"
                 >
                   Download Now <FaArrowRight className="text-[10px]" />
@@ -610,7 +610,7 @@ export default function Home({ exams = [] }) {
         {/* ── Footer ─────────────────────────────────────────────────────── */}
         <footer className="bg-[#0f172a] text-slate-400 pt-16 pb-8 px-4 mt-16 border-t border-slate-900">
           <div className="max-w-7xl mx-auto">
-            
+
             {/* Top row: Newsletter + branding */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-12 border-b border-slate-800 items-center">
               <div className="lg:col-span-5 text-center lg:text-left space-y-2">
@@ -643,7 +643,7 @@ export default function Home({ exams = [] }) {
                 <p className="text-xs text-slate-500 leading-relaxed max-w-xs">
                   India's free platform for government exam answer key calculation, rank prediction and question bank.
                 </p>
-                
+
                 {/* Social icons */}
                 <div className="flex items-center gap-3 mt-4">
                   <a href="#" className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center text-sm hover:bg-indigo-600 transition"><FaTelegram /></a>
@@ -670,8 +670,8 @@ export default function Home({ exams = [] }) {
                 <ul className="space-y-2.5 text-xs">
                   <li><Link href="/exams" className="hover:text-white transition">All Exams</Link></li>
                   <li><Link href="/marketplace" className="hover:text-white transition">Question Bank</Link></li>
-                  <li><Link href="/#pricing" className="hover:text-white transition">Pricing</Link></li>
-                  <li><Link href="/#blog" className="hover:text-white transition">Blog</Link></li>
+                  <li><Link href="/pricing" className="hover:text-white transition">Pricing</Link></li>
+                  <li><Link href="/blog" className="hover:text-white transition">Blog</Link></li>
                   <li><Link href="/login" className="hover:text-white transition">Login</Link></li>
                 </ul>
               </div>

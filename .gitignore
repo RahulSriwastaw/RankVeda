@@ -38,3 +38,21 @@ desktop.ini
 
 # Logs
 *.log
+
+# PDFs
+*.pdf
+answer key pdf.pdf
+
+# Temporary scripts
+backend/check_db_state.py
+backend/db_update_test.py
+backend/fix_all_fks.py
+backend/fix_constraints.py
+backend/fix_fk.py
+backend/fix_mq_correct_answer.py
+backend/fix_stats.py
+backend/scratch_test.py
+backend/test_parser.py
+backend/verify_schema.py
+backend/dev.db
+

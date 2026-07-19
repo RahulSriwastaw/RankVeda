@@ -81,7 +81,7 @@ class MasterQuestion(db.Model):
     chapter = db.Column(db.String(200))             # e.g. Percentage, Profit & Loss
     question_type = db.Column(db.String(50))        # e.g. MCQ, Fill in the blank, True/False
     difficulty = db.Column(db.String(20))           # Easy / Medium / Hard
-    correct_answer = db.Column(db.String(10), nullable=False)
+    correct_answer = db.Column(db.String(10), nullable=True)
     correct_option_text = db.Column(db.Text)
     # Options - text in original, Hindi, English
     option_a_text = db.Column(db.Text)
@@ -156,7 +156,7 @@ class ExamResult(db.Model):
     
     # Candidate Info
     registration_number = db.Column(db.String(50))
-    roll_number = db.Column(db.String(50), nullable=False)
+    roll_number = db.Column(db.String(50), nullable=True)
     candidate_name = db.Column(db.String(200))
     community = db.Column(db.String(50))
     test_centre_name = db.Column(db.String(300))
@@ -171,8 +171,8 @@ class ExamResult(db.Model):
     parsed_at = db.Column(db.DateTime, default=utcnow)
     
     # Result
-    score = db.Column(db.Numeric(5,2), nullable=False)
-    rank = db.Column(db.Integer, nullable=False)
+    score = db.Column(db.Numeric(5,2), nullable=False, default=0)
+    rank = db.Column(db.Integer, nullable=True, default=0)
     percentile = db.Column(db.Numeric(5,2))
     category_rank = db.Column(db.Integer)
     category = db.Column(db.String(10))

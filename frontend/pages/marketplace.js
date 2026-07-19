@@ -54,13 +54,10 @@ export default function Marketplace() {
   const [filterOptions, setFilterOptions] = useState({ subjects: [], dates: [], times: [] });
   const [selectedIds, setSelectedIds] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  const [pointsPacks, setPointsPacks] = useState([]);
-  const [pointsPacksLoading, setPointsPacksLoading] = useState(true);
 
   useEffect(() => {
     fetchExams();
     fetchPacks();
-    fetchPointsPacks();
     fetchUserPoints();
   }, [user]);
 
@@ -81,18 +78,7 @@ export default function Marketplace() {
     }
   };
 
-  const fetchPointsPacks = async () => {
-    setPointsPacksLoading(true);
-    try {
-      const res = await fetch(`${API}/api/marketplace/points-packs`);
-      const data = await res.json();
-      setPointsPacks(Array.isArray(data.packs) ? data.packs : []);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setPointsPacksLoading(false);
-    }
-  };
+
 
   const fetchExams = async () => {
     setLoading(true);
@@ -550,54 +536,23 @@ export default function Marketplace() {
           </div>
         </div>
 
-        {/* Points Packs Section */}
+        {/* Packs Section */}
         <div className="max-w-5xl mx-auto px-4 pb-8">
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-extrabold text-indigo-950 mb-1">💎 Buy Points Packs</h2>
-              <p className="text-slate-500 text-xs">Purchase points to unlock detailed AI explanations</p>
+              <h2 className="text-xl font-extrabold text-indigo-950 mb-1">📦 Question Bank Packs</h2>
+              <p className="text-slate-500 text-xs">Buy a bundle of exams at once and unlock every exam inside the pack.</p>
             </div>
-            {currentUser && (
-              <span className="text-xs bg-amber-50 border border-amber-200 text-amber-700 px-3.5 py-1.5 rounded-xl font-extrabold flex items-center gap-1.5 select-none shadow-sm shadow-amber-100">
-                <FaCoins /> {currentUser.balance || 0} Points
-              </span>
-            )}
-          </div>
-          {pointsPacksLoading ? (
-            <div className="flex justify-center py-10">
-              <div className="animate-spin w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full" />
+            <div className="flex items-center gap-3">
+              {currentUser && (
+                <span className="text-xs bg-amber-50 border border-amber-200 text-amber-700 px-3.5 py-1.5 rounded-xl font-extrabold flex items-center gap-1.5 select-none shadow-sm shadow-amber-100">
+                  <FaCoins /> {currentUser.balance || 0} Points
+                </span>
+              )}
+              <Link href="/pricing" className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-sm flex items-center gap-1.5 transition">
+                💎 Get Points
+              </Link>
             </div>
-          ) : pointsPacks.length === 0 ? (
-            <div className="text-center py-8 text-slate-400 bg-white border border-slate-100 rounded-3xl shadow-sm">
-              <p className="text-sm font-bold text-slate-500">No points packs configured yet.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-              {pointsPacks.map((pack) => (
-                <motion.div key={pack.id} whileHover={{ y: -2 }} className="bg-white border border-slate-100 rounded-3xl p-5 flex flex-col justify-between transition duration-200 shadow-sm">
-                  <div>
-                    <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">{pack.name}</h3>
-                    <div className="flex items-baseline gap-1.5 my-3">
-                      <span className="text-3xl font-black text-amber-500">{pack.points}</span>
-                      <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Points</span>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <button onClick={() => buyItem(pack, 'pointspack')} className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-905 font-extrabold text-xs shadow-sm">
-                      Buy for ₹{pack.price}
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Pack Cards */}
-        <div className="max-w-5xl mx-auto px-4 pb-8">
-          <div className="mb-6">
-            <h2 className="text-xl font-extrabold text-indigo-950 mb-1">📦 Question Bank Packs</h2>
-            <p className="text-slate-500 text-xs">Buy a bundle of exams at once and unlock every exam inside the pack.</p>
           </div>
           {packsLoading ? (
             <div className="flex justify-center py-10">

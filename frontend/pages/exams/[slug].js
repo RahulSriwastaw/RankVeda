@@ -6,9 +6,10 @@ import { motion } from 'framer-motion';
 import {
   FaSearch, FaUsers, FaTrophy, FaDownload, FaChevronDown,
   FaChevronUp, FaBookOpen, FaRobot, FaChartLine, FaArrowRight,
-  FaCheckCircle, FaLock
+  FaCheckCircle, FaLock, FaFilePdf
 } from 'react-icons/fa';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import Navbar from '../../components/Navbar';
 import Logo from '../../components/Logo';
 
@@ -181,6 +182,9 @@ export default function ExamPage({ exam, allExams = [] }) {
   const router = useRouter();
   const [url, setUrl] = useState('');
   const [liveCount, setLiveCount] = useState(0);
+  const [activeTab, setActiveTab] = useState('url');
+  const [pdfFile, setPdfFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   // Guard: fallback or missing prop during dev HMR
   if (router.isFallback || !exam) {
@@ -217,6 +221,29 @@ export default function ExamPage({ exam, allExams = [] }) {
     e.preventDefault();
     if (!url.trim()) return;
     router.push(`/result?url=${encodeURIComponent(url.trim())}&exam=${exam.id}`);
+  };
+
+  const handlePdfSubmit = async (e) => {
+    e.preventDefault();
+    if (!pdfFile) return;
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', pdfFile);
+    formData.append('exam_id', exam.id);
+
+    try {
+      toast.loading('Uploading and parsing PDF response sheet...', { id: 'pdf-upload' });
+      const res = await axios.post(`${API_BASE}/api/results/upload-pdf`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      toast.success('Successfully parsed response sheet!', { id: 'pdf-upload' });
+      router.push(`/result?id=${res.data.result.id}&exam=${exam.id}`);
+    } catch (err) {
+      const errMsg = err.response?.data?.error || 'Failed to parse PDF. Please try again.';
+      toast.error(errMsg, { id: 'pdf-upload' });
+    } finally {
+      setUploading(false);
+    }
   };
 
   // ── Schema.org structured data ──────────────────────────────────────────
@@ -388,36 +415,116 @@ export default function ExamPage({ exam, allExams = [] }) {
                   Check Your {exam.name} Score
                 </h2>
                 <p className="text-xs font-semibold text-slate-400 mb-4">
-                  Paste your official response sheet / answer key URL below
+                  {activeTab === 'url' ? 'Paste your official response sheet / answer key URL below' : 'Upload your official response sheet PDF below'}
                 </p>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label htmlFor="answer-key-url" className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                      Answer Key / Response Sheet URL <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="answer-key-url"
-                      type="url"
-                      value={url}
-                      onChange={(e) => setUrl(e.target.value)}
-                      placeholder="https://cdndigialm.com/.../assessment.html"
-                      required
-                      className={`w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 ${t.ring} focus:ring-2 text-slate-800 placeholder-slate-400 text-sm transition outline-none`}
-                    />
-                    <p className="mt-1.5 text-[10px] font-semibold text-slate-400">
-                      Find this URL on the official exam portal after result declaration
-                    </p>
-                  </div>
-
+                {/* Mode Selector Tabs */}
+                <div className="flex border border-slate-100 rounded-xl p-1 bg-slate-50 mb-5">
                   <button
-                    type="submit"
-                    id="check-score-btn"
-                    className={`w-full py-3 rounded-xl bg-gradient-to-r ${t.btn} text-white font-extrabold transition flex items-center justify-center gap-2 text-sm shadow-md`}
+                    type="button"
+                    onClick={() => setActiveTab('url')}
+                    className={`flex-1 py-2 text-xs font-black rounded-lg transition ${
+                      activeTab === 'url'
+                        ? 'bg-white text-indigo-950 shadow-sm border border-slate-100'
+                        : 'text-slate-400 hover:text-slate-650'
+                    }`}
                   >
-                    <FaSearch className="text-xs" /> Check Score &amp; Rank Now
+                    🌐 Submit URL
                   </button>
-                </form>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('pdf')}
+                    className={`flex-1 py-2 text-xs font-black rounded-lg transition ${
+                      activeTab === 'pdf'
+                        ? 'bg-white text-indigo-950 shadow-sm border border-slate-100'
+                        : 'text-slate-400 hover:text-slate-650'
+                    }`}
+                  >
+                    📄 Upload PDF
+                  </button>
+                </div>
+
+                {activeTab === 'url' ? (
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                      <label htmlFor="answer-key-url" className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                        Answer Key / Response Sheet URL <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="answer-key-url"
+                        type="url"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        placeholder="https://cdndigialm.com/.../assessment.html"
+                        required
+                        className={`w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 ${t.ring} focus:ring-2 text-slate-800 placeholder-slate-400 text-sm transition outline-none`}
+                      />
+                      <p className="mt-1.5 text-[10px] font-semibold text-slate-400">
+                        Find this URL on the official exam portal after result declaration
+                      </p>
+                    </div>
+
+                    <button
+                      type="submit"
+                      id="check-score-btn"
+                      className={`w-full py-3 rounded-xl bg-gradient-to-r ${t.btn} text-white font-extrabold transition flex items-center justify-center gap-2 text-sm shadow-md`}
+                    >
+                      <FaSearch className="text-xs" /> Check Score &amp; Rank Now
+                    </button>
+                  </form>
+                ) : (
+                  <form onSubmit={handlePdfSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                        Upload Response Sheet PDF <span className="text-red-500">*</span>
+                      </label>
+                      
+                      <div className="relative border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 bg-slate-50 hover:bg-indigo-50/10 text-center cursor-pointer transition">
+                        <input
+                          type="file"
+                          accept=".pdf"
+                          required
+                          onChange={(e) => setPdfFile(e.target.files[0])}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <FaFilePdf className="text-3xl text-red-500" />
+                          {pdfFile ? (
+                            <div>
+                              <p className="text-xs font-black text-slate-700 truncate max-w-[240px]">
+                                {pdfFile.name}
+                              </p>
+                              <p className="text-[10px] font-bold text-slate-400">
+                                {(pdfFile.size / (1024 * 1024)).toFixed(2)} MB
+                              </p>
+                            </div>
+                          ) : (
+                            <div>
+                              <p className="text-xs font-black text-slate-600">
+                                Drag &amp; drop response PDF here
+                              </p>
+                              <p className="text-[10px] font-bold text-slate-400 mt-0.5">
+                                or click to browse files
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <p className="mt-1.5 text-[10px] font-semibold text-slate-400">
+                        Only text-searchable PDFs printed from the response sheet webpage are supported.
+                      </p>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={!pdfFile || uploading}
+                      className={`w-full py-3 rounded-xl bg-gradient-to-r ${t.btn} text-white font-extrabold transition flex items-center justify-center gap-2 text-sm shadow-md disabled:opacity-50`}
+                    >
+                      {uploading ? 'Processing...' : 'Upload & Check Score'}
+                    </button>
+                  </form>
+                )}
 
                 {/* Trust signals */}
                 <div className="mt-5 pt-4 border-t border-slate-100">

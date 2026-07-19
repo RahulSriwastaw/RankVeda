@@ -218,3 +218,68 @@
     scrollbar-color: rgb(var(--muted)) transparent;
   }
 }
+
+/* ReactQuill editor style overrides to fix white-on-white text contrast in dark mode */
+.ql-container.ql-snow,
+.ql-editor,
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3,
+.ql-editor h4,
+.ql-editor h5,
+.ql-editor h6,
+.ql-editor p,
+.ql-editor li,
+.ql-editor ol,
+.ql-editor ul,
+.ql-editor strong,
+.ql-editor em,
+.ql-editor u,
+.ql-editor s,
+.ql-editor span,
+.prose .ql-editor,
+.prose .ql-editor h1,
+.prose .ql-editor h2,
+.prose .ql-editor h3,
+.prose .ql-editor h4,
+.prose .ql-editor h5,
+.prose .ql-editor h6,
+.prose .ql-editor p,
+.prose .ql-editor li,
+.prose .ql-editor ol,
+.prose .ql-editor ul,
+.prose .ql-editor strong,
+.prose .ql-editor em,
+.prose .ql-editor u,
+.prose .ql-editor s,
+.prose .ql-editor span {
+  color: #0f172a; /* Slate 900 */
+}
+
+/* Custom placeholder color for editor */
+.ql-editor.ql-blank::before {
+  color: #64748b; /* Slate 500 */
+  font-style: normal;
+}
+
+/* Format toolbar and container styles to blend nicely */
+.ql-toolbar.ql-snow {
+  background-color: #f8fafc; /* Slate 50 */
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  border-color: #e2e8f0;
+}
+
+.ql-container.ql-snow {
+  background-color: #ffffff;
+  border-bottom-left-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+  border-color: #e2e8f0;
+}
+
+/* Ensure ReactQuill container expands to full height when h-full is applied (fullscreen mode) */
+.h-full .ql-container.ql-snow {
+  height: calc(100% - 42px) !important; /* Subtracting toolbar height */
+}
+
+

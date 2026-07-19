@@ -43,8 +43,8 @@ export default function Navbar({ user: propUser, setUser: propSetUser }) {
         {/* Middle navigation */}
         <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-300">
           <Link href="/exams" className="hover:text-white transition-colors">Exams</Link>
-          <Link href="/#pricing" className="hover:text-white transition-colors">Pricing</Link>
-          <Link href="/#blog" className="hover:text-white transition-colors">Blog</Link>
+          <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
+          <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
           <Link href="/marketplace" className="hover:text-amber-400 transition-colors">Question Bank</Link>
         </div>
 

@@ -570,7 +570,7 @@ const LoadingScreen = () => {
 
 export default function ResultPage() {
   const router = useRouter();
-  const { url, exam } = router.query;
+  const { url, exam, id } = router.query;
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [filter, setFilter] = useState('all');
@@ -594,13 +594,18 @@ export default function ResultPage() {
   }, []);
 
   useEffect(() => {
-    if (!url) return;
+    if (!url && !id) return;
     const fetchResult = async () => {
       try {
-        const res = await axios.post(`${API}/api/results/`, {
-          url: decodeURIComponent(url),
-          exam_id: exam || 1
-        });
+        let res;
+        if (id) {
+          res = await axios.get(`${API}/api/results/${id}`);
+        } else {
+          res = await axios.post(`${API}/api/results/`, {
+            url: decodeURIComponent(url),
+            exam_id: exam || 1
+          });
+        }
         setData(res.data);
         try {
           const score = res.data?.result?.score;
@@ -622,7 +627,7 @@ export default function ResultPage() {
       } finally { setLoading(false); }
     };
     fetchResult();
-  }, [url, exam, authUser]);
+  }, [url, id, exam, authUser]);
 
   // ── BULK SOLUTION GENERATOR ───────────────────────────────────────
   const handleBulkGenerate = async (qIds) => {
@@ -1211,7 +1216,7 @@ export default function ResultPage() {
             <div className="flex items-center gap-6 text-slate-400 font-medium">
               <Link href="/exams" className="hover:text-white transition">Exams</Link>
               <Link href="/marketplace" className="hover:text-white transition">Question Bank</Link>
-              <Link href="/#pricing" className="hover:text-white transition">Pricing</Link>
+              <Link href="/pricing" className="hover:text-white transition">Pricing</Link>
             </div>
             <div className="text-slate-500 text-[11px]">
               © {new Date().getFullYear()} RankVeda. All rights reserved.

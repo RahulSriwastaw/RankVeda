@@ -12,34 +12,55 @@ def call_gemini_ai(prompt, system_instruction="You are a professional blogging a
     if not api_key:
         return {'error': 'GEMINI_API_KEY not configured in backend environment.'}
 
-    model = os.getenv('GEMINI_MODEL', 'gemini-2.0-flash')
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-    
-    headers = {'Content-Type': 'application/json'}
-    data = {
-        "contents": [
-            {
-                "role": "user",
-                "parts": [
-                    {"text": f"{system_instruction}\n\nUser Request: {prompt}"}
-                ]
-            }
-        ],
-        "generationConfig": {
-            "temperature": 0.7,
-            "maxOutputTokens": 2048
-        }
-    }
+    configured_model = os.getenv('GEMINI_MODEL')
+    if configured_model:
+        models_to_try = [configured_model]
+    else:
+        models_to_try = [
+            'gemini-3.5-flash',
+            'gemini-flash-latest',
+            'gemini-3.1-flash-lite',
+            'gemini-flash-lite-latest',
+            'gemini-2.0-flash',
+            'gemini-2.0-flash-lite',
+        ]
 
-    try:
-        response = requests.post(url, headers=headers, json=data, timeout=45)
-        response.raise_for_status()
-        payload = response.json()
-        text_out = payload['candidates'][0]['content']['parts'][0]['text']
-        return {'text': text_out}
-    except Exception as e:
-        print("Gemini Blog AI Error:", e)
-        return {'error': str(e)}
+    headers = {'Content-Type': 'application/json'}
+    last_error = None
+
+    for model in models_to_try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        data = {
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": [
+                        {"text": f"{system_instruction}\n\nUser Request: {prompt}"}
+                    ]
+                }
+            ],
+            "generationConfig": {
+                "temperature": 0.7,
+                "maxOutputTokens": 2048
+            }
+        }
+        try:
+            response = requests.post(url, headers=headers, json=data, timeout=45)
+            if response.status_code == 429:
+                print(f"[AI Blog] Model {model} rate-limited or quota exceeded (429), trying next model...")
+                continue
+            response.raise_for_status()
+            payload = response.json()
+            text_out = payload['candidates'][0]['content']['parts'][0]['text']
+            return {'text': text_out}
+        except Exception as e:
+            last_error = e
+            print(f"Gemini Blog AI Error for model {model}:", e)
+            if 'response' in locals() and hasattr(response, 'text'):
+                print('Response:', response.text[:300])
+            continue
+
+    return {'error': f"All models exhausted. Last error: {last_error}"}
 
 # ─── Public Blog Endpoints ───────────────────────────────────────────────
 
