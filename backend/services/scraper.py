@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 def fetch_html(url, use_curl=True):
     """
     Fetch HTML from URL. Uses curl_cffi by default for bot-detection bypass.
-    Falls back to requests if curl_cffi not available.
+    Falls back to requests if curl_cffi fails or is not available.
     """
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -19,27 +19,29 @@ def fetch_html(url, use_curl=True):
         'Cache-Control': 'no-cache',
         'Upgrade-Insecure-Requests': '1',
     }
-    try:
-        if use_curl:
-            from curl_cffi import requests as curl_requests
-            resp = curl_requests.get(url, headers=headers, impersonate="chrome120", timeout=30)
-        else:
-            resp = requests.get(url, headers=headers, timeout=30)
-
-        if resp.status_code == 200:
-            return resp.text
-        else:
-            print(f"[Scraper] Status code: {resp.status_code}")
-    except ImportError:
-        print("[Scraper] curl_cffi not installed, falling back to requests")
+    
+    # Try with curl_cffi if requested
+    if use_curl:
         try:
-            resp = requests.get(url, headers=headers, timeout=30)
+            from curl_cffi import requests as curl_requests
+            print(f"[Scraper] Attempting fetch with curl_cffi...")
+            resp = curl_requests.get(url, headers=headers, impersonate="chrome120", timeout=15)
             if resp.status_code == 200:
                 return resp.text
+            print(f"[Scraper] curl_cffi status code: {resp.status_code}")
         except Exception as e:
-            print(f"[Scraper] requests fallback error: {e}")
+            print(f"[Scraper] curl_cffi fetch failed: {e}. Falling back to standard requests.")
+
+    # Fallback to standard requests
+    try:
+        print(f"[Scraper] Fetching with standard requests...")
+        resp = requests.get(url, headers=headers, timeout=20)
+        if resp.status_code == 200:
+            return resp.text
+        print(f"[Scraper] requests status code: {resp.status_code}")
     except Exception as e:
-        print(f"[Scraper] Fetch error: {e}")
+        print(f"[Scraper] requests fetch failed: {e}")
+        
     return None
 
 
