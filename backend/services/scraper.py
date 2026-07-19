@@ -522,7 +522,7 @@ def parse_result_html(html, base_url=None):
                 correct_count += 1
                 status = 'correct'
             else:
-                marks = -1/3
+                marks = -0.33
                 wrong_count += 1
                 status = 'wrong'
         else:
@@ -688,7 +688,7 @@ def parse_result_html(html, base_url=None):
             elif st == 'wrong':
                 section_groups[sname]['wrong'] += 1
                 section_groups[sname]['na'] += 0
-                section_groups[sname]['marks'] = truncate_float(section_groups[sname]['marks'] - 1/3, 3)
+                section_groups[sname]['marks'] = truncate_float(section_groups[sname]['marks'] - 0.33, 3)
             else:
                 section_groups[sname]['na'] += 1
         section_summary = list(section_groups.values())

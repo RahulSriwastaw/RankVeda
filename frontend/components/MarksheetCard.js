@@ -19,10 +19,8 @@ const MarksheetCard = forwardRef(function MarksheetCard({ candidate, score, rank
   const maxMarks = score?.max_marks || 100;
   const truncateTo3DecimalsStr = (val) => {
     if (val == null || isNaN(val)) return '—';
-    const num = Number(val);
-    const factor = 1000;
-    const truncated = num >= 0 ? Math.floor(num * factor) / factor : Math.ceil(num * factor) / factor;
-    return truncated.toFixed(3);
+    const rounded = Math.round(Number(val) * 1000) / 1000;
+    return rounded.toFixed(3);
   };
   const totalMarks = truncateTo3DecimalsStr(score?.total_marks);
   const sections = score?.sections || [];
