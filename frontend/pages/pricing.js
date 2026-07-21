@@ -102,19 +102,17 @@ export default function Pricing() {
         return;
       }
 
-      if (typeof window !== 'undefined' && window.Razorpay) {
+      if (window.Razorpay) {
         const options = {
-          key: orderData.key_id,
-          amount: orderData.amount,
-          currency: orderData.currency,
+          key: orderData.key,
+          amount: orderData.order.amount,
+          currency: orderData.order.currency,
           name: 'RankResult',
           description: `Points Pack: ${buyModal.name}`,
-          order_id: orderData.order_id,
+          order_id: orderData.order.id,
           handler: async function (response) {
-            setBuying(true);
-            setBuyMsg('Verifying payment details...');
             try {
-              const verifyRes = await fetch(`${API}/api/payments/razorpay/verify-payment`, {
+              const verifyRes = await fetch(`${API}/api/payments/razorpay/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', ...authHeaders },
                 body: JSON.stringify({
@@ -195,22 +193,22 @@ export default function Pricing() {
 
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
-      <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col justify-between">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans flex flex-col justify-between transition-colors">
         <div>
           <Navbar user={currentUser} />
 
           {/* Pricing Header Hero */}
-          <section className="relative overflow-hidden py-16">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-white to-slate-50/30 pointer-events-none" />
+          <section className="relative overflow-hidden py-12 sm:py-16">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-slate-50 to-white dark:from-[#0b0f29] dark:via-[#0f172a] dark:to-slate-950 pointer-events-none transition-colors" />
             <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
-                <span className="inline-flex items-center gap-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-extrabold px-3.5 py-1.5 rounded-full mb-3 uppercase tracking-wider shadow-sm">
+                <span className="inline-flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-[10px] font-extrabold px-3.5 py-1.5 rounded-full mb-3 uppercase tracking-wider shadow-sm">
                   💎 Secure Points Marketplace
                 </span>
-                <h1 className="text-3xl md:text-4xl font-extrabold text-indigo-950 tracking-tight leading-tight">
-                  Transparent Pricing, <span className="text-indigo-600">Infinite Learning</span>
+                <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                  Transparent Pricing, <span className="text-indigo-600 dark:text-indigo-400">Infinite Learning</span>
                 </h1>
-                <p className="text-slate-500 text-xs md:text-sm max-w-xl mx-auto mt-2 leading-relaxed">
+                <p className="text-slate-600 dark:text-slate-400 text-xs md:text-sm max-w-xl mx-auto mt-2 leading-relaxed">
                   Purchase points packages securely to unlock AI solutions, in-depth shift analyses, and step-by-step reasoning for competitive exam questions.
                 </p>
               </motion.div>
@@ -221,14 +219,14 @@ export default function Pricing() {
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.1 }}
-                  className="inline-flex items-center gap-3 bg-white border border-slate-100 rounded-2xl px-5 py-3 shadow-md shadow-indigo-50/40 mt-8"
+                  className="inline-flex items-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl px-5 py-3 shadow-md mt-8"
                 >
                   <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-white text-sm shadow-sm select-none">
                     <FaCoins />
                   </div>
                   <div className="text-left">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Your Balance</p>
-                    <p className="text-base font-black text-slate-800">{currentUser.balance || 0} Points</p>
+                    <p className="text-base font-black text-slate-900 dark:text-white">{currentUser.balance || 0} Points</p>
                   </div>
                 </motion.div>
               )}
@@ -242,24 +240,22 @@ export default function Pricing() {
                 <div className="animate-spin w-10 h-10 border-2 border-indigo-600 border-t-transparent rounded-full" />
               </div>
             ) : pointsPacks.length === 0 ? (
-              <div className="text-center py-16 text-slate-400 bg-white border border-slate-100 rounded-3xl shadow-sm max-w-2xl mx-auto">
+              <div className="text-center py-16 text-slate-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-3xl shadow-sm max-w-2xl mx-auto">
                 <FaCoins className="text-4xl mx-auto mb-3 opacity-30 text-indigo-600 animate-pulse" />
-                <p className="text-sm font-bold text-slate-500">No points packages configured yet.</p>
+                <p className="text-sm font-bold text-slate-700 dark:text-slate-300">No points packages configured yet.</p>
                 <p className="text-xs text-slate-400 mt-1">Please check back later or contact support.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
                 {pointsPacks.map((pack, index) => {
-                  // Determine customized color themes for each pack based on its index
                   const themes = [
-                    { border: 'border-slate-100', headerBg: 'bg-slate-50/50', btnBg: 'from-slate-800 to-slate-900 text-white hover:from-slate-700 hover:to-slate-800', ribbon: null, iconColor: 'text-slate-400' },
-                    { border: 'border-indigo-100', headerBg: 'bg-indigo-50/10', btnBg: 'from-indigo-600 to-indigo-700 text-white hover:from-indigo-500 hover:to-indigo-600', ribbon: null, iconColor: 'text-indigo-500' },
-                    { border: 'border-amber-250 shadow-md shadow-amber-50', headerBg: 'bg-amber-50/20', btnBg: 'from-amber-500 to-yellow-600 text-white hover:from-amber-400 hover:to-yellow-500', ribbon: 'Most Popular 🔥', iconColor: 'text-amber-500' },
-                    { border: 'border-purple-200', headerBg: 'bg-purple-50/20', btnBg: 'from-purple-600 to-indigo-700 text-white hover:from-purple-500 hover:to-indigo-600', ribbon: 'Best Value 🚀', iconColor: 'text-purple-500' }
+                    { border: 'border-slate-200 dark:border-slate-700/80', headerBg: 'bg-slate-50 dark:bg-slate-800/50', btnBg: 'from-slate-800 to-slate-900 text-white hover:from-slate-700 hover:to-slate-800', ribbon: null, iconColor: 'text-slate-400' },
+                    { border: 'border-indigo-200 dark:border-indigo-800/80', headerBg: 'bg-indigo-50/50 dark:bg-indigo-950/30', btnBg: 'from-indigo-600 to-indigo-700 text-white hover:from-indigo-500 hover:to-indigo-600', ribbon: null, iconColor: 'text-indigo-500' },
+                    { border: 'border-amber-300 dark:border-amber-500/50 shadow-md', headerBg: 'bg-amber-50/50 dark:bg-amber-950/30', btnBg: 'from-amber-500 to-yellow-600 text-white hover:from-amber-400 hover:to-yellow-500', ribbon: 'Most Popular 🔥', iconColor: 'text-amber-500' },
+                    { border: 'border-purple-200 dark:border-purple-800/80', headerBg: 'bg-purple-50/50 dark:bg-purple-950/30', btnBg: 'from-purple-600 to-indigo-700 text-white hover:from-purple-500 hover:to-indigo-600', ribbon: 'Best Value 🚀', iconColor: 'text-purple-500' }
                   ];
                   const t = themes[index % themes.length];
                   
-                  // Generate custom feature listings based on pack points
                   const pointsVal = pack.points || 0;
                   const estimatedUnlocks = Math.floor(pointsVal / 8);
 
@@ -268,7 +264,7 @@ export default function Pricing() {
                       key={pack.id}
                       whileHover={{ y: -6 }}
                       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      className={`bg-white border rounded-3xl flex flex-col justify-between overflow-hidden shadow-sm relative h-full transition duration-300 ${t.border}`}
+                      className={`bg-white dark:bg-slate-800/80 border rounded-3xl flex flex-col justify-between overflow-hidden shadow-sm relative h-full transition duration-300 ${t.border}`}
                     >
                       {t.ribbon && (
                         <span className="absolute top-3.5 right-4 bg-indigo-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
@@ -279,9 +275,9 @@ export default function Pricing() {
                       <div className="p-6 flex-1 flex flex-col justify-between">
                         <div>
                           <div className={`p-4 rounded-2xl mb-4 ${t.headerBg}`}>
-                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">{pack.name}</h3>
+                            <h3 className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{pack.name}</h3>
                             <div className="flex items-baseline gap-1.5 mt-2">
-                              <span className="text-3xl font-black text-slate-800 tracking-tight">{pack.points}</span>
+                              <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{pack.points}</span>
                               <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider flex items-center gap-1">
                                 <FaCoins className="text-[9px] text-amber-500 animate-spin" style={{ animationDuration: '4s' }} /> Points
                               </span>
@@ -289,26 +285,26 @@ export default function Pricing() {
                           </div>
 
                           <div className="flex items-baseline gap-1.5 my-5">
-                            <span className="text-2xl font-black text-slate-800">₹{pack.price}</span>
+                            <span className="text-2xl font-black text-slate-900 dark:text-white">₹{pack.price}</span>
                             <span className="text-[10px] text-slate-400 font-bold">One-time payment</span>
                           </div>
 
-                          <div className="border-t border-slate-100 pt-4 space-y-3">
+                          <div className="border-t border-slate-100 dark:border-slate-700/60 pt-4 space-y-3">
                             <div className="flex items-start gap-2 text-xs">
                               <FaCheckCircle className="text-emerald-500 text-sm mt-0.5 shrink-0" />
-                              <span className="text-slate-600">Unlocks approx. <strong className="text-indigo-950">{estimatedUnlocks} AI explanations</strong></span>
+                              <span className="text-slate-600 dark:text-slate-300">Unlocks approx. <strong className="text-slate-900 dark:text-white">{estimatedUnlocks} AI explanations</strong></span>
                             </div>
                             <div className="flex items-start gap-2 text-xs">
                               <FaCheckCircle className="text-emerald-500 text-sm mt-0.5 shrink-0" />
-                              <span className="text-slate-600">Bilingual reasoning (Hindi/English)</span>
+                              <span className="text-slate-600 dark:text-slate-300">Bilingual reasoning (Hindi/English)</span>
                             </div>
                             <div className="flex items-start gap-2 text-xs">
                               <FaCheckCircle className="text-emerald-500 text-sm mt-0.5 shrink-0" />
-                              <span className="text-slate-600">Step-by-step math calculations</span>
+                              <span className="text-slate-600 dark:text-slate-300">Step-by-step math calculations</span>
                             </div>
                             <div className="flex items-start gap-2 text-xs">
                               <FaCheckCircle className="text-emerald-500 text-sm mt-0.5 shrink-0" />
-                              <span className="text-slate-600">Lifetime Validity</span>
+                              <span className="text-slate-600 dark:text-slate-300">Lifetime Validity</span>
                             </div>
                           </div>
                         </div>
@@ -331,34 +327,34 @@ export default function Pricing() {
 
           {/* Secure transaction notice */}
           <section className="max-w-md mx-auto px-4 pb-16 text-center">
-            <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm flex items-center justify-center gap-3">
-              <FaShieldAlt className="text-indigo-600 text-2xl" />
-              <div className="text-left text-[11px] leading-relaxed text-slate-500">
-                <strong className="text-slate-800 font-bold uppercase block tracking-wider mb-0.5">Secure Checkout</strong>
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-3xl p-5 shadow-sm flex items-center justify-center gap-3">
+              <FaShieldAlt className="text-indigo-600 dark:text-indigo-400 text-2xl" />
+              <div className="text-left text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                <strong className="text-slate-900 dark:text-white font-bold uppercase block tracking-wider mb-0.5">Secure Checkout</strong>
                 Payments are securely processed via Razorpay and Stripe. None of your card or payment information is stored by us.
               </div>
             </div>
           </section>
 
           {/* FAQ Section */}
-          <section className="bg-white border-y border-slate-100 py-16">
+          <section className="bg-white dark:bg-slate-950 border-y border-slate-200 dark:border-slate-800/80 py-16 transition-colors">
             <div className="max-w-3xl mx-auto px-4">
               <div className="text-center mb-10">
-                <span className="inline-flex items-center gap-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-extrabold px-3 py-1.5 rounded-full mb-3 uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-[10px] font-extrabold px-3 py-1.5 rounded-full mb-3 uppercase tracking-wider">
                   <FaQuestionCircle /> Frequently Asked Questions
                 </span>
-                <h2 className="text-2xl font-extrabold text-indigo-950">Got Questions? We've Got Answers</h2>
+                <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Got Questions? We've Got Answers</h2>
               </div>
 
               <div className="space-y-3">
                 {faqs.map((faq, i) => (
-                  <div key={i} className="border border-slate-100 rounded-2xl overflow-hidden transition bg-slate-50/30">
+                  <div key={i} className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden transition bg-slate-50 dark:bg-slate-900/60">
                     <button
                       onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                      className="w-full p-4 text-left font-bold text-xs md:text-sm text-indigo-950 flex justify-between items-center transition hover:bg-slate-50/50"
+                      className="w-full p-4 text-left font-bold text-xs md:text-sm text-slate-900 dark:text-white flex justify-between items-center transition hover:bg-slate-100 dark:hover:bg-slate-800/80"
                     >
                       {faq.q}
-                      <FaChevronDown className={`text-slate-400 text-xs transition duration-300 ${openFaq === i ? 'rotate-180 text-indigo-600' : ''}`} />
+                      <FaChevronDown className={`text-slate-400 text-xs transition duration-300 ${openFaq === i ? 'rotate-180 text-indigo-600 dark:text-indigo-400' : ''}`} />
                     </button>
                     <AnimatePresence initial={false}>
                       {openFaq === i && (
@@ -368,7 +364,7 @@ export default function Pricing() {
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <div className="p-4 pt-0 text-slate-500 text-xs md:text-sm leading-relaxed border-t border-slate-100 bg-white">
+                          <div className="p-4 pt-0 text-slate-600 dark:text-slate-400 text-xs md:text-sm leading-relaxed border-t border-slate-100 dark:border-slate-800/60 bg-white dark:bg-slate-900">
                             {faq.a}
                           </div>
                         </motion.div>
@@ -382,7 +378,7 @@ export default function Pricing() {
         </div>
 
         {/* Footer */}
-        <footer className="bg-[#0f172a] text-slate-400 pt-12 pb-8 px-4 border-t border-slate-900">
+        <footer className="bg-slate-900 dark:bg-slate-950 text-slate-400 pt-12 pb-8 px-4 border-t border-slate-800">
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-b border-slate-800 pb-8">
               <div>
@@ -412,31 +408,31 @@ export default function Pricing() {
       {/* Buy Confirm Modal */}
       <AnimatePresence>
         {buyModal && (
-          <motion.div className="fixed inset-0 bg-indigo-950/40 backdrop-blur-sm flex items-center justify-center z-50 px-4"
+          <motion.div className="fixed inset-0 bg-slate-900/60 dark:bg-indigo-950/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <motion.div className="bg-white border border-slate-100 rounded-3xl p-6 max-w-sm w-full shadow-lg"
+            <motion.div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-xl"
               initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}>
-              <h3 className="text-lg font-extrabold text-indigo-950 mb-2">🛒 Confirm Purchase</h3>
-              <p className="text-slate-500 text-xs mb-4 leading-relaxed">Unlock {buyModal.name} Points Bundle.</p>
-              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-5 flex justify-between items-center shadow-sm">
-                <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Price</span>
-                <span className="text-amber-500 font-extrabold text-base flex items-center gap-1">
+              <h3 className="text-lg font-extrabold text-slate-900 dark:text-white mb-2">🛒 Confirm Purchase</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-xs mb-4 leading-relaxed">Unlock {buyModal.name} Points Bundle.</p>
+              <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 mb-5 flex justify-between items-center shadow-sm">
+                <span className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Price</span>
+                <span className="text-amber-600 dark:text-amber-400 font-extrabold text-base flex items-center gap-1">
                   ₹{buyModal.price}
                 </span>
               </div>
               {buyMsg && (
-                <div className={`mb-4 text-xs font-semibold px-4 py-3 rounded-xl ${buyMsg.startsWith('✅') ? 'bg-emerald-50 text-emerald-800 border border-emerald-250' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                <div className={`mb-4 text-xs font-semibold px-4 py-3 rounded-xl ${buyMsg.startsWith('✅') ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800'}`}>
                   {buyMsg}
                 </div>
               )}
               {!buyMsg.startsWith('✅') && (
                 <div className="flex gap-3">
                   <button onClick={() => setBuyModal(null)}
-                    className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-700 text-xs font-bold transition">
+                    className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold transition">
                     Cancel
                   </button>
                   <button onClick={confirmBuy} disabled={buying}
-                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-500 text-white font-extrabold text-xs disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm">
+                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-xs disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm">
                     {buying ? <span className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full" /> : '✅ Confirm'}
                   </button>
                 </div>

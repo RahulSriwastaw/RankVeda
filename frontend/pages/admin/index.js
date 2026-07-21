@@ -966,15 +966,16 @@ function Exams() {
 
               {/* Marketplace / Price config */}
               <div className="card p-5 space-y-4">
-                <h3 className="text-sm font-semibold border-b border-[rgb(var(--border))] pb-2">Marketplace & Legal</h3>
+                <h3 className="text-sm font-semibold border-b border-[rgb(var(--border))] pb-2">Marketplace & Pricing</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="label text-xs">Points/Price Required (0 = Free)</label>
-                    <input type="number" value={form.price} onChange={e => setForm({ ...form, price: parseInt(e.target.value) || 0 })} className="input mt-1.5" />
+                    <label className="label text-xs">Individual Exam Pack Price (₹ INR)</label>
+                    <input type="number" value={form.price} onChange={e => setForm({ ...form, price: parseInt(e.target.value) || 0 })} className="input mt-1.5" placeholder="Price in ₹ INR (e.g. 199)" />
+                    <p className="text-[10px] text-[rgb(var(--muted-foreground))] mt-1">Creating/editing price here automatically updates the Individual Question Bank Pack in ₹ INR (purchased via Razorpay, not points).</p>
                   </div>
                 </div>
                 <div>
-                  <label className="label text-xs">Marketplace Folder Description</label>
+                  <label className="label text-xs">Marketplace Description</label>
                   <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="textarea mt-1.5 h-20" placeholder="Description of the question bank pack..." />
                 </div>
                 <div>
@@ -1048,48 +1049,184 @@ function Packs() {
 
   const fetchData = async () => {
     setLoading(true);
-    try { const [packsRes, examsRes] = await Promise.all([fetch(`${API}/packs`), fetch(`${API}/exams`)]); const packsData = await packsRes.json(); const examsData = await examsRes.json(); setPacks(Array.isArray(packsData.packs) ? packsData.packs : []); setExams(Array.isArray(examsData.exams) ? examsData.exams : []); }
-    catch (e) { console.error(e); setError('Failed to load'); } finally { setLoading(false); }
+    try {
+      const [packsRes, examsRes] = await Promise.all([fetch(`${API}/packs`), fetch(`${API}/exams`)]);
+      const packsData = await packsRes.json();
+      const examsData = await examsRes.json();
+      setPacks(Array.isArray(packsData.packs) ? packsData.packs : []);
+      setExams(Array.isArray(examsData.exams) ? examsData.exams : []);
+    } catch (e) {
+      console.error(e);
+      setError('Failed to load packs');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div>
-      <PageHeader title="Question Packs" subtitle="Bundle multiple exams into marketplace offers" />
+      <PageHeader title="Question Packs & Individual Exam Packs" subtitle="Manage pricing and exam bundles for the Question Bank Marketplace (₹ INR)" />
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <form onSubmit={async e => { e.preventDefault(); setSubmitting(true); setMessage(''); setError(''); try { const url = editingPackId ? `${API}/packs/${editingPackId}` : `${API}/packs`; const method = editingPackId ? 'PUT' : 'POST'; const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: form.name, description: form.description, price: Number(form.price || 0), exam_ids: form.exam_ids, is_active: form.is_active }) }); const data = await res.json(); if (data.success) { setMessage(editingPackId ? 'Pack updated' : 'Pack created'); setForm({ name: '', description: '', price: '0', exam_ids: [] }); setEditingPackId(null); fetchData(); } else setError(data.error || 'Failed'); } catch (e) { setError('Network error'); } finally { setSubmitting(false); } }} className="xl:col-span-2 card p-4 space-y-4">
-          <h2 className="text-sm font-semibold flex items-center gap-2">{editingPackId ? <FaEdit className="text-indigo-400" /> : <FaPlus className="text-emerald-400" />}{editingPackId ? 'Edit Pack' : 'New Pack'}</h2>
+        <form onSubmit={async e => {
+          e.preventDefault();
+          setSubmitting(true);
+          setMessage('');
+          setError('');
+          try {
+            const url = editingPackId ? `${API}/packs/${editingPackId}` : `${API}/packs`;
+            const method = editingPackId ? 'PUT' : 'POST';
+            const res = await fetch(url, {
+              method,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: form.name,
+                description: form.description,
+                price: Number(form.price || 0),
+                exam_ids: form.exam_ids,
+                is_active: form.is_active
+              })
+            });
+            const data = await res.json();
+            if (data.success) {
+              setMessage(editingPackId ? 'Pack updated successfully!' : 'Pack created successfully!');
+              setForm({ name: '', description: '', price: '0', exam_ids: [], is_active: true });
+              setEditingPackId(null);
+              fetchData();
+            } else {
+              setError(data.error || 'Failed to save pack');
+            }
+          } catch (e) {
+            setError('Network error');
+          } finally {
+            setSubmitting(false);
+          }
+        }} className="xl:col-span-2 card p-5 space-y-4">
+          <h2 className="text-sm font-semibold flex items-center gap-2">
+            {editingPackId ? <FaEdit className="text-indigo-400" /> : <FaPlus className="text-emerald-400" />}
+            {editingPackId ? 'Edit Question Pack' : 'Create New Question Pack'}
+          </h2>
           {message && <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 text-sm text-emerald-400"><FaCheckCircle className="inline mr-1" />{message}</div>}
           {error && <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm text-red-400"><FaExclamationTriangle className="inline mr-1" />{error}</div>}
+          
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="input" placeholder="Pack name" required />
-            <input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} className="input" placeholder="Price (INR)" />
+            <div>
+              <label className="label text-xs mb-1 block">Pack Title</label>
+              <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="input" placeholder="e.g. RRB NTPC Question Bank Pack" required />
+            </div>
+            <div>
+              <label className="label text-xs mb-1 block">Price (₹ INR)</label>
+              <input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} className="input" placeholder="Price in ₹ (e.g. 199)" />
+            </div>
           </div>
-          <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="textarea" placeholder="Description..." />
-          <label className="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })} className="w-4 h-4 rounded border-[rgb(var(--border))] text-[rgb(var(--primary))]" /><span>Active</span></label>
-          <div><label className="label text-xs mb-2 block">Select Exams</label>
-            <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto scrollbar-thin rounded-lg border border-[rgb(var(--border))] p-2">
+
+          <div>
+            <label className="label text-xs mb-1 block">Description</label>
+            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="textarea h-20" placeholder="Description of what this pack includes..." />
+          </div>
+
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input type="checkbox" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })} className="w-4 h-4 rounded border-[rgb(var(--border))] text-[rgb(var(--primary))]" />
+            <span>Active in Marketplace</span>
+          </label>
+
+          <div>
+            <label className="label text-xs mb-2 block">Assigned Exam(s)</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-56 overflow-y-auto scrollbar-thin rounded-lg border border-[rgb(var(--border))] p-2">
               {exams.map(exam => {
                 const checked = form.exam_ids.some(item => typeof item === 'object' ? item.exam_id === exam.id : item === exam.id);
                 return (
-                  <label key={exam.id} className={cn('flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm cursor-pointer transition-colors', checked ? 'bg-[rgb(var(--primary))/0.05]' : 'hover:bg-[rgb(var(--accent))/0.3]')}>
-                    <input type="checkbox" checked={checked} onChange={() => setForm(prev => { const exists = prev.exam_ids.some(item => typeof item === 'object' ? item.exam_id === exam.id : item === exam.id); if (exists) return { ...prev, exam_ids: prev.exam_ids.filter(item => typeof item === 'object' ? item.exam_id !== exam.id : item !== exam.id) }; return { ...prev, exam_ids: [...prev.exam_ids, { exam_id: exam.id, include_questions: true, include_results: true }] }; })} className="w-4 h-4 rounded border-[rgb(var(--border))] text-[rgb(var(--primary))]" />
-                    <span>{exam.name}</span>
+                  <label key={exam.id} className={cn('flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm cursor-pointer transition-colors', checked ? 'bg-[rgb(var(--primary))/0.1] border border-[rgb(var(--primary))/0.3]' : 'hover:bg-[rgb(var(--accent))/0.3]')}>
+                    <input type="checkbox" checked={checked} onChange={() => setForm(prev => {
+                      const exists = prev.exam_ids.some(item => typeof item === 'object' ? item.exam_id === exam.id : item === exam.id);
+                      if (exists) {
+                        return { ...prev, exam_ids: prev.exam_ids.filter(item => typeof item === 'object' ? item.exam_id !== exam.id : item !== exam.id) };
+                      }
+                      return { ...prev, exam_ids: [...prev.exam_ids, { exam_id: exam.id, include_questions: true, include_results: true }] };
+                    })} className="w-4 h-4 rounded border-[rgb(var(--border))] text-[rgb(var(--primary))]" />
+                    <span className="truncate">{exam.name}</span>
                   </label>
                 );
               })}
             </div>
           </div>
-          <div className="flex gap-2"><button type="submit" disabled={submitting} className="btn-primary btn-sm">{submitting ? 'Saving...' : editingPackId ? 'Update' : 'Create'}</button>{editingPackId && <button type="button" onClick={() => { setEditingPackId(null); setForm({ name: '', description: '', price: '0', exam_ids: [] }); setMessage(''); setError(''); }} className="btn-ghost btn-sm">Cancel</button>}</div>
+
+          <div className="flex gap-2 pt-2">
+            <button type="submit" disabled={submitting} className="btn-primary btn-sm">
+              {submitting ? 'Saving...' : editingPackId ? 'Update Pack Settings' : 'Create Pack'}
+            </button>
+            {editingPackId && (
+              <button type="button" onClick={() => { setEditingPackId(null); setForm({ name: '', description: '', price: '0', exam_ids: [], is_active: true }); setMessage(''); setError(''); }} className="btn-ghost btn-sm">
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
+
         <div className="card p-4">
-          <h2 className="text-sm font-semibold mb-3">Existing Packs</h2>
-          {loading ? <div className="space-y-2">{[1, 2, 3].map(i => <div key={i} className="skeleton h-20 rounded-lg" />)}</div> : packs.length === 0 ? <div className="text-center py-8 text-sm text-[rgb(var(--muted-foreground))]">No packs created yet.</div> : (
-            <div className="space-y-2 max-h-[400px] overflow-y-auto scrollbar-thin pr-1">{packs.map(pack => (
-              <div key={pack.id} className="rounded-lg border border-[rgb(var(--border))] p-3 hover:border-[rgb(var(--muted-foreground))/0.3] transition-colors">
-                <div className="flex items-start justify-between gap-2"><div className="min-w-0 flex-1"><p className="text-sm font-medium truncate">{pack.name}</p><p className="text-xs text-[rgb(var(--muted-foreground))] truncate mt-0.5">{pack.description || 'No description'}</p></div><div className="flex items-center gap-1 shrink-0"><button onClick={() => { setEditingPackId(pack.id); setForm({ name: pack.name || '', description: pack.description || '', price: (pack.price || 0).toString(), exam_ids: pack.exam_ids || [], is_active: pack.is_active !== false }); }} className="btn-ghost p-1"><FaEdit size={12} /></button><button onClick={async () => { if (!confirm('Delete this pack?')) return; try { const res = await fetch(`${API}/packs/${pack.id}`, { method: 'DELETE' }); const data = await res.json(); if (data.success) fetchData(); else setError(data.error || 'Delete failed'); } catch (e) { setError('Delete failed'); } }} className="btn-ghost p-1 text-red-400"><FaTrash size={12} /></button></div></div>
-                <div className="mt-2 flex items-center gap-2 text-xs"><span className="text-[rgb(var(--muted-foreground))]">{(pack.exam_ids || []).length} exams</span><span className={pack.is_active ? 'badge-success' : 'badge-destructive'}>{pack.is_active ? 'Active' : 'Inactive'}</span><span className="text-emerald-400 font-semibold">\u20B9{pack.price || 0}</span></div>
-              </div>
-            ))}</div>
+          <h2 className="text-sm font-semibold mb-3">All Marketplace Packs</h2>
+          {loading ? (
+            <div className="space-y-2">{[1, 2, 3].map(i => <div key={i} className="skeleton h-20 rounded-lg" />)}</div>
+          ) : packs.length === 0 ? (
+            <div className="text-center py-8 text-sm text-[rgb(var(--muted-foreground))]">No packs found.</div>
+          ) : (
+            <div className="space-y-2.5 max-h-[550px] overflow-y-auto scrollbar-thin pr-1">
+              {packs.map(pack => {
+                const examCount = (pack.exam_ids || []).length;
+                const isSingleExam = examCount === 1;
+
+                return (
+                  <div key={pack.id} className="rounded-lg border border-[rgb(var(--border))] p-3 hover:border-[rgb(var(--muted-foreground))/0.3] transition-colors bg-[rgb(var(--card))]">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                          <span className={isSingleExam ? 'px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30' : 'px-2 py-0.5 rounded text-[9px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/30'}>
+                            {isSingleExam ? '🎯 Individual Exam' : '📦 Multi-Exam Pack'}
+                          </span>
+                          <span className={pack.is_active ? 'badge-success text-[9px]' : 'badge-destructive text-[9px]'}>
+                            {pack.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+                        <p className="text-sm font-semibold truncate">{pack.name}</p>
+                        <p className="text-xs text-[rgb(var(--muted-foreground))] line-clamp-2 mt-0.5">{pack.description || 'No description'}</p>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button onClick={() => {
+                          setEditingPackId(pack.id);
+                          setForm({
+                            name: pack.name || '',
+                            description: pack.description || '',
+                            price: (pack.price || 0).toString(),
+                            exam_ids: pack.exam_ids || [],
+                            is_active: pack.is_active !== false
+                          });
+                          setMessage('');
+                          setError('');
+                        }} className="btn-ghost p-1 text-indigo-400" title="Edit Pack">
+                          <FaEdit size={14} />
+                        </button>
+                        <button onClick={async () => {
+                          if (!confirm('Delete this pack?')) return;
+                          try {
+                            const res = await fetch(`${API}/packs/${pack.id}`, { method: 'DELETE' });
+                            const data = await res.json();
+                            if (data.success) fetchData();
+                            else setError(data.error || 'Delete failed');
+                          } catch (e) { setError('Delete failed'); }
+                        }} className="btn-ghost p-1 text-red-400" title="Delete Pack">
+                          <FaTrash size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between text-xs pt-2 border-t border-[rgb(var(--border))]">
+                      <span className="text-[rgb(var(--muted-foreground))]">{examCount} exam{examCount === 1 ? '' : 's'} linked</span>
+                      <span className="text-emerald-400 font-black text-sm">₹{pack.price || 0}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>

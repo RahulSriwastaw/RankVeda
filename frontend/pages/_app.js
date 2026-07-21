@@ -6,7 +6,7 @@ import '@/utils/firebase';
 
 export default function App({ Component, pageProps }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light">
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
       <Toaster position="top-center" reverseOrder={false} />
       <Component {...pageProps} />
     </ThemeProvider>

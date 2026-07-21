@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
-from db.models import db, User, UserPoints
+from db.models import db, User, UserPoints, PointsTransaction
 import hashlib
 import jwt
 import os
@@ -71,16 +71,18 @@ def register():
         db.session.add(user)
         db.session.flush()  # get user.id
 
-        # Create wallet
-        wallet = UserPoints(user_id=user.id, balance=0, total_earned=0, total_spent=0)
+        # Create wallet with 50 Welcome Bonus points
+        wallet = UserPoints(user_id=user.id, balance=50, total_earned=50, total_spent=0)
         db.session.add(wallet)
+        txn = PointsTransaction(user_id=user.id, type='earn', amount=50, description='Welcome Bonus: Free 50 Points')
+        db.session.add(txn)
         db.session.commit()
 
         token = _make_token(user.id, user.email)
         return jsonify({
             'success': True,
             'token': token,
-            'user': {'id': user.id, 'email': user.email, 'name': user.name, 'balance': 0}
+            'user': {'id': user.id, 'email': user.email, 'name': user.name, 'balance': 50}
         }), 201
     except Exception as e:
         db.session.rollback()
@@ -105,6 +107,11 @@ def login():
             return jsonify({'error': 'Invalid email or password'}), 401
 
         wallet = UserPoints.query.filter_by(user_id=user.id).first()
+        if not wallet:
+            wallet = UserPoints(user_id=user.id, balance=50, total_earned=50, total_spent=0)
+            db.session.add(wallet)
+            db.session.commit()
+
         token = _make_token(user.id, user.email)
         return jsonify({
             'success': True,
@@ -113,7 +120,7 @@ def login():
                 'id': user.id,
                 'email': user.email,
                 'name': user.name,
-                'balance': wallet.balance if wallet else 0
+                'balance': wallet.balance if wallet else 50
             }
         })
     except Exception as e:
@@ -129,11 +136,16 @@ def me():
     if not user:
         return jsonify({'error': 'Unauthorized'}), 401
     wallet = UserPoints.query.filter_by(user_id=user.id).first()
+    if not wallet:
+        wallet = UserPoints(user_id=user.id, balance=50, total_earned=50, total_spent=0)
+        db.session.add(wallet)
+        db.session.commit()
+
     return jsonify({
         'id': user.id,
         'email': user.email,
         'name': user.name,
-        'balance': wallet.balance if wallet else 0,
+        'balance': wallet.balance if wallet else 50,
         'created_at': user.created_at.isoformat() if user.created_at else None
     })
 
@@ -186,8 +198,10 @@ def google_login():
             db.session.add(user)
             db.session.flush()
 
-            wallet = UserPoints(user_id=user.id, balance=0, total_earned=0, total_spent=0)
+            wallet = UserPoints(user_id=user.id, balance=50, total_earned=50, total_spent=0)
             db.session.add(wallet)
+            txn = PointsTransaction(user_id=user.id, type='earn', amount=50, description='Welcome Bonus: Free 50 Points')
+            db.session.add(txn)
             db.session.commit()
             is_new = True
 
@@ -201,7 +215,7 @@ def google_login():
                 'id': user.id,
                 'email': user.email,
                 'name': user.name,
-                'balance': wallet.balance if wallet else 0
+                'balance': wallet.balance if wallet else 50
             },
             'is_new': is_new
         })
@@ -247,9 +261,11 @@ def firebase_login():
             db.session.add(user)
             db.session.flush()
 
-            # Create wallet
-            wallet = UserPoints(user_id=user.id, balance=0, total_earned=0, total_spent=0)
+            # Create wallet with 50 free welcome points
+            wallet = UserPoints(user_id=user.id, balance=50, total_earned=50, total_spent=0)
             db.session.add(wallet)
+            txn = PointsTransaction(user_id=user.id, type='earn', amount=50, description='Welcome Bonus: Free 50 Points')
+            db.session.add(txn)
             db.session.commit()
             is_new = True
         else:
@@ -268,7 +284,7 @@ def firebase_login():
                 'id': user.id,
                 'email': user.email,
                 'name': user.name,
-                'balance': wallet.balance if wallet else 0
+                'balance': wallet.balance if wallet else 50
             },
             'is_new': is_new
         })

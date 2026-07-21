@@ -2,11 +2,13 @@ import Head from 'next/head';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaSearch, FaUsers, FaTrophy, FaDownload, FaChevronDown,
   FaChevronUp, FaBookOpen, FaRobot, FaChartLine, FaArrowRight,
-  FaCheckCircle, FaLock, FaFilePdf
+  FaCheckCircle, FaLock, FaFilePdf, FaShieldAlt, FaAward,
+  FaClock, FaFileAlt, FaLink, FaExclamationCircle, FaQuestionCircle,
+  FaStar, FaExternalLinkAlt, FaGraduationCap
 } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -16,159 +18,76 @@ import Logo from '../../components/Logo';
 const SITE_URL = 'https://rankresult.in';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-// ─── Colour token map (themeColor → Tailwind classes for Light Theme) ────────
-const THEME = {
-  indigo: {
-    badge: 'bg-indigo-50 border-indigo-200 text-indigo-700',
-    hero: 'from-indigo-50/50 via-white to-slate-50/30',
-    btn: 'from-indigo-700 via-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-500 shadow-indigo-100',
-    ring: 'focus:border-indigo-500 focus:ring-indigo-500/20',
-    icon: 'text-indigo-600',
-    dot: 'bg-indigo-600',
-    border: 'border-indigo-100',
-    crumb: 'text-indigo-600',
-    tag: 'bg-indigo-50/60 text-indigo-700 border-indigo-100/50',
-  },
-  red: {
-    badge: 'bg-red-50 border-red-200 text-red-700',
-    hero: 'from-red-50/50 via-white to-slate-50/30',
-    btn: 'from-red-700 via-red-600 to-orange-600 hover:from-red-600 hover:to-orange-500 shadow-red-100',
-    ring: 'focus:border-red-500 focus:ring-red-500/20',
-    icon: 'text-red-600',
-    dot: 'bg-red-600',
-    border: 'border-red-100',
-    crumb: 'text-red-600',
-    tag: 'bg-red-50/60 text-red-700 border-red-100/50',
-  },
-  blue: {
-    badge: 'bg-blue-50 border-blue-200 text-blue-700',
-    hero: 'from-blue-50/50 via-white to-slate-50/30',
-    btn: 'from-blue-700 via-blue-600 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 shadow-blue-100',
-    ring: 'focus:border-blue-500 focus:ring-blue-500/20',
-    icon: 'text-blue-600',
-    dot: 'bg-blue-600',
-    border: 'border-blue-100',
-    crumb: 'text-blue-600',
-    tag: 'bg-blue-50/60 text-blue-700 border-blue-100/50',
-  },
-  teal: {
-    badge: 'bg-teal-50 border-teal-200 text-teal-700',
-    hero: 'from-teal-50/50 via-white to-slate-50/30',
-    btn: 'from-teal-700 via-teal-600 to-cyan-600 hover:from-teal-600 hover:to-cyan-500 shadow-teal-100',
-    ring: 'focus:border-teal-500 focus:ring-teal-500/20',
-    icon: 'text-teal-600',
-    dot: 'bg-teal-600',
-    border: 'border-teal-100',
-    crumb: 'text-teal-600',
-    tag: 'bg-teal-50/60 text-teal-700 border-teal-100/50',
-  },
-  amber: {
-    badge: 'bg-amber-50 border-amber-200 text-amber-700',
-    hero: 'from-amber-50/50 via-white to-slate-50/30',
-    btn: 'from-amber-700 via-amber-600 to-orange-600 hover:from-amber-600 hover:to-orange-500 shadow-amber-100',
-    ring: 'focus:border-amber-500 focus:ring-amber-500/20',
-    icon: 'text-amber-600',
-    dot: 'bg-amber-600',
-    border: 'border-amber-100',
-    crumb: 'text-amber-600',
-    tag: 'bg-amber-50/60 text-amber-700 border-amber-100/50',
-  },
-  purple: {
-    badge: 'bg-purple-50 border-purple-200 text-purple-700',
-    hero: 'from-purple-50/50 via-white to-slate-50/30',
-    btn: 'from-purple-700 via-purple-600 to-pink-600 hover:from-purple-600 hover:to-pink-500 shadow-purple-100',
-    ring: 'focus:border-purple-500 focus:ring-purple-500/20',
-    icon: 'text-purple-600',
-    dot: 'bg-purple-600',
-    border: 'border-purple-100',
-    crumb: 'text-purple-600',
-    tag: 'bg-purple-50/60 text-purple-700 border-purple-100/50',
-  },
-  orange: {
-    badge: 'bg-orange-50 border-orange-200 text-orange-700',
-    hero: 'from-orange-50/50 via-white to-slate-50/30',
-    btn: 'from-orange-700 via-orange-600 to-amber-600 hover:from-orange-600 hover:to-amber-500 shadow-orange-100',
-    ring: 'focus:border-orange-500 focus:ring-orange-500/20',
-    icon: 'text-orange-600',
-    dot: 'bg-orange-600',
-    border: 'border-orange-100',
-    crumb: 'text-orange-600',
-    tag: 'bg-orange-50/60 text-orange-700 border-orange-100/50',
-  },
-  pink: {
-    badge: 'bg-pink-50 border-pink-200 text-pink-700',
-    hero: 'from-pink-50/50 via-white to-slate-50/30',
-    btn: 'from-pink-700 via-pink-600 to-rose-600 hover:from-pink-600 hover:to-rose-500 shadow-pink-100',
-    ring: 'focus:border-pink-500 focus:ring-pink-500/20',
-    icon: 'text-pink-600',
-    dot: 'bg-pink-600',
-    border: 'border-pink-100',
-    crumb: 'text-pink-600',
-    tag: 'bg-pink-50/60 text-pink-700 border-pink-100/50',
-  },
-};
-
-// ─── FAQ Accordion ────────────────────────────────────────────────────────────
-function FAQItem({ item, idx, t }) {
-  const [open, setOpen] = useState(false);
+// ─── FAQ Accordion Component ──────────────────────────────────────────────────
+function FAQItem({ item, idx }) {
+  const [open, setOpen] = useState(idx === 0);
   return (
-    <div className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm bg-white">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm transition">
       <button
         id={`faq-q-${idx}`}
         aria-expanded={open}
         aria-controls={`faq-a-${idx}`}
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between p-5 text-left bg-white hover:bg-slate-50 transition gap-4 text-indigo-950 font-bold"
+        className="w-full p-4 text-left flex items-center justify-between gap-3 text-xs sm:text-sm font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-300 transition"
       >
-        <span className="text-sm">{item.q}</span>
-        {open
-          ? <FaChevronUp className={`${t.icon} shrink-0 text-xs`} />
-          : <FaChevronDown className="text-slate-400 shrink-0 text-xs" />}
+        <span>{item.q}</span>
+        <span className={`text-indigo-600 dark:text-indigo-400 transition-transform duration-200 shrink-0 ${open ? 'rotate-180' : ''}`}>
+          ▼
+        </span>
       </button>
-      {open && (
-        <div
-          id={`faq-a-${idx}`}
-          role="region"
-          aria-labelledby={`faq-q-${idx}`}
-          className="p-5 bg-slate-50/50 border-t border-slate-100 text-xs md:text-sm text-slate-600 leading-relaxed"
-        >
-          {item.a}
-        </div>
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            id={`faq-a-${idx}`}
+            role="region"
+            aria-labelledby={`faq-q-${idx}`}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="px-4 pb-4 text-xs text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800/60 pt-3">
+              {item.a}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-// ─── Other Exams sidebar ─────────────────────────────────────────────────────
+// ─── Other Exams Sidebar Component ────────────────────────────────────────────
 function OtherExams({ currentSlug, allExams = [] }) {
   const others = allExams.filter((e) => e.slug !== currentSlug).slice(0, 5);
   return (
-    <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
-      <h3 className="font-extrabold text-indigo-950 mb-4 text-sm flex items-center gap-2">
-        <FaBookOpen className="text-indigo-600" /> Other Exams
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+      <h3 className="font-extrabold text-slate-900 dark:text-white mb-4 text-xs sm:text-sm flex items-center gap-2 uppercase tracking-wider">
+        <FaBookOpen className="text-indigo-600 dark:text-indigo-400" /> Other Exam Calculators
       </h3>
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {others.map((e) => (
           e.status === 'active' ? (
             <Link
               key={e.slug}
               href={`/exams/${e.slug}`}
-              className="flex items-center justify-between px-4 py-3 rounded-2xl bg-slate-50 hover:bg-indigo-50/50 border border-slate-100 hover:border-indigo-100 transition group text-xs font-bold text-slate-700"
+              className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 border border-slate-200 dark:border-slate-700/60 hover:border-indigo-500/50 transition group text-xs font-bold text-slate-700 dark:text-slate-200"
             >
-              <span className="flex items-center gap-2">
-                <span className="text-lg">{e.icon}</span> {e.name}
+              <span className="flex items-center gap-2 truncate">
+                <span className="text-base">{e.icon || '📋'}</span>
+                <span className="truncate">{e.name}</span>
               </span>
-              <FaArrowRight className="text-[10px] text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition" />
+              <FaArrowRight className="text-[10px] text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:translate-x-0.5 transition shrink-0" />
             </Link>
           ) : (
             <div
               key={e.slug}
-              className="flex items-center justify-between px-4 py-3 rounded-2xl bg-slate-50/50 border border-slate-100/50 text-xs font-bold text-slate-400 opacity-60"
+              className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-800 text-xs font-bold text-slate-400 dark:text-slate-500 opacity-60"
             >
-              <span className="flex items-center gap-2">
-                <span className="text-lg">{e.icon}</span> {e.name}
+              <span className="flex items-center gap-2 truncate">
+                <span className="text-base">{e.icon || '📋'}</span>
+                <span className="truncate">{e.name}</span>
               </span>
-              <FaLock className="text-[10px]" />
+              <FaLock className="text-[10px] shrink-0" />
             </div>
           )
         ))}
@@ -177,10 +96,11 @@ function OtherExams({ currentSlug, allExams = [] }) {
   );
 }
 
-// ─── Main Page Component ──────────────────────────────────────────────────────
+// ─── Main Exam SEO Page Component ─────────────────────────────────────────────
 export default function ExamPage({ exam, allExams = [] }) {
   const router = useRouter();
   const [url, setUrl] = useState('');
+  const [urlError, setUrlError] = useState('');
   const [liveCount, setLiveCount] = useState(0);
   const [activeTab, setActiveTab] = useState('url');
   const [pdfFile, setPdfFile] = useState(null);
@@ -189,17 +109,15 @@ export default function ExamPage({ exam, allExams = [] }) {
   // Guard: fallback or missing prop during dev HMR
   if (router.isFallback || !exam) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-500 text-xs font-bold">Loading exam data...</p>
+          <div className="w-10 h-10 border-2 border-indigo-600 dark:border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-500 dark:text-slate-400 text-xs font-bold">Loading exam data...</p>
         </div>
       </div>
     );
   }
 
-  const themeColorKey = exam.theme_color || 'indigo';
-  const t = THEME[themeColorKey] || THEME.indigo;
   const CANONICAL = `${SITE_URL}/exams/${exam.slug}`;
 
   // Live candidate counter
@@ -219,7 +137,15 @@ export default function ExamPage({ exam, allExams = [] }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!url.trim()) return;
+    setUrlError('');
+    if (!url.trim()) {
+      setUrlError('Please paste your response sheet URL');
+      return;
+    }
+    if (!url.includes('digialm.com') && !url.includes('http')) {
+      setUrlError('Please enter a valid response sheet URL (e.g. digialm.com)');
+      return;
+    }
     router.push(`/result?url=${encodeURIComponent(url.trim())}&exam=${exam.id}`);
   };
 
@@ -232,11 +158,11 @@ export default function ExamPage({ exam, allExams = [] }) {
     formData.append('exam_id', exam.id);
 
     try {
-      toast.loading('Uploading and parsing PDF response sheet...', { id: 'pdf-upload' });
+      toast.loading('Uploading and parsing response sheet PDF...', { id: 'pdf-upload' });
       const res = await axios.post(`${API_BASE}/api/results/upload-pdf`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      toast.success('Successfully parsed response sheet!', { id: 'pdf-upload' });
+      toast.success('Response sheet parsed successfully!', { id: 'pdf-upload' });
       router.push(`/result?id=${res.data.result.id}&exam=${exam.id}`);
     } catch (err) {
       const errMsg = err.response?.data?.error || 'Failed to parse PDF. Please try again.';
@@ -260,7 +186,7 @@ export default function ExamPage({ exam, allExams = [] }) {
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: exam.faq.map((f) => ({
+    mainEntity: (exam.faq || []).map((f) => ({
       '@type': 'Question',
       name: f.q,
       acceptedAnswer: { '@type': 'Answer', text: f.a },
@@ -270,9 +196,9 @@ export default function ExamPage({ exam, allExams = [] }) {
   const examEventSchema = {
     '@context': 'https://schema.org',
     '@type': 'Event',
-    name: exam.seo.eventName,
-    description: exam.seo.eventDesc,
-    organizer: { '@type': 'Organization', name: exam.conducted_by, url: 'https://indianrailways.gov.in' },
+    name: exam.seo?.eventName || `${exam.name} Answer Key Release 2025`,
+    description: exam.seo?.eventDesc || `Official answer key calculation and rank predictor for ${exam.name}`,
+    organizer: { '@type': 'Organization', name: exam.conducted_by || 'Recruitment Board', url: 'https://indianrailways.gov.in' },
     url: CANONICAL,
     eventStatus: 'https://schema.org/EventScheduled',
     eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
@@ -281,37 +207,42 @@ export default function ExamPage({ exam, allExams = [] }) {
   const webPageSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
-    name: exam.seo.title,
-    description: exam.seo.description,
+    name: exam.seo?.title || `${exam.name} Answer Key 2025 — Score & Rank Calculator`,
+    description: exam.seo?.description || `Check ${exam.name} answer key 2025. Calculate exact marks with negative marking, view percentile & download score card.`,
     url: CANONICAL,
     inLanguage: 'en-IN',
     author: { '@type': 'Organization', name: 'RankResult', url: SITE_URL },
     breadcrumb: breadcrumbSchema,
   };
 
+  const totalQuestions = exam.sections ? exam.sections.reduce((sum, sec) => sum + sec.questions, 0) : 100;
+  const negativeMarkingText = exam.highlights?.find(h => h.label === 'Negative Marking')?.value || '1/3 Negative';
+
   return (
     <>
       <Head>
-        <title>{exam.seo.title}</title>
-        <meta name="description" content={exam.seo.description} />
-        <meta name="keywords" content={exam.seo.keywords} />
+        <title>{exam.seo?.title || `${exam.name} Answer Key Calculator 2025 | Score & Rank Predictor`}</title>
+        <meta name="description" content={exam.seo?.description || `Calculate ${exam.name} exam marks with negative marking. Paste Digialm response URL to get instant score, category rank & HD score card download.`} />
+        <meta name="keywords" content={exam.seo?.keywords || `${exam.name} answer key 2025, ${exam.name} score calculator, ${exam.name} rank predictor, ${exam.name} response sheet checker, negative marking calculator`} />
         <link rel="canonical" href={CANONICAL} />
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
         <meta name="author" content="RankResult" />
         <meta name="language" content="en-IN" />
+        <meta name="theme-color" content="#0f172a" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
 
         {/* Open Graph */}
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content={exam.seo.ogTitle} />
-        <meta property="og:description" content={exam.seo.ogDesc} />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={exam.seo?.ogTitle || `${exam.name} Answer Key Calculator & Rank Predictor 2025`} />
+        <meta property="og:description" content={exam.seo?.ogDesc || `Free marks calculator for ${exam.name}. Calculate exact score with negative marking & live rank estimate.`} />
         <meta property="og:url" content={CANONICAL} />
         <meta property="og:site_name" content="RankResult" />
         <meta property="og:locale" content="en_IN" />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={exam.seo.twitterTitle} />
-        <meta name="twitter:description" content={exam.seo.twitterDesc} />
+        <meta name="twitter:title" content={exam.seo?.twitterTitle || `${exam.name} Score & Rank Calculator 2025`} />
+        <meta name="twitter:description" content={exam.seo?.twitterDesc || `Check ${exam.name} answer key response URL for instant marks & rank.`} />
         <meta name="twitter:site" content="@RankResultIn" />
 
         {/* JSON-LD */}
@@ -321,112 +252,109 @@ export default function ExamPage({ exam, allExams = [] }) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       </Head>
 
-      <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-indigo-500 selection:text-white transition-colors">
 
         {/* ── Navbar ─────────────────────────────────────────────────────── */}
         <Navbar />
 
-        {/* ── Breadcrumb ─────────────────────────────────────────────────── */}
-        <nav aria-label="breadcrumb" className="max-w-7xl mx-auto px-4 pt-4">
-          <ol className="flex items-center gap-2 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
-            <li><Link href="/" className="hover:text-indigo-600">Home</Link></li>
-            <li className="text-slate-350">›</li>
-            <li><Link href="/exams" className="hover:text-indigo-600">Exams</Link></li>
-            <li className="text-slate-350">›</li>
-            <li className={`${t.crumb} font-extrabold`}>{exam.name}</li>
+        {/* ── Breadcrumb Bar ─────────────────────────────────────────────── */}
+        <nav aria-label="breadcrumb" className="max-w-7xl mx-auto px-3.5 sm:px-6 pt-4">
+          <ol className="flex items-center gap-1.5 text-[10.5px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <li><Link href="/" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Home</Link></li>
+            <li className="text-slate-400 dark:text-slate-600">›</li>
+            <li><Link href="/exams" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Exams</Link></li>
+            <li className="text-slate-400 dark:text-slate-600">›</li>
+            <li className="text-indigo-600 dark:text-indigo-300 font-bold truncate max-w-[180px]">{exam.name}</li>
           </ol>
         </nav>
 
-        {/* ── Hero ───────────────────────────────────────────────────────── */}
-        <section className="max-w-7xl mx-auto px-4 py-10 relative">
-          {/* Subtle gradient glow */}
-          <div className={`absolute inset-0 bg-gradient-to-br ${t.hero} to-transparent pointer-events-none rounded-3xl`} />
+        {/* ── Hero & Dedicated Exam Calculator Section ──────────────────── */}
+        <section className="max-w-7xl mx-auto px-3.5 sm:px-6 py-6 sm:py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start relative">
-
-            {/* Left — copy */}
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-              <div className={`inline-flex items-center gap-2 ${t.badge} border text-[10px] font-extrabold px-3 py-1.5 rounded-full mb-4`}>
-                {exam.icon} {exam.name} {exam.year}
+            {/* Left Column — H1 Title, Meta Tags & Exam Overview */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="lg:col-span-7 space-y-4"
+            >
+              {/* Badge Pill */}
+              <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-950/90 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-[11px] font-extrabold px-3 py-1 rounded-full shadow-sm">
+                <span className="text-amber-500 dark:text-amber-400">{exam.icon || '📋'}</span>
+                <span>{exam.name} {exam.year || '2025'} Official Calculator</span>
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-extrabold text-indigo-950 leading-tight mb-3 tracking-tight">
-                {exam.name}{' '}
-                <span className="text-indigo-600">Rank Predictor</span>{' '}
-                {exam.year} — Score Calculator &amp; Answer Key
+              {/* H1 SEO Heading */}
+              <h1 className="text-2xl xs:text-3xl sm:text-4xl font-black text-slate-900 dark:text-white leading-[1.15] tracking-tight">
+                {exam.name} <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 dark:from-amber-400 dark:via-orange-400 dark:to-rose-400 text-transparent bg-clip-text">Answer Key 2025</span> &amp; <span className="bg-gradient-to-r from-indigo-600 to-sky-600 dark:from-indigo-400 dark:to-sky-400 text-transparent bg-clip-text">Rank Predictor</span>
               </h1>
 
-              <p className="text-slate-500 text-sm leading-relaxed mb-5">
-                {exam.body_text}
+              {/* Subheading / Body paragraph */}
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                {exam.body_text || `Official ${exam.name} answer key calculator on RankResult. Submit your Digialm response sheet URL or upload response PDF to get instant subject-wise marks, negative marking deduction, and All India Rank (AIR) estimate.`}
               </p>
 
-              {/* Live counter */}
-              <div className="flex items-center gap-2 text-xs font-bold mb-6">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-emerald-600" suppressHydrationWarning>
-                  {liveCount.toLocaleString()}+
+              {/* Live Count Badge */}
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-ping" />
+                <span className="text-emerald-600 dark:text-emerald-400 font-black" suppressHydrationWarning>
+                  {(liveCount || 12450).toLocaleString()}+
                 </span>
-                <span className="text-slate-400 uppercase tracking-wide">candidates checked on RankResult</span>
+                <span>candidates checked for {exam.name}</span>
               </div>
 
-              {/* Quick feature pills */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                {[
-                  { icon: '⚡', text: 'Instant Score' },
-                  { icon: '📊', text: 'Section-wise Analysis' },
-                  { icon: '🏆', text: 'Live Rank' },
-                  { icon: '📥', text: 'Score Card Download' },
-                  { icon: '🤖', text: 'AI Explanations' },
-                ].map((pill) => (
-                  <span
-                    key={pill.text}
-                    className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-3 py-1 rounded-full border ${t.tag}`}
-                  >
-                    {pill.icon} {pill.text}
-                  </span>
-                ))}
+              {/* Exam Quick Specs Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
+                <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm">
+                  <div className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-wider">Total Questions</div>
+                  <div className="text-xs sm:text-sm font-black text-slate-900 dark:text-white mt-0.5">{totalQuestions} MCQs</div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm">
+                  <div className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-wider">Negative Marking</div>
+                  <div className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 mt-0.5">{negativeMarkingText}</div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm">
+                  <div className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-wider">Conducted By</div>
+                  <div className="text-xs sm:text-sm font-black text-indigo-600 dark:text-indigo-300 mt-0.5 truncate">{exam.conducted_by || 'Board'}</div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm">
+                  <div className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-wider">Rank Engine</div>
+                  <div className="text-xs sm:text-sm font-black text-amber-600 dark:text-amber-400 mt-0.5">AIR Live</div>
+                </div>
               </div>
 
-              {/* Exam at a glance */}
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: 'Questions', value: exam.sections.reduce((sum, sec) => sum + sec.questions, 0) + ' MCQs' },
-                  { label: 'Duration', value: exam.highlights.find(h => h.label === 'Duration')?.value || '—' },
-                  { label: 'Sections', value: exam.sections.length + ' Subjects' },
-                  { label: 'Marking', value: exam.highlights.find(h => h.label === 'Negative Marking')?.value || '—' },
-                ].map((stat) => (
-                  <div key={stat.label} className="bg-white border border-slate-100 rounded-2xl px-4 py-3 shadow-sm">
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">{stat.label}</p>
-                    <p className="text-sm font-extrabold text-indigo-950">{stat.value}</p>
-                  </div>
-                ))}
-              </div>
             </motion.div>
 
-            {/* Right — URL input card */}
+            {/* Right Column — Dedicated Calculator Box */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.15 }}
-              className="lg:sticky lg:top-24"
+              transition={{ delay: 0.1 }}
+              className="lg:col-span-5 lg:sticky lg:top-20"
             >
-              <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
-                <h2 className="text-lg font-extrabold mb-1 text-indigo-950">
-                  Check Your {exam.name} Score
-                </h2>
-                <p className="text-xs font-semibold text-slate-400 mb-4">
-                  {activeTab === 'url' ? 'Paste your official response sheet / answer key URL below' : 'Upload your official response sheet PDF below'}
-                </p>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-indigo-500/30 rounded-2xl p-4 sm:p-5 shadow-xl dark:shadow-2xl space-y-3.5 backdrop-blur-xl">
+                
+                <div>
+                  <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                    Check {exam.name} Score
+                  </h2>
+                  <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+                    {activeTab === 'url' ? 'Paste your Digialm response sheet URL below' : 'Upload your official response sheet PDF below'}
+                  </p>
+                </div>
 
-                {/* Mode Selector Tabs */}
-                <div className="flex border border-slate-100 rounded-xl p-1 bg-slate-50 mb-5">
+                {/* Submission Mode Selector Tabs */}
+                <div className="flex border border-slate-200 dark:border-slate-800 rounded-xl p-1 bg-slate-100 dark:bg-slate-950">
                   <button
                     type="button"
                     onClick={() => setActiveTab('url')}
                     className={`flex-1 py-2 text-xs font-black rounded-lg transition ${
                       activeTab === 'url'
-                        ? 'bg-white text-indigo-950 shadow-sm border border-slate-100'
-                        : 'text-slate-400 hover:text-slate-650'
+                        ? 'bg-indigo-600 text-white shadow-md'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     🌐 Submit URL
@@ -436,50 +364,62 @@ export default function ExamPage({ exam, allExams = [] }) {
                     onClick={() => setActiveTab('pdf')}
                     className={`flex-1 py-2 text-xs font-black rounded-lg transition ${
                       activeTab === 'pdf'
-                        ? 'bg-white text-indigo-950 shadow-sm border border-slate-100'
-                        : 'text-slate-400 hover:text-slate-650'
+                        ? 'bg-indigo-600 text-white shadow-md'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     📄 Upload PDF
                   </button>
                 </div>
 
+                {/* Form A: Submit URL */}
                 {activeTab === 'url' ? (
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <form onSubmit={handleSubmit} className="space-y-3">
                     <div>
-                      <label htmlFor="answer-key-url" className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                        Answer Key / Response Sheet URL <span className="text-red-500">*</span>
+                      <label htmlFor="answer-key-url" className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">
+                        Digialm Response Sheet URL <span className="text-rose-500">*</span>
                       </label>
-                      <input
-                        id="answer-key-url"
-                        type="url"
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                        placeholder="https://cdndigialm.com/.../assessment.html"
-                        required
-                        className={`w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 ${t.ring} focus:ring-2 text-slate-800 placeholder-slate-400 text-sm transition outline-none`}
-                      />
-                      <p className="mt-1.5 text-[10px] font-semibold text-slate-400">
-                        Find this URL on the official exam portal after result declaration
+                      <div className="relative">
+                        <FaLink className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-500 dark:text-indigo-400 text-xs" />
+                        <input
+                          id="answer-key-url"
+                          type="url"
+                          value={url}
+                          onChange={(e) => { setUrl(e.target.value); setUrlError(''); }}
+                          placeholder="https://cdndigialm.com/.../assessment.html"
+                          required
+                          className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 font-mono text-xs rounded-xl pl-9 pr-3 py-3 border border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none"
+                        />
+                      </div>
+                      <p className="mt-1 text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
+                        Found on the official recruitment portal after answer key release.
                       </p>
                     </div>
+
+                    {urlError && (
+                      <div className="flex items-center gap-1.5 text-rose-500 dark:text-rose-400 text-[11px] font-semibold">
+                        <FaExclamationCircle className="shrink-0" />
+                        <span>{urlError}</span>
+                      </div>
+                    )}
 
                     <button
                       type="submit"
                       id="check-score-btn"
-                      className={`w-full py-3 rounded-xl bg-gradient-to-r ${t.btn} text-white font-extrabold transition flex items-center justify-center gap-2 text-sm shadow-md`}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xs transition flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20 active:scale-[0.98]"
                     >
-                      <FaSearch className="text-xs" /> Check Score &amp; Rank Now
+                      <FaSearch className="text-xs" /> Check Score &amp; Live Rank
                     </button>
                   </form>
                 ) : (
-                  <form onSubmit={handlePdfSubmit} className="space-y-4">
+                  /* Form B: Upload PDF */
+                  <form onSubmit={handlePdfSubmit} className="space-y-3">
                     <div>
-                      <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                        Upload Response Sheet PDF <span className="text-red-500">*</span>
+                      <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">
+                        Response Sheet PDF <span className="text-rose-500">*</span>
                       </label>
                       
-                      <div className="relative border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 bg-slate-50 hover:bg-indigo-50/10 text-center cursor-pointer transition">
+                      <div className="relative border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-indigo-500 rounded-xl p-5 bg-slate-50 dark:bg-slate-950 text-center cursor-pointer transition">
                         <input
                           type="file"
                           accept=".pdf"
@@ -487,268 +427,175 @@ export default function ExamPage({ exam, allExams = [] }) {
                           onChange={(e) => setPdfFile(e.target.files[0])}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         />
-                        <div className="flex flex-col items-center justify-center gap-2">
-                          <FaFilePdf className="text-3xl text-red-500" />
+                        <div className="flex flex-col items-center justify-center gap-1.5">
+                          <FaFilePdf className="text-2xl text-rose-500 dark:text-rose-400" />
                           {pdfFile ? (
                             <div>
-                              <p className="text-xs font-black text-slate-700 truncate max-w-[240px]">
+                              <p className="text-xs font-black text-slate-800 dark:text-white truncate max-w-[220px]">
                                 {pdfFile.name}
                               </p>
-                              <p className="text-[10px] font-bold text-slate-400">
+                              <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
                                 {(pdfFile.size / (1024 * 1024)).toFixed(2)} MB
                               </p>
                             </div>
                           ) : (
                             <div>
-                              <p className="text-xs font-black text-slate-600">
-                                Drag &amp; drop response PDF here
+                              <p className="text-xs font-black text-slate-700 dark:text-slate-300">
+                                Click or drag response sheet PDF
                               </p>
-                              <p className="text-[10px] font-bold text-slate-400 mt-0.5">
-                                or click to browse files
+                              <p className="text-[10px] font-semibold text-slate-500">
+                                Text-searchable printed PDFs supported
                               </p>
                             </div>
                           )}
                         </div>
                       </div>
-                      
-                      <p className="mt-1.5 text-[10px] font-semibold text-slate-400">
-                        Only text-searchable PDFs printed from the response sheet webpage are supported.
-                      </p>
                     </div>
 
                     <button
                       type="submit"
                       disabled={!pdfFile || uploading}
-                      className={`w-full py-3 rounded-xl bg-gradient-to-r ${t.btn} text-white font-extrabold transition flex items-center justify-center gap-2 text-sm shadow-md disabled:opacity-50`}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xs transition flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20 disabled:opacity-50"
                     >
-                      {uploading ? 'Processing...' : 'Upload & Check Score'}
+                      {uploading ? 'Processing PDF...' : 'Upload & Calculate Score'}
                     </button>
                   </form>
                 )}
 
-                {/* Trust signals */}
-                <div className="mt-5 pt-4 border-t border-slate-100">
-                  <div className="grid grid-cols-3 gap-2">
-                    {exam.features.map((f) => (
-                      <div key={f.text} className="flex flex-col items-center text-center gap-1">
-                        <span className="text-xl">{f.icon}</span>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{f.text}</span>
-                      </div>
-                    ))}
-                  </div>
+                {/* Trust Footer */}
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1">
+                  <FaCheckCircle className="text-[9px]" /> 100% Free · No Login Required · Instant AIR
                 </div>
 
-                <p className="mt-4 text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
-                  🔒 Free forever · No login required · Instant results
-                </p>
               </div>
             </motion.div>
+
           </div>
         </section>
 
-        {/* ── How it Works ───────────────────────────────────────────────── */}
-        <section className="max-w-7xl mx-auto px-4 pb-10">
-          <h2 className="text-xl font-extrabold mb-6 text-indigo-950">
-            How to Check {exam.name} Score on RankResult
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { step: '01', title: 'Open Official Portal', desc: `Go to the official ${exam.conducted_by} website and find your response sheet link.`, icon: '🌐' },
-              { step: '02', title: 'Copy URL & Paste', desc: 'Copy the response sheet URL and paste it in the input box above on RankResult.', icon: '📋' },
-              { step: '03', title: 'Instant Analysis', desc: 'Get score with negative marking, section-wise breakdown, live rank and percentile instantly.', icon: '🚀' },
-            ].map((item) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 * parseInt(item.step) }}
-                className="bg-white border border-slate-100 rounded-3xl p-6 relative overflow-hidden shadow-sm"
-              >
-                <span className="absolute top-3 right-4 text-5xl font-black text-slate-100 select-none leading-none">
-                  {item.step}
-                </span>
-                <div className="text-2xl mb-3">{item.icon}</div>
-                <h3 className="font-extrabold text-indigo-950 mb-1 text-sm">{item.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </section>
+        {/* ── SEO Article Content Section ────────────────────────────── */}
+        <section className="py-10 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800/80 transition-colors">
+          <div className="max-w-7xl mx-auto px-3.5 sm:px-6">
+            
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              
+              {/* Article Main Body */}
+              <article className="lg:col-span-8 space-y-6 text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed">
+                
+                <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-7 space-y-4 shadow-sm">
+                  <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                    How To Check {exam.name} Answer Key 2025 &amp; Calculate Marks
+                  </h2>
 
-        {/* ── Exam Pattern + Details ─────────────────────────────────────── */}
-        <section className="max-w-7xl mx-auto px-4 pb-10">
-          <h2 className="text-xl font-extrabold mb-6 text-indigo-950">{exam.name} Exam Pattern {exam.year}</h2>
+                  <p>
+                    Following the completion of the <strong className="text-slate-900 dark:text-white">{exam.full_name || exam.name}</strong> examination, candidates can check their recorded responses using the official candidate login portal (Digialm). RankResult automates the calculation process by evaluating your attempted questions against official key answers.
+                  </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6 items-start">
+                  <h3 className="text-sm font-black text-indigo-700 dark:text-indigo-300 pt-2 flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center text-[10px] font-black">1</span>
+                    Step-by-Step Instructions to Extract Response Sheet URL:
+                  </h3>
 
-            {/* Pattern table */}
-            <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
-              <div className={`flex items-center gap-2 mb-4 font-bold ${t.icon}`}>
-                <FaChartLine className="text-sm" />
-                <span className="text-indigo-950 font-extrabold text-sm">Subject-wise Breakdown</span>
-              </div>
-
-              <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white">
-                <div className="grid grid-cols-3 border-b border-slate-100 text-[10px] font-extrabold text-slate-400 bg-slate-50/50 uppercase tracking-wider">
-                  <div className="p-3">Subject</div>
-                  <div className="p-3 text-center">Questions</div>
-                  <div className="p-3 text-center">Marks</div>
+                  <ol className="list-decimal list-inside space-y-2 pl-2 text-slate-600 dark:text-slate-400 font-medium text-xs sm:text-xs">
+                    <li>Log into your official recruitment board candidate portal ({exam.conducted_by || 'Digialm'}).</li>
+                    <li>Navigate to the <strong className="text-slate-900 dark:text-slate-200">Candidate Response / Objection Tracker</strong> tab.</li>
+                    <li>Click on the link that opens your response sheet in a new browser tab.</li>
+                    <li>Copy the full browser URL (starts with <code className="text-indigo-700 dark:text-indigo-300 bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded font-mono">https://cdndigialm.com/...</code>).</li>
+                    <li>Paste the URL into the RankResult {exam.name} calculator input above and tap <strong className="text-indigo-600 dark:text-indigo-400">Check Score</strong>.</li>
+                  </ol>
                 </div>
-                {exam.sections.map((section) => (
-                  <div key={section.name} className="grid grid-cols-3 border-b border-slate-100 last:border-b-0 hover:bg-slate-50/50 transition">
-                    <div className="p-3 text-xs font-semibold text-slate-700">{section.name}</div>
-                    <div className="p-3 text-xs text-center font-bold text-slate-500">{section.questions}</div>
-                    <div className="p-3 text-xs text-center font-bold text-slate-500">{section.marks}</div>
-                  </div>
-                ))}
-                {/* Total row */}
-                <div className="grid grid-cols-3 bg-slate-50 border-t border-slate-100">
-                  <div className="p-3 text-xs font-extrabold text-indigo-950">Total</div>
-                  <div className={`p-3 text-xs text-center font-extrabold ${t.icon}`}>
-                    {exam.sections.reduce((sum, sec) => sum + sec.questions, 0)}
-                  </div>
-                  <div className={`p-3 text-xs text-center font-extrabold ${t.icon}`}>
-                    {exam.sections.reduce((sum, sec) => sum + sec.marks, 0)}
-                  </div>
-                </div>
-              </div>
 
-              {/* Marking scheme */}
-              <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50/30 p-4 text-xs text-slate-500">
-                <p className="font-extrabold text-indigo-950 mb-2 text-[10px] uppercase tracking-wider">Marking Scheme</p>
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <FaCheckCircle className="text-emerald-500 text-xs shrink-0" />
-                    <span>Correct answer: <strong className="text-emerald-600 font-bold">+1 mark</strong></span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-red-500 text-[10px] font-black shrink-0 w-3 text-center">✕</span>
-                    <span>Wrong answer: <strong className="text-red-600 font-bold">
-                      -{exam.highlights.find(h => h.label === 'Negative Marking')?.value?.replace('mark for each wrong answer', '').trim() || '1/3'}
-                    </strong></span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-400 text-xs shrink-0 w-3 text-center">○</span>
-                    <span>Unattempted: <strong className="text-slate-500 font-bold">0 marks</strong></span>
+                {/* Exam Pattern & Subject Breakdown Table */}
+                <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-7 space-y-4 shadow-sm">
+                  <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                    {exam.name} Exam Pattern &amp; Marking Scheme {exam.year || '2025'}
+                  </h2>
+
+                  <p>
+                    The official exam pattern for {exam.name} determines the section-wise distribution of questions and marks:
+                  </p>
+
+                  {/* Section Table */}
+                  {exam.sections && exam.sections.length > 0 && (
+                    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 font-extrabold uppercase text-[10px]">
+                          <tr>
+                            <th className="p-3">Section / Subject</th>
+                            <th className="p-3 text-center">Questions</th>
+                            <th className="p-3 text-center">Total Marks</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                          {exam.sections.map((sec) => (
+                            <tr key={sec.name} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                              <td className="p-3 font-bold text-slate-900 dark:text-white">{sec.name}</td>
+                              <td className="p-3 text-center text-slate-700 dark:text-slate-300">{sec.questions}</td>
+                              <td className="p-3 text-center text-slate-700 dark:text-slate-300">{sec.marks}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  <div className="bg-white dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 space-y-2 text-xs shadow-sm">
+                    <div className="font-extrabold text-slate-900 dark:text-white uppercase text-[10px] tracking-wider">Formula for Score Calculation:</div>
+                    <div className="font-mono text-indigo-700 dark:text-indigo-300 bg-slate-100 dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px]">
+                      Raw Score = (Correct Answers × Positive Marks) - (Incorrect Answers × Negative Deduction)
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                      Negative Marking Rule: <strong className="text-rose-500 dark:text-rose-400">{negativeMarkingText}</strong> deducted for every incorrect attempt. Unattempted questions receive 0 marks.
+                    </p>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Exam details table */}
-            <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
-              <div className={`flex items-center gap-2 mb-4 font-bold ${t.icon}`}>
-                <FaRobot className="text-sm" />
-                <span className="text-indigo-950 font-extrabold text-sm">Exam Details</span>
-              </div>
-              <div className="space-y-2">
-                {exam.highlights.map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-2xl border border-slate-100 bg-slate-50/30 px-4 py-3 flex items-center justify-between gap-3"
-                  >
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{item.label}</span>
-                    <span className="text-xs font-extrabold text-indigo-950">{item.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Topics Covered ─────────────────────────────────────────────── */}
-        <section className="max-w-7xl mx-auto px-4 pb-10">
-          <h2 className="text-xl font-extrabold mb-6 text-indigo-950">{exam.name} Topics Covered</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {exam.sections.map((section) => (
-              <div key={section.name} className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className={`w-2 h-2 rounded-full ${t.dot}`} />
-                  <h3 className="font-extrabold text-indigo-950 text-sm">{section.name}</h3>
-                  <span className={`ml-auto text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${t.tag}`}>
-                    {section.questions} Qs
-                  </span>
-                </div>
-                <ul className="space-y-2">
-                  {section.topics.map((topic) => (
-                    <li key={topic} className="text-xs font-semibold text-slate-500 flex items-center gap-2">
-                      <span className={`w-1 h-1 rounded-full ${t.dot} opacity-60`} />
-                      {topic}
-                    </li>
+                {/* FAQ Accordion */}
+                <div className="space-y-3 pt-2">
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white">
+                    Frequently Asked Questions ({exam.name})
+                  </h2>
+                  {(exam.faq || []).map((f, idx) => (
+                    <FAQItem key={idx} item={f} idx={idx} />
                   ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
+                </div>
 
-        {/* ── Why RankResult ───────────────────────────────────────────────── */}
-        <section className="max-w-7xl mx-auto px-4 pb-10">
-          <h2 className="text-xl font-extrabold mb-6 text-indigo-950">Why Use RankResult for {exam.name}?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { icon: '⚡', title: 'Instant Score Calculation', desc: 'Get your exact score in seconds — automatic negative marking calculation, no manual effort.' },
-              { icon: '📊', title: 'Section-wise Analysis', desc: 'See your performance broken down by subject. Identify weak areas instantly.' },
-              { icon: '🏆', title: 'Live Rank & Percentile', desc: `Know where you stand among all ${exam.name} candidates on RankResult in real-time.` },
-              { icon: '📥', title: 'Score Card Download', desc: 'Download your personalized score card in PNG or PDF — share with friends and family.' },
-              { icon: '🤖', title: 'AI-Powered Explanations', desc: 'Understand wrong answers with Gemini AI — never miss learning from mistakes.' },
-              { icon: '🔒', title: '100% Free & Secure', desc: 'No login required, no data sold. Your result URL stays private and secure.' },
-            ].map((feature) => (
-              <div
-                key={feature.title}
-                className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300"
-              >
-                <div className="text-2xl mb-3">{feature.icon}</div>
-                <h3 className="font-extrabold text-indigo-950 text-sm mb-2">{feature.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+              </article>
 
-        {/* ── FAQ ────────────────────────────────────────────────────────── */}
-        <section className="max-w-7xl mx-auto px-4 pb-10">
-          <h2 className="text-xl font-extrabold mb-6 text-indigo-950">
-            Frequently Asked Questions — {exam.name}
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
-            <div className="space-y-4">
-              {exam.faq.map((item, idx) => (
-                <FAQItem key={item.q} item={item} idx={idx} t={t} />
-              ))}
+              {/* Sidebar Column */}
+              <aside className="lg:col-span-4 space-y-6">
+                <OtherExams currentSlug={exam.slug} allExams={allExams} />
+
+                {/* RankResult Platform CTA */}
+                <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-indigo-500/30 rounded-2xl p-5 space-y-3 shadow-sm">
+                  <h3 className="text-sm font-black text-slate-900 dark:text-white">
+                    Need AI Explanations for Wrong Answers?
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Check your {exam.name} score to unlock step-by-step AI solutions for incorrect questions.
+                  </p>
+                  <button
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs transition shadow-md"
+                  >
+                    Check Score Now
+                  </button>
+                </div>
+              </aside>
+
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
-              <OtherExams currentSlug={exam.slug} allExams={allExams} />
-
-              {/* CTA card */}
-              <div className={`bg-gradient-to-br ${t.hero} border border-slate-100 rounded-3xl p-6 shadow-sm`}>
-                <h3 className="font-extrabold text-indigo-950 text-sm mb-2">
-                  Ready to check your {exam.name} score?
-                </h3>
-                <p className="text-xs text-slate-500 mb-4">
-                  Paste your response sheet URL and get instant results.
-                </p>
-                <button
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className={`w-full py-2.5 rounded-xl bg-gradient-to-r ${t.btn} text-white font-extrabold text-xs transition flex items-center justify-center gap-2 shadow-md`}
-                >
-                  <FaSearch className="text-[10px]" /> Check Score Now
-                </button>
-              </div>
-            </div>
           </div>
         </section>
 
         {/* ── Footer ─────────────────────────────────────────────────────── */}
-        <footer className="bg-slate-900 text-slate-400 pt-12 pb-8 px-4 mt-16">
+        <footer className="bg-slate-900 dark:bg-slate-950 text-slate-400 pt-12 pb-8 px-3.5 sm:px-6 border-t border-slate-800">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-b border-slate-800 pb-8">
               <div>
                 <div className="mb-2"><Logo size="sm" /></div>
                 <p className="text-[10px] text-slate-500 mt-1">
-                  Unofficial rank predictor. Not affiliated with {exam.conducted_by || 'recruitment board'}.
+                  Unofficial score calculator. Not affiliated with {exam.conducted_by || 'recruitment board'}.
                 </p>
               </div>
               <div className="flex items-center gap-6 text-xs font-bold uppercase tracking-wider">
@@ -761,7 +608,7 @@ export default function ExamPage({ exam, allExams = [] }) {
             <div className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
               <div>© 2025 RankResult — All Rights Reserved</div>
               <div className="text-center md:text-right normal-case tracking-normal">
-                Disclaimer: Scores are unofficial. Final result by respective recruitment boards only.
+                Disclaimer: Scores are unofficial estimates. Final result by respective recruitment boards only.
               </div>
             </div>
           </div>
@@ -776,8 +623,8 @@ export default function ExamPage({ exam, allExams = [] }) {
 export async function getServerSideProps({ params }) {
   try {
     const [examRes, allExamsRes] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/public/exams/${params.slug}`),
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/public/exams`)
+      fetch(`${API_BASE}/api/public/exams/${params.slug}`),
+      fetch(`${API_BASE}/api/public/exams`)
     ]);
     
     if (examRes.status === 404) {

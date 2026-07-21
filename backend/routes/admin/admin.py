@@ -3,7 +3,7 @@ from db.models import db, User, Exam, ExamResult, QuestionResponse, AISolution, 
 from sqlalchemy import func, desc, or_
 from datetime import datetime, timedelta, timezone
 from services.ai_service import ai_edit_question, bulk_ai_edit_questions
-from services.marketplace_service import create_question_pack
+from services.marketplace_service import create_question_pack, sync_individual_exam_pack
 import traceback
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
@@ -378,9 +378,11 @@ def bulk_delete_users():
 
 @admin_bp.route('/exams', methods=['GET'])
 def list_exams():
-    """List all exams."""
+    """List all exams and auto-sync individual question packs."""
     try:
         exams = Exam.query.order_by(desc(Exam.date)).all()
+        for e in exams:
+            sync_individual_exam_pack(db.session, e)
         return jsonify({
             'exams': [dict(e.to_dict(), results_count=ExamResult.query.filter_by(exam_id=e.id).count()) for e in exams]
         })
@@ -391,7 +393,7 @@ def list_exams():
 
 @admin_bp.route('/exams', methods=['POST'])
 def create_exam():
-    """Create a new exam."""
+    """Create a new exam and auto-create individual question pack."""
     try:
         data = request.get_json() or {}
         if not data or not data.get('name'):
@@ -427,6 +429,9 @@ def create_exam():
         db.session.add(exam)
         db.session.commit()
 
+        # Auto-create individual question bank pack
+        sync_individual_exam_pack(db.session, exam)
+
         return jsonify({'success': True, 'exam': {'id': exam.id, 'name': exam.name}}), 201
     except Exception as e:
         db.session.rollback()
@@ -436,7 +441,7 @@ def create_exam():
 
 @admin_bp.route('/exams/<int:exam_id>', methods=['PUT'])
 def update_exam(exam_id):
-    """Update an exam."""
+    """Update an exam and sync individual question pack."""
     try:
         exam = Exam.query.get_or_404(exam_id)
         data = request.get_json() or {}
@@ -494,6 +499,10 @@ def update_exam(exam_id):
             exam.marketplace_config = data['marketplace_config']
 
         db.session.commit()
+
+        # Auto-update individual question bank pack
+        sync_individual_exam_pack(db.session, exam)
+
         return jsonify({'success': True})
     except Exception as e:
         db.session.rollback()
@@ -559,6 +568,9 @@ def bulk_delete_exams():
 @admin_bp.route('/packs', methods=['GET'])
 def list_packs():
     try:
+        exams = Exam.query.all()
+        for e in exams:
+            sync_individual_exam_pack(db.session, e)
         packs = QuestionPack.query.order_by(desc(QuestionPack.created_at)).all()
         return jsonify({'packs': [p.to_dict() for p in packs]})
     except Exception as e:
@@ -601,6 +613,21 @@ def update_pack(pack_id):
             pack.exam_ids = list(data.get('exam_ids') or [])
         if 'is_active' in data:
             pack.is_active = bool(data.get('is_active'))
+
+        # If pack belongs to a single exam, sync price back to Exam
+        raw_ids = pack.exam_ids or []
+        clean_ids = []
+        for item in raw_ids:
+            if isinstance(item, dict):
+                clean_ids.append(int(item.get('exam_id')))
+            elif item is not None:
+                clean_ids.append(int(item))
+
+        if len(clean_ids) == 1:
+            single_exam = Exam.query.get(clean_ids[0])
+            if single_exam:
+                single_exam.price = pack.price
+
         db.session.commit()
         return jsonify({'success': True, 'pack': pack.to_dict()})
     except Exception as e:

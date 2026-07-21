@@ -48,7 +48,7 @@ export default function Logo({ className = "", size = "md", href = "/" }) {
 
       {/* Brand Text */}
       <div className={`flex items-center font-black tracking-tight ${textSize}`}>
-        <span className="text-white">Rank</span>
+        <span className="text-indigo-950 dark:text-white">Rank</span>
         <span className="text-[#FF9F1C]">Result</span>
       </div>
     </div>
