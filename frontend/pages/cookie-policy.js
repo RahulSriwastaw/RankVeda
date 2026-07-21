@@ -68,12 +68,12 @@ export default function CookiePolicyPage() {
   return (
     <>
       <Head>
-        <title>Cookie Policy | RankResult — How We Use Cookies</title>
+        <title>Cookie Policy - RankResult.in | Score Calculator &amp; Rank Predictor</title>
         <meta name="description" content="RankResult Cookie Policy explains how and why we use cookies, and how you can manage them." />
         <meta name="keywords" content="RankResult cookie policy, cookies, tracking, Google Analytics, cookie preferences" />
         <link rel="canonical" href={`${SITE_URL}/cookie-policy`} />
         <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="Cookie Policy | RankResult" />
+        <meta property="og:title" content="Cookie Policy - RankResult.in" />
         <meta property="og:description" content="Learn how RankResult uses cookies and how you can control your cookie preferences." />
         <meta property="og:url" content={`${SITE_URL}/cookie-policy`} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />

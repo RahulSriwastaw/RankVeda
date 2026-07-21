@@ -35,28 +35,28 @@ export default function ExamsIndexPage({ exams = [] }) {
   return (
     <>
       <Head>
-        <title>All Exam Answer Key Calculators 2025 | RRB NTPC, SSC CGL, CHSL, Bank PO | RankResult</title>
+        <title>Score Calculator &amp; Rank Predictor for All Exams 2026 | SSC, Railway, BPSC | RankResult.in</title>
         <meta
           name="description"
-          content="Check answer keys, calculate exact scores and predict rank for RRB NTPC UG, NTPC CBT-II, SSC CGL, SSC CHSL, RRB ALP, IBPS PO and SSC MTS 2025. Free tool with section-wise analysis and score card download."
+          content="Calculate exact marks and predict your exam rank instantly. Upload answer key PDF or paste URL for SSC CGL, RRB NTPC, BPSC &amp; all competitive exams. Free Rank Predictor 2026."
         />
         <meta
           name="keywords"
-          content="exam answer key calculator 2025, RRB NTPC answer key, NTPC CBT-II answer key, SSC CGL answer key, SSC CHSL answer key, RRB ALP answer key, IBPS PO answer key, SSC MTS answer key, government exam rank predictor"
+          content="Score Calculator, Rank Predictor 2026, Answer Key Calculator, Marks Calculator, SSC Score Calculator, Railway Rank Predictor, BPSC Answer Key Calculator, Analyze Answer Key, Test Ranker, Exam Ranker"
         />
         <link rel="canonical" href={`${SITE_URL}/exams`} />
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
         <meta name="author" content="RankResult" />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="All Exam Answer Key Calculators 2025 | RankResult" />
+        <meta property="og:title" content="Score Calculator &amp; Rank Predictor for All Exams 2026 | RankResult.in" />
         <meta
           property="og:description"
-          content="Free answer key calculators for RRB NTPC, SSC CGL, SSC CHSL, RRB ALP, IBPS PO and SSC MTS. Check score, rank and download score card."
+          content="Convert answer key to marks &amp; predict live rank. Works with PDF answer keys and response sheet URLs for SSC, Railway, BPSC."
         />
         <meta property="og:url" content={`${SITE_URL}/exams`} />
         <meta property="og:site_name" content="RankResult" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="All Exam Answer Key Calculators 2025 | RankResult" />
+        <meta name="twitter:title" content="Score Calculator &amp; Rank Predictor for All Exams 2026 | RankResult.in" />
         <meta name="twitter:site" content="@RankResultIn" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />

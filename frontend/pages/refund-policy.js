@@ -107,12 +107,12 @@ export default function RefundPolicyPage() {
   return (
     <>
       <Head>
-        <title>Refund & Cancellation Policy | RankResult</title>
-        <meta name="description" content="RankResult Refund and Cancellation Policy for points packs, exam packs, and question bank purchases." />
+        <title>Refund &amp; Cancellation Policy - RankResult.in | Score Calculator &amp; Rank Predictor</title>
+        <meta name="description" content="RankResult Refund and Cancellation Policy for points packs, exam packs, and digital services." />
         <meta name="keywords" content="RankResult refund, cancellation policy, digital goods refund, points pack refund" />
         <link rel="canonical" href={`${SITE_URL}/refund-policy`} />
         <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="Refund & Cancellation Policy | RankResult" />
+        <meta property="og:title" content="Refund &amp; Cancellation Policy - RankResult.in" />
         <meta property="og:description" content="Understand the refund and cancellation policy for digital purchases on RankResult." />
         <meta property="og:url" content={`${SITE_URL}/refund-policy`} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />

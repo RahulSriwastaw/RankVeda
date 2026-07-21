@@ -42,12 +42,12 @@ export default function AboutPage() {
   return (
     <>
       <Head>
-        <title>About Us | RankResult — Mission, Vision & Team</title>
-        <meta name="description" content="Learn about RankResult — India's free platform for government exam answer key calculation, rank prediction, and score card download. Our mission, values, and team." />
-        <meta name="keywords" content="RankResult about, mission, team, exam score calculator, India, rank predictor" />
+        <title>About Us - Score Calculator &amp; Rank Predictor 2026 | RankResult.in</title>
+        <meta name="description" content="Learn about RankResult — India's free platform for instant score calculation, rank prediction, and response sheet analysis for SSC, Railway, BPSC, and competitive exams." />
+        <meta name="keywords" content="About RankResult, Score Calculator, Rank Predictor 2026, Answer Key Calculator, Marks Calculator, Analyze Answer Key, D.K. Academy, Trusted Rank Predictor" />
         <link rel="canonical" href={`${SITE_URL}/about`} />
         <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="About Us | RankResult" />
+        <meta property="og:title" content="About Us - Score Calculator &amp; Rank Predictor 2026 | RankResult.in" />
         <meta property="og:description" content="RankResult helps millions of government exam aspirants calculate scores, predict ranks, and download score cards — all for free." />
         <meta property="og:url" content={`${SITE_URL}/about`} />
         <meta name="twitter:card" content="summary_large_image" />

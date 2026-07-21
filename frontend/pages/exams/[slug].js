@@ -221,9 +221,9 @@ export default function ExamPage({ exam, allExams = [] }) {
   return (
     <>
       <Head>
-        <title>{exam.seo?.title || `${exam.name} Answer Key Calculator 2025 | Score & Rank Predictor`}</title>
-        <meta name="description" content={exam.seo?.description || `Calculate ${exam.name} exam marks with negative marking. Paste Digialm response URL to get instant score, category rank & HD score card download.`} />
-        <meta name="keywords" content={exam.seo?.keywords || `${exam.name} answer key 2025, ${exam.name} score calculator, ${exam.name} rank predictor, ${exam.name} response sheet checker, negative marking calculator`} />
+        <title>{exam.seo?.title || `${exam.name} Rank Predictor & Score Calculator 2026 | RankResult.in`}</title>
+        <meta name="description" content={exam.seo?.description || `Predict your ${exam.name} rank instantly. Upload answer key PDF or paste URL to calculate marks, percentile & AIR category rank. Free Rank Predictor 2026.`} />
+        <meta name="keywords" content={exam.seo?.keywords || `${exam.name} Rank Predictor, ${exam.name} Score Calculator, Score Calculator, Rank Predictor 2026, Answer Key Calculator, Marks Calculator, Analyze Answer Key, ${exam.name} Answer Key PDF`} />
         <link rel="canonical" href={CANONICAL} />
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
         <meta name="author" content="RankResult" />

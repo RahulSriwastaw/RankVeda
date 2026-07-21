@@ -75,6 +75,10 @@ def list_marketplace_packs():
                     exam_ids.append(item)
             exam_ids = [int(x) for x in exam_ids if x is not None]
 
+            # Bundles must contain multiple exams
+            if len(exam_ids) <= 1:
+                continue
+
             student_count = 0
             question_count = 0
             set_count = 0

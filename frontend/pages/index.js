@@ -84,7 +84,59 @@ const FAQ_ITEMS = [
   }
 ];
 
-export default function Home({ exams = [] }) {
+const DEFAULT_FALLBACK_EXAMS = [
+  {
+    id: 1,
+    name: 'RRB NTPC UG',
+    full_name: 'Railway Recruitment Board NTPC Under Graduate 2025',
+    slug: 'rrb-ntpc-ug',
+    icon: '🚆',
+    year: '2025',
+    status: 'active',
+    badge: 'Live Key',
+    description: 'Calculate your RRB NTPC UG score & rank',
+    desc_card: 'Calculate score, negative marking & rank for RRB NTPC UG CBT-1.'
+  },
+  {
+    id: 2,
+    name: 'SSC CGL',
+    full_name: 'Staff Selection Commission Combined Graduate Level 2025',
+    slug: 'ssc-cgl',
+    icon: '🏛️',
+    year: '2025',
+    status: 'active',
+    badge: 'Active Calculator',
+    description: 'Calculate your SSC CGL score & rank',
+    desc_card: 'Calculate score, tier 1 marks & category rank for SSC CGL.'
+  },
+  {
+    id: 3,
+    name: 'RRB ALP',
+    full_name: 'Assistant Loco Pilot CBT-1 Answer Key 2025',
+    slug: 'rrb-alp',
+    icon: '⚡',
+    year: '2025',
+    status: 'active',
+    badge: 'Live',
+    description: 'Calculate your RRB ALP score & rank',
+    desc_card: 'Instant marks & rank prediction for RRB Assistant Loco Pilot.'
+  },
+  {
+    id: 4,
+    name: 'SSC CHSL',
+    full_name: 'Staff Selection Commission CHSL Tier-1 2025',
+    slug: 'ssc-chsl',
+    icon: '📝',
+    year: '2025',
+    status: 'active',
+    badge: 'Active',
+    description: 'Calculate your SSC CHSL score & rank',
+    desc_card: 'Calculate score & percentile for SSC CHSL Tier-1.'
+  }
+];
+
+export default function Home({ exams }) {
+  const safeExams = (Array.isArray(exams) && exams.length > 0) ? exams : DEFAULT_FALLBACK_EXAMS;
   const router = useRouter();
   const [liveCount, setLiveCount] = useState(0);
   const [user, setUser] = useState(null);
@@ -122,11 +174,11 @@ export default function Home({ exams = [] }) {
 
   // Set default selected exam slug once exams load
   useEffect(() => {
-    if (exams && exams.length > 0) {
-      const activeExam = exams.find(e => e.status === 'active') || exams[0];
+    if (safeExams && safeExams.length > 0) {
+      const activeExam = safeExams.find(e => e.status === 'active') || safeExams[0];
       setSelectedSlug(activeExam.slug || 'rrb-ntpc-ug');
     }
-  }, [exams]);
+  }, [safeExams]);
 
   const handleSubscribe = (e) => {
     e.preventDefault();
@@ -146,7 +198,7 @@ export default function Home({ exams = [] }) {
   // Filter exams based on category & search query
   const categories = ['All', 'Active Keys', 'Railway', 'SSC', 'Banking', 'State Exams'];
 
-  const filteredExams = exams.filter(exam => {
+  const filteredExams = safeExams.filter(exam => {
     const nameLower = (exam.name || '').toLowerCase();
     const fullNameLower = (exam.full_name || '').toLowerCase();
     const qLower = searchQuery.toLowerCase();
@@ -174,7 +226,7 @@ export default function Home({ exams = [] }) {
     '@type': 'ItemList',
     name: 'Government Exam Answer Key Calculators',
     description: 'List of all supported government exam answer key calculators on RankResult',
-    itemListElement: exams.map((exam, index) => ({
+    itemListElement: safeExams.map((exam, index) => ({
       '@type': 'ListItem',
       position: index + 1,
       name: `${exam.name} ${exam.year || '2025'} Answer Key Calculator`,
@@ -186,15 +238,27 @@ export default function Home({ exams = [] }) {
   return (
     <>
       <Head>
-        <title>RankResult — Government Exam Answer Key Calculator Portal 2025 | RRB NTPC, SSC, Bank Score & Rank</title>
-        <meta name="description" content="Select your exam on RankResult — India's #1 free exam score calculator. Dedicated pages for RRB NTPC UG, SSC CGL, CHSL, Bank PO, RRB ALP answer keys 2025. Calculate exact marks with negative marking, predict live rank & percentile." />
-        <meta name="keywords" content="RRB NTPC UG answer key 2025, SSC CGL answer key 2025, SSC CHSL answer key 2025, RRB ALP answer key 2025, Bank PO answer key 2025, exam score calculator, marks calculator with negative marking, rank predictor" />
+        <title>Score Calculator &amp; Rank Predictor 2026 - RankResult.in | Instant Marks Calculator</title>
+        <meta name="description" content="Predict your exam rank instantly. Upload answer key PDF or URL, get score, percentile &amp; category rank. Works with SSC, Railway, BPSC. Free Rank Predictor 2026." />
+        <meta name="keywords" content="Score Calculator, Rank Predictor 2026, Answer Key Calculator, Marks Calculator, Score Calculator by URL, Score Calculator by PDF, Analyze Answer Key, Test Ranker, Exam Ranker, Testing Rank, SSC Rank Predictor, Railway Rank Predictor, BPSC Rank Predictor, Instant Rank" />
         <link rel="canonical" href={SITE_URL} />
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
         <meta name="author" content="RankResult" />
         <meta name="language" content="en-IN" />
         <meta name="theme-color" content="#0f172a" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
+
+        {/* OpenGraph Meta Tags */}
+        <meta property="og:title" content="Score Calculator &amp; Rank Predictor 2026 - RankResult.in" />
+        <meta property="og:description" content="Predict your exam rank instantly. Upload answer key PDF or URL, get score, percentile &amp; category rank. Works with SSC, Railway, BPSC." />
+        <meta property="og:url" content={SITE_URL} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="RankResult" />
+
+        {/* Twitter Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Score Calculator &amp; Rank Predictor 2026 - RankResult.in" />
+        <meta name="twitter:description" content="Instant score calculation &amp; rank prediction for SSC, Railway, BPSC, UPSC." />
 
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
@@ -221,7 +285,7 @@ export default function Home({ exams = [] }) {
               <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-[11px] sm:text-xs font-bold px-3 py-1 sm:px-4 sm:py-1.5 rounded-full shadow-sm dark:shadow-lg backdrop-blur-md">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                 <span className="text-amber-500 dark:text-amber-400 font-black">★</span>
-                <span>India's #1 Exam Score &amp; Rank Calculator Portal</span>
+                <span>Instant Score Calculator &amp; Free Rank Predictor 2026</span>
                 <span className="hidden xs:inline text-slate-400">•</span>
                 <span className="hidden xs:inline text-emerald-600 dark:text-emerald-400 font-extrabold" suppressHydrationWarning>
                   {(liveCount || 24580).toLocaleString()}+ Candidates Served
@@ -232,11 +296,11 @@ export default function Home({ exams = [] }) {
             {/* Main Headline & Subtitle */}
             <div className="text-center max-w-3xl mx-auto space-y-3 sm:space-y-4">
               <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-black text-slate-900 dark:text-white leading-[1.15] tracking-tight">
-                Select Your Exam Page for <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 dark:from-amber-400 dark:via-orange-400 dark:to-rose-400 text-transparent bg-clip-text">Instant Score</span> &amp; <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-sky-600 dark:from-indigo-400 dark:via-purple-300 dark:to-sky-400 text-transparent bg-clip-text">Rank Prediction</span>
+                Instant Rank Prediction &amp; Score Calculator for Competitive Exams
               </h1>
               
               <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-300 font-medium leading-relaxed max-w-2xl mx-auto px-2">
-                Every exam has its dedicated calculation page with specific negative marking rules, subject weightage, normalization formulas &amp; SEO analysis. Select your exam below.
+                Calculate your instant marks and predict All India Rank (AIR), category rank &amp; percentile score from response sheet URL or PDF answer key.
               </p>
             </div>
 
@@ -256,8 +320,8 @@ export default function Home({ exams = [] }) {
                       onChange={(e) => setSelectedSlug(e.target.value)}
                       className="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-bold text-xs sm:text-sm rounded-xl px-3.5 py-3 border border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:outline-none appearance-none cursor-pointer pr-9"
                     >
-                      {exams.length > 0 ? (
-                        exams.map(exam => (
+                      {safeExams.length > 0 ? (
+                        safeExams.map(exam => (
                           <option key={exam.slug || exam.id} value={exam.slug}>
                             {exam.name} {exam.year || '2025'} {exam.status !== 'active' ? '(Coming Soon)' : ''}
                           </option>
@@ -284,7 +348,7 @@ export default function Home({ exams = [] }) {
                 {/* Popular Exam Links Chips */}
                 <div className="pt-2 border-t border-slate-100 dark:border-slate-700/50 flex flex-wrap items-center justify-center gap-1.5 text-[10.5px] font-bold text-slate-600 dark:text-slate-300">
                   <span className="text-slate-400">Popular:</span>
-                  {exams.slice(0, 4).map(exam => (
+                  {safeExams.slice(0, 4).map(exam => (
                     <Link
                       key={exam.slug}
                       href={`/exams/${exam.slug}`}
@@ -633,7 +697,7 @@ export default function Home({ exams = [] }) {
               <div>
                 <div className="font-extrabold text-white text-xs uppercase tracking-wider mb-3">Exams Pages</div>
                 <ul className="space-y-2 text-xs">
-                  {exams.slice(0, 5).map(e => (
+                  {safeExams.slice(0, 5).map(e => (
                     <li key={e.slug}>
                       <Link href={`/exams/${e.slug}`} className="hover:text-white transition">{e.name}</Link>
                     </li>
@@ -653,12 +717,16 @@ export default function Home({ exams = [] }) {
               </div>
 
               <div>
-                <div className="font-extrabold text-white text-xs uppercase tracking-wider mb-3">Legal</div>
+                <div className="font-extrabold text-white text-xs uppercase tracking-wider mb-3">Legal &amp; Policy</div>
                 <ul className="space-y-2 text-xs">
                   <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
                   <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
                   <li><Link href="/disclaimer" className="hover:text-white transition">Disclaimer</Link></li>
-                  <li><Link href="/refund-policy" className="hover:text-white transition">Refund Policy</Link></li>
+                  <li><Link href="/refund-policy" className="hover:text-white transition">Refund &amp; Cancellation</Link></li>
+                  <li><Link href="/dmca" className="hover:text-white transition">DMCA &amp; Copyright</Link></li>
+                  <li><Link href="/cookie-policy" className="hover:text-white transition">Cookie Policy</Link></li>
+                  <li><Link href="/eula" className="hover:text-white transition">EULA</Link></li>
+                  <li><Link href="/about" className="hover:text-white transition">About Us</Link></li>
                   <li><Link href="/contact" className="hover:text-white transition">Contact Us</Link></li>
                 </ul>
               </div>

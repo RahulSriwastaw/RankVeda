@@ -96,12 +96,12 @@ export default function DMCAPage() {
   return (
     <>
       <Head>
-        <title>DMCA & Copyright Policy | RankResult</title>
+        <title>DMCA &amp; Copyright Policy - RankResult.in | Score Calculator &amp; Rank Predictor</title>
         <meta name="description" content="RankResult DMCA Compliance and Copyright Policy. Learn how to report copyright infringement and our intellectual property protection practices." />
         <meta name="keywords" content="RankResult DMCA, copyright policy, copyright infringement, trademark, intellectual property" />
         <link rel="canonical" href={`${SITE_URL}/dmca`} />
         <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="DMCA & Copyright Policy | RankResult" />
+        <meta property="og:title" content="DMCA &amp; Copyright Policy - RankResult.in" />
         <meta property="og:description" content="Copyright and DMCA compliance information for RankResult platform." />
         <meta property="og:url" content={`${SITE_URL}/dmca`} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />

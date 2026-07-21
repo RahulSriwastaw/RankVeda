@@ -196,12 +196,12 @@ export default function TermsPage() {
   return (
     <>
       <Head>
-        <title>Terms & Conditions | RankResult</title>
-        <meta name="description" content="RankResult Terms & Conditions governing your use of our exam score calculator, rank predictor, and question bank platform." />
+        <title>Terms of Service - RankResult.in | Score Calculator &amp; Rank Predictor</title>
+        <meta name="description" content="RankResult Terms &amp; Conditions governing your use of our exam score calculator, rank predictor, and question bank platform." />
         <meta name="keywords" content="RankResult terms, terms of service, conditions of use, exam platform terms" />
         <link rel="canonical" href={`${SITE_URL}/terms`} />
         <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="Terms & Conditions | RankResult" />
+        <meta property="og:title" content="Terms of Service - RankResult.in" />
         <meta property="og:description" content="Terms and conditions governing the use of RankResult exam analysis platform." />
         <meta property="og:url" content={`${SITE_URL}/terms`} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />

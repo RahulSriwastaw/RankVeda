@@ -1,0 +1,37 @@
+<svg viewBox="0 0 40 44" width="64" height="64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rvShieldBg" x1="20" y1="2" x2="20" y2="43.5" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1e1b4b" />
+      <stop offset="60%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#0a0e27" />
+    </linearGradient>
+    <linearGradient id="rvShieldBorder" x1="3" y1="2" x2="37" y2="43.5" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#c084fc" />
+      <stop offset="50%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+    <linearGradient id="rvTextGrad" x1="0" y1="0" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="50%" stop-color="#e9d5ff" />
+      <stop offset="100%" stop-color="#a5b4fc" />
+    </linearGradient>
+  </defs>
+  <path
+    d="M20 2L3 8.5V22C3 31.8 10.3 40.8 20 43.5C29.7 40.8 37 31.8 37 22V8.5L20 2Z"
+    fill="url(#rvShieldBg)"
+    stroke="url(#rvShieldBorder)"
+    stroke-width="2.4"
+    stroke-linejoin="round"
+  />
+  <text
+    x="20"
+    y="24.5"
+    text-anchor="middle"
+    dominant-baseline="central"
+    fill="url(#rvTextGrad)"
+    font-family="system-ui, -apple-system, sans-serif"
+    font-weight="900"
+    font-size="15"
+    letter-spacing="-1px"
+  >RR</text>
+</svg>

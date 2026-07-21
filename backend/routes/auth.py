@@ -38,6 +38,9 @@ def verify_token(token: str) -> dict | None:
 
 def get_current_user():
     """Extract and verify user from Authorization header."""
+    from flask import has_request_context
+    if not has_request_context():
+        return None
     auth_header = request.headers.get('Authorization', '')
     if not auth_header.startswith('Bearer '):
         return None

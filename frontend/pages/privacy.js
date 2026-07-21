@@ -179,13 +179,13 @@ export default function PrivacyPage() {
   return (
     <>
       <Head>
-        <title>Privacy Policy | RankResult — Your Data, Your Rights</title>
-        <meta name="description" content="RankResult Privacy Policy explains how we collect, use, and protect your personal data in compliance with DPDP Act 2023, IT Act 2000, GDPR, and CCPA." />
-        <meta name="keywords" content="RankResult privacy policy, data protection, DPDP Act 2023, IT Act 2000, GDPR, CCPA, privacy, data security" />
+        <title>Privacy Policy - RankResult.in | Score Calculator &amp; Rank Predictor</title>
+        <meta name="description" content="RankResult Privacy Policy explains how we collect, use, and protect your personal data in compliance with DPDP Act 2023 and IT Act 2000." />
+        <meta name="keywords" content="RankResult privacy policy, data protection, DPDP Act 2023, IT Act 2000, privacy" />
         <link rel="canonical" href={`${SITE_URL}/privacy`} />
         <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="Privacy Policy | RankResult" />
-        <meta property="og:description" content="How RankResult protects your personal data in compliance with Indian and international privacy laws." />
+        <meta property="og:title" content="Privacy Policy - RankResult.in" />
+        <meta property="og:description" content="How RankResult protects your personal data in compliance with Indian privacy laws." />
         <meta property="og:url" content={`${SITE_URL}/privacy`} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       </Head>

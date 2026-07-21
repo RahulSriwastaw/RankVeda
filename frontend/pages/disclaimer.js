@@ -91,12 +91,12 @@ export default function DisclaimerPage() {
   return (
     <>
       <Head>
-        <title>Disclaimer | RankResult — Unofficial Score Estimates</title>
-        <meta name="description" content="RankResult Disclaimer: All scores, ranks, and percentiles are unofficial estimates. Refer to official exam boards for final results." />
+        <title>Disclaimer - RankResult.in | Score Calculator &amp; Rank Predictor</title>
+        <meta name="description" content="RankResult Disclaimer: All scores, ranks, and percentiles calculated are unofficial estimates for candidate preparation." />
         <meta name="keywords" content="RankResult disclaimer, unofficial scores, rank estimate, exam disclaimer" />
         <link rel="canonical" href={`${SITE_URL}/disclaimer`} />
         <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="Disclaimer | RankResult" />
+        <meta property="og:title" content="Disclaimer - RankResult.in" />
         <meta property="og:description" content="Important disclaimer about the unofficial nature of score calculations and rank predictions on RankResult." />
         <meta property="og:url" content={`${SITE_URL}/disclaimer`} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />

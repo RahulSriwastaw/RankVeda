@@ -56,3 +56,7 @@ backend/test_parser.py
 backend/verify_schema.py
 backend/dev.db
 
+# Private keys
+*.pem
+
+

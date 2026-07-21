@@ -83,7 +83,10 @@ export default function Marketplace() {
     try {
       const res = await fetch(`${API}/api/marketplace/exams`, { headers: authHeaders });
       const data = await res.json();
-      setExams(Array.isArray(data.exams) ? data.exams : []);
+      const uniqueExams = Array.isArray(data.exams)
+        ? data.exams.filter((exam, index, self) => self.findIndex(e => e.id === exam.id) === index)
+        : [];
+      setExams(uniqueExams);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -466,8 +469,14 @@ export default function Marketplace() {
   return (
     <>
       <Head>
-        <title>Question Bank Marketplace — RankResult</title>
-        <meta name="description" content="Question Bank for all competitive exams. RRB NTPC, SSC, Banking — all shifts questions at one place." />
+        <title>Exam Question Bank Marketplace - RankResult.in | Score &amp; Question Solutions</title>
+        <meta name="description" content="Explore previous year exam question banks for SSC, Railway, BPSC and Banking exams. All shift questions with correct answer key &amp; AI solutions." />
+        <meta name="keywords" content="Exam Question Bank, SSC Question Bank, Railway Question Bank, BPSC Question Bank, Answer Key Solutions, RankResult Marketplace" />
+        <link rel="canonical" href="https://rankresult.in/marketplace" />
+        <meta name="robots" content="index, follow" />
+        <meta property="og:title" content="Exam Question Bank Marketplace - RankResult.in" />
+        <meta property="og:description" content="All shift questions, answer keys &amp; AI solutions for SSC, Railway, BPSC exams." />
+        <meta property="og:url" content="https://rankresult.in/marketplace" />
       </Head>
 
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans transition-colors">

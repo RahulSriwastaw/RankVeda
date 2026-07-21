@@ -186,9 +186,14 @@ export default function Pricing() {
   return (
     <>
       <Head>
-        <title>Pricing Plans &amp; Points Packages — RankResult</title>
-        <meta name="description" content="Simple, transparent pricing. Buy RankResult points packages to unlock step-by-step AI exam solutions and detailed rank calculations." />
+        <title>Pricing Plans &amp; Points Packs - RankResult.in | Free Score Calculator</title>
+        <meta name="description" content="Simple, transparent pricing. Score calculation &amp; rank prediction is 100% free. Buy points packs to unlock AI question solutions and step-by-step explanations." />
+        <meta name="keywords" content="RankResult pricing, Score Calculator free, Rank Predictor points, AI solution points" />
         <link rel="canonical" href="https://rankresult.in/pricing" />
+        <meta name="robots" content="index, follow" />
+        <meta property="og:title" content="Pricing Plans &amp; Points Packs - RankResult.in" />
+        <meta property="og:description" content="Calculate marks &amp; predict rank for free. Unlock step-by-step AI question solutions with points packs." />
+        <meta property="og:url" content="https://rankresult.in/pricing" />
       </Head>
 
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />

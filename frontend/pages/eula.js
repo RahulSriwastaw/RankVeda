@@ -134,10 +134,13 @@ export default function EULAPage() {
   return (
     <>
       <Head>
-        <title>End User License Agreement (EULA) | RankResult</title>
-        <meta name="description" content="RankResult End User License Agreement governing the use of our web platform and services." />
+        <title>End User License Agreement (EULA) - RankResult.in | Score Calculator &amp; Rank Predictor</title>
+        <meta name="description" content="RankResult End User License Agreement governing the use of our web platform, score calculator, and rank predictor services." />
         <meta name="keywords" content="RankResult EULA, end user license agreement, software license, terms of use" />
         <link rel="canonical" href={`${SITE_URL}/eula`} />
+        <meta name="robots" content="index, follow" />
+        <meta property="og:title" content="End User License Agreement (EULA) - RankResult.in" />
+        <meta property="og:description" content="Terms of end user license agreement for RankResult platform." />
         <meta name="robots" content="index, follow" />
         <meta property="og:title" content="End User License Agreement | RankResult" />
         <meta property="og:description" content="Legal agreement governing the use of RankResult platform and services." />

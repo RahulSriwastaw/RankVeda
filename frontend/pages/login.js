@@ -109,8 +109,10 @@ export default function LoginPage() {
   return (
     <>
       <Head>
-        <title>{`${mode === 'login' ? 'Login' : 'Register'} — RankResult`}</title>
-        <meta name="description" content="Login to RankResult to view your exam result, rank and AI solution." />
+        <title>{`${mode === 'login' ? 'Login' : 'Register'} - RankResult.in | Score Calculator &amp; Rank Predictor`}</title>
+        <meta name="description" content="Sign in or register on RankResult.in to analyze response keys, save exam scores, predict live ranks, and access AI question solutions." />
+        <link rel="canonical" href="https://rankresult.in/login" />
+        <meta name="robots" content="index, follow" />
       </Head>
 
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden font-sans text-slate-900 dark:text-slate-100 transition-colors">

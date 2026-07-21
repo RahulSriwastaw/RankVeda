@@ -30,13 +30,13 @@ export default function ContactPage() {
   return (
     <>
       <Head>
-        <title>Contact Us | RankResult — Get in Touch</title>
-        <meta name="description" content="Contact RankResult support team. Email us at support@rankresult.in for queries, feedback, or grievances." />
-        <meta name="keywords" content="RankResult contact, support, email, grievance officer, help" />
+        <title>Contact Us - RankResult.in | Score Calculator &amp; Support</title>
+        <meta name="description" content="Contact RankResult support team. Email us at support@rankresult.in for exam score calculator queries, rank predictor help, or feedback." />
+        <meta name="keywords" content="RankResult contact, Score Calculator support, Rank Predictor help, Answer Key Calculator support" />
         <link rel="canonical" href={`${SITE_URL}/contact`} />
         <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="Contact Us | RankResult" />
-        <meta property="og:description" content="Get in touch with the RankResult team for support, feedback, or any queries." />
+        <meta property="og:title" content="Contact Us - RankResult.in | Score Calculator &amp; Support" />
+        <meta property="og:description" content="Get in touch with the RankResult team for support, feedback, or any exam score calculation queries." />
         <meta property="og:url" content={`${SITE_URL}/contact`} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       </Head>
